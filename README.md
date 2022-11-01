@@ -36,8 +36,7 @@ composer require laswitchtech/php-auth
 ## How do I use it?
 In this documentations, we will use a table called users for our examples.
 
-### Examples
-#### Selecting Data
+### Example
 ```php
 
 //Import Auth class into the global namespace
