@@ -37,6 +37,7 @@ composer require laswitchtech/php-auth
 In this documentations, we will use a table called users for our examples.
 
 ### Example
+#### Initiate Auth Using Constant
 ```php
 
 //Import Auth class into the global namespace
@@ -47,5 +48,20 @@ use LaswitchTech\phpAUTH\Auth;
 require 'vendor/autoload.php';
 
 //Initiate Auth
+define("AUTH_TYPE", "BASIC");
 $Auth = new Auth();
+```
+
+#### Initiate Auth Without Using Constant
+```php
+
+//Import Auth class into the global namespace
+//These must be at the top of your script, not inside a function
+use LaswitchTech\phpAUTH\Auth;
+
+//Load Composer's autoloader
+require 'vendor/autoload.php';
+
+//Initiate Auth
+$Auth = new Auth("BASIC");
 ```

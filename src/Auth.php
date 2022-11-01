@@ -8,7 +8,8 @@ use LaswitchTech\phpDB\Database;
 
 class Auth {
 
-  public function __construct($type = "BASIC"){
+  public function __construct($type = null){
+    if($type == null && defined('AUTH_TYPE')){ $type = AUTH_TYPE; }
     switch($type){
       case"BASIC":
         $this->getBasicAuth();

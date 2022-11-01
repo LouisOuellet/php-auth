@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3071f7c3bcefb236fbb2e059f4b2b787",
+    "content-hash": "1b47268e544ede35c35a9cd40e070019",
     "packages": [
         {
             "name": "laswitchtech/php-database",
-            "version": "v1.0",
+            "version": "v1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/LouisOuellet/php-database.git",
-                "reference": "ef0d1514b6da79a905eb284fa92034b100e9007c"
+                "reference": "9f17af414f04352828ff4926a0f10a44d72f47ce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/LouisOuellet/php-database/zipball/ef0d1514b6da79a905eb284fa92034b100e9007c",
-                "reference": "ef0d1514b6da79a905eb284fa92034b100e9007c",
+                "url": "https://api.github.com/repos/LouisOuellet/php-database/zipball/9f17af414f04352828ff4926a0f10a44d72f47ce",
+                "reference": "9f17af414f04352828ff4926a0f10a44d72f47ce",
                 "shasum": ""
             },
             "require": {
@@ -42,9 +42,9 @@
             "description": "Database Class for PHP",
             "support": {
                 "issues": "https://github.com/LouisOuellet/php-database/issues",
-                "source": "https://github.com/LouisOuellet/php-database/tree/v1.0"
+                "source": "https://github.com/LouisOuellet/php-database/tree/v1.1"
             },
-            "time": "2022-11-01T12:54:15+00:00"
+            "time": "2022-11-01T13:40:14+00:00"
         }
     ],
     "packages-dev": [],
