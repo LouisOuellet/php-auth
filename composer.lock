@@ -1,0 +1,61 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "3071f7c3bcefb236fbb2e059f4b2b787",
+    "packages": [
+        {
+            "name": "laswitchtech/php-database",
+            "version": "v1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/LouisOuellet/php-database.git",
+                "reference": "ef0d1514b6da79a905eb284fa92034b100e9007c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/LouisOuellet/php-database/zipball/ef0d1514b6da79a905eb284fa92034b100e9007c",
+                "reference": "ef0d1514b6da79a905eb284fa92034b100e9007c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "LaswitchTech\\phpDB\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "Louis Ouellet",
+                    "email": "louis_ouellet@hotmail.com"
+                }
+            ],
+            "description": "Database Class for PHP",
+            "support": {
+                "issues": "https://github.com/LouisOuellet/php-database/issues",
+                "source": "https://github.com/LouisOuellet/php-database/tree/v1.0"
+            },
+            "time": "2022-11-01T12:54:15+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=5.5.0"
+    },
+    "platform-dev": [],
+    "plugin-api-version": "2.0.0"
+}

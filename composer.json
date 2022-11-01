@@ -1,0 +1,22 @@
+{
+    "name": "laswitchtech/php-auth",
+    "description": "Auth Class for PHP",
+    "type": "library",
+    "license": "GPL-3.0-only",
+    "authors": [
+        {
+            "name": "Louis Ouellet",
+            "email": "louis_ouellet@hotmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=5.5.0",
+        "laswitchtech/php-database": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "LaswitchTech\\phpAUTH\\": "src/"
+        }
+    }
+}
