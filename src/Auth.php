@@ -69,9 +69,8 @@ class Auth {
     } else {
       $this->sendOutput('Unable to Retrieve Authentication', array('HTTP/1.1 403 Permission Denied'));
     }
-    if($this->User == null){
-      $this->sendOutput('Unable to Validate Authentication', array('HTTP/1.1 403 Permission Denied'));
-    } else { return $this->User; }
+    if($this->User != null){ return $this->User; }
+    else { $this->sendOutput('Unable to Validate Authentication', array('HTTP/1.1 403 Permission Denied')); }
   }
 
   protected function sendOutput($data, $httpHeaders=array()) {

@@ -10,7 +10,7 @@
  - Authentication Support
    - BASIC
    - BEARER
- - Authorization Support
+ - Authorization Support [Planned not implemented yet]
 
 ## Why you might need it
 If you are looking for an easy way to setup authentication and authorization in your project. This PHP Class is for you.
@@ -63,5 +63,5 @@ use LaswitchTech\phpAUTH\Auth;
 require 'vendor/autoload.php';
 
 //Initiate Auth
-$Auth = new Auth("BASIC");
+$Auth = new Auth("BEARER");
 ```
