@@ -3,64 +3,75 @@
 //Declaring namespace
 namespace LaswitchTech\phpAUTH;
 
-//Import Database class into the global namespace
+//Import Classes into the global namespace
 use LaswitchTech\phpDB\Database;
+use LaswitchTech\phpAUTH\Basic;
+use LaswitchTech\phpAUTH\Bearer;
 
 class Auth {
 
+  protected $Database = null;
+  protected $Authentication = null;
+  protected $Authorization = null;
+  protected $Type = null;
+  protected $User = null;
+
   public function __construct($type = null){
     if($type == null && defined('AUTH_TYPE')){ $type = AUTH_TYPE; }
-    switch($type){
+    switch(strtoupper($type)){
       case"BASIC":
-        $this->getBasicAuth();
+        $this->Type = strtoupper($type);
+        $this->Authentication = new Basic();
         break;
       case"BEARER":
-        $this->getBearerToken();
+        $this->Type = strtoupper($type);
+        $this->Authentication = new Bearer();
         break;
       default:
         $this->sendOutput('Unknown Authentication Type', array('HTTP/1.1 500 Internal Server Error'));
         break;
     }
+    $this->getUser();
   }
 
   public function __call($name, $arguments) {
     $this->sendOutput('Unknown Authentication Method', array('HTTP/1.1 500 Internal Server Error'));
   }
 
-  private function getAuthorizationHeader(){
-    $headers = null;
-    if (isset($_SERVER['Authorization'])) {
-      $headers = trim($_SERVER['Authorization']);
-    } else if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-      $headers = trim($_SERVER['HTTP_AUTHORIZATION']);
-    } elseif (function_exists('apache_request_headers')) {
-      $requestHeaders = apache_request_headers();
-      $requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
-      if (isset($requestHeaders['Authorization'])) {
-        $headers = trim($requestHeaders['Authorization']);
-      }
-    }
-    return $headers;
+  public function connect($host = null, $username = null, $password = null, $database = null){
+    if($host == null && defined('DB_HOST')){ $host = DB_HOST; }
+    if($username == null && defined('DB_USERNAME')){ $username = DB_USERNAME; }
+    if($password == null && defined('DB_PASSWORD')){ $password = DB_PASSWORD; }
+    if($database == null && defined('DB_DATABASE_NAME')){ $database = DB_DATABASE_NAME; }
+    $this->Database = new Database($host, $username, $password, $database);
   }
 
-  protected function getBearerToken() {
-    $headers = $this->getAuthorizationHeader();
-    if (!empty($headers)) {
-      if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
-        return [ "token" => $matches[1] ];
+  public function getUser(){
+    if($this->Authentication->isSet()){
+      if($this->Database == null){ $this->connect(); }
+      if($this->User == null){
+        switch($this->Type){
+          case"BASIC":
+            $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
+            if(count($user) > 0){
+              $user = $user[0];
+              if(password_verify($this->Authentication->getAuth('password'), $user['password'])){
+                $this->User = $user;
+              }
+            }
+            break;
+          case"BEARER":
+            $user = $this->Database->select("SELECT * FROM users WHERE token = ?", [hash("sha256", $this->Authentication->getAuth('token'), false)]);
+            if(count($user) > 0){ $this->User = $user[0]; }
+            break;
+        }
       }
+    } else {
+      $this->sendOutput('Unable to Retrieve Authentication', array('HTTP/1.1 403 Permission Denied'));
     }
-    return null;
-  }
-
-  protected function getBasicAuth() {
-    $headers = $this->getAuthorizationHeader();
-    if (!empty($headers)) {
-      if (str_contains($headers, 'Basic') && isset($_SERVER['PHP_AUTH_USER'])) {
-        return [ "username" => $_SERVER['PHP_AUTH_USER'], "password" => $_SERVER['PHP_AUTH_PW'] ];
-      }
-    }
-    return null;
+    if($this->User == null){
+      $this->sendOutput('Unable to Validate Authentication', array('HTTP/1.1 403 Permission Denied'));
+    } else { return $this->User; }
   }
 
   protected function sendOutput($data, $httpHeaders=array()) {
