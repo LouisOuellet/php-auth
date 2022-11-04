@@ -170,7 +170,6 @@ define("AUTH_ROLES", false); //Default is false
 define("AUTH_GROUPS", false); //Default is false
 define("AUTH_RETURN", "HEADER"); //Default is HEADER
 //Database Information
-define("DB_INIT", false);
 define("DB_HOST", "localhost");
 define("DB_USERNAME", "demo");
 define("DB_PASSWORD", "demo");
