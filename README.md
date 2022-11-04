@@ -7,10 +7,13 @@
 ![Version](https://img.shields.io/github/v/release/LouisOuellet/php-auth?label=Version&style=for-the-badge)
 
 ## Features
- - Authentication Support
-   - BASIC
-   - BEARER
- - Authorization Support [Planned not implemented yet]
+  - Authentication Support
+    - Front-End
+      - BASIC
+      - BEARER (Much faster then BASIC)
+    - Back-End
+      - SQL
+  - Authorization Support
 
 ## Why you might need it
 If you are looking for an easy way to setup authentication and authorization in your project. This PHP Class is for you.
@@ -22,7 +25,113 @@ Sure!
 This software is distributed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) license. Please read [LICENSE](LICENSE) for information on the software availability and distribution.
 
 ## Requirements
-PHP >= 5.5.0
+* PHP >= 5.5.0
+* MySQL or MariaDB
+
+### SQL Requirements
+To support authentication in your application, you will need at least one table called users. Since phpAUTH is packed with phpDB, you can create the table like this:
+```php
+
+//Import Database class into the global namespace
+//These must be at the top of your script, not inside a function
+use LaswitchTech\phpDB\Database;
+
+//Load Composer's autoloader
+require 'vendor/autoload.php';
+
+//Initiate Database
+$phpDB = new Database("localhost","demo","demo","demo");
+
+//Create the users table
+$phpDB->create('users',[
+  'id' => [
+    'type' => 'BIGINT(10)',
+    'extra' => ['UNSIGNED','AUTO_INCREMENT','PRIMARY KEY']
+  ],
+  'username' => [
+    'type' => 'VARCHAR(60)',
+    'extra' => ['NOT NULL','UNIQUE']
+  ],
+  'password' => [
+    'type' => 'VARCHAR(100)',
+    'extra' => ['NOT NULL']
+  ],
+  'token' => [
+    'type' => 'VARCHAR(100)',
+    'extra' => ['NOT NULL','UNIQUE']
+  ]
+]);
+
+//Optionally you may want to add a type column if you want to support multiple Authentication Back-Ends like LDAP, SMTP, IMAP, etc.
+$phpDB->alter('users',[
+  'type' => [
+    'action' => 'ADD',
+    'type' => 'VARCHAR(10)',
+    'extra' => ['NOT NULL','DEFAULT "SQL"']
+  ]
+]);
+
+//Other Suggestions
+$phpDB->alter('users',[
+  'created' => [
+    'action' => 'ADD',
+    'type' => 'DATETIME',
+    'extra' => ['DEFAULT CURRENT_TIMESTAMP']
+  ],
+  'modified' => [
+    'action' => 'ADD',
+    'type' => 'DATETIME',
+    'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+  ]
+]);
+
+//If you enable Roles, you will need a roles table and a roles column to your users table.
+$phpDB->create('roles',[
+  'id' => [
+    'type' => 'BIGINT(10)',
+    'extra' => ['UNSIGNED','AUTO_INCREMENT','PRIMARY KEY']
+  ],
+  'name' => [
+    'type' => 'VARCHAR(60)',
+    'extra' => ['NOT NULL','UNIQUE']
+  ],
+  'permissions' => [
+    'type' => 'LONGTEXT',
+    'extra' => ['NULL']
+  ],
+  'members' => [
+    'type' => 'LONGTEXT',
+    'extra' => ['NULL']
+  ]
+]);
+
+//Optionally you may want to add a roles column if you want to quickly list roles memberships.
+
+$phpDB->alter('users',[
+  'roles' => [
+    'action' => 'ADD',
+    'type' => 'LONGTEXT',
+    'extra' => ['NULL']
+  ]
+]);
+
+//Other Suggestions
+$phpDB->alter('roles',[
+  'created' => [
+    'action' => 'ADD',
+    'type' => 'DATETIME',
+    'extra' => ['DEFAULT CURRENT_TIMESTAMP']
+  ],
+  'modified' => [
+    'action' => 'ADD',
+    'type' => 'DATETIME',
+    'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+  ]
+]);
+
+//Create a user
+$phpDB->insert("INSERT INTO users (username, password, token) VALUES (?,?,?)", ["user1",password_hash("pass1", PASSWORD_DEFAULT),hash("sha256", "pass1", false)]);
+```
 
 ## Security
 Please disclose any vulnerabilities found responsibly – report security issues to the maintainers privately.
@@ -37,7 +146,7 @@ composer require laswitchtech/php-auth
 In this documentations, we will use a table called users for our examples.
 
 ### Example
-#### Initiate Auth Using Constant
+#### Initiate Auth
 ```php
 
 //Import Auth class into the global namespace
@@ -48,11 +157,38 @@ use LaswitchTech\phpAUTH\Auth;
 require 'vendor/autoload.php';
 
 //Initiate Auth
-define("AUTH_TYPE", "BASIC");
-$Auth = new Auth();
+$phpAUTH = new Auth();
 ```
 
-#### Initiate Auth Without Using Constant
+#### Initiate Auth
+```php
+
+//Import Auth class into the global namespace
+//These must be at the top of your script, not inside a function
+use LaswitchTech\phpAUTH\Auth;
+
+//Load Composer's autoloader
+require 'vendor/autoload.php';
+
+//Define Configuration Information
+//Auth Information
+define("AUTH_F_TYPE", "BEARER"); //Default is BEARER
+define("AUTH_B_TYPE", "SQL"); //Default is SQL
+define("AUTH_ROLES", false); //Default is false
+define("AUTH_GROUPS", false); //Default is false
+define("AUTH_RETURN", "HEADER"); //Default is HEADER
+//Database Information
+define("DB_INIT", false);
+define("DB_HOST", "localhost");
+define("DB_USERNAME", "demo");
+define("DB_PASSWORD", "demo");
+define("DB_DATABASE_NAME", "demo");
+
+//Initiate Auth
+$phpAUTH = new Auth();
+```
+
+#### Initiate Auth Without Using Constants
 ```php
 
 //Import Auth class into the global namespace
@@ -63,5 +199,68 @@ use LaswitchTech\phpAUTH\Auth;
 require 'vendor/autoload.php';
 
 //Initiate Auth
-$Auth = new Auth("BEARER");
+$phpAUTH = new Auth("BASIC", "SQL", true, false, "HEADER");
+
+//Initiate Database
+$phpAUTH->connect("localhost","demo","demo","demo");
+```
+
+#### Retrieve User Information
+```php
+
+//Import Auth class into the global namespace
+//These must be at the top of your script, not inside a function
+use LaswitchTech\phpAUTH\Auth;
+
+//Load Composer's autoloader
+require 'vendor/autoload.php';
+
+//Initiate Auth
+$phpAUTH = new Auth("BASIC", "SQL", true, false, "HEADER");
+
+//Initiate Database
+$phpAUTH->connect("localhost","demo","demo","demo");
+
+//Retrieve User Information
+$user = $phpAUTH->getUser();
+```
+
+#### Retrieve Authorization
+```php
+
+//Import Auth class into the global namespace
+//These must be at the top of your script, not inside a function
+use LaswitchTech\phpAUTH\Auth;
+
+//Load Composer's autoloader
+require 'vendor/autoload.php';
+
+//Initiate Auth
+$phpAUTH = new Auth("BASIC", "SQL", true, false, "BOOLEAN");
+
+//Initiate Database
+$phpAUTH->connect("localhost","demo","demo","demo");
+
+//Retrieve Authorization
+$Authorization = $phpAUTH->isAuthorized("users/list");
+```
+
+#### Handle Authorization
+```php
+
+//Import Auth class into the global namespace
+//These must be at the top of your script, not inside a function
+use LaswitchTech\phpAUTH\Auth;
+
+//Load Composer's autoloader
+require 'vendor/autoload.php';
+
+//Initiate Auth
+$phpAUTH = new Auth("BASIC", "SQL", true, false, "HEADER");
+
+//Initiate Database
+$phpAUTH->connect("localhost","demo","demo","demo");
+
+//Handle Authorization
+$phpAUTH->isAuthorized("users/list");
 ```
