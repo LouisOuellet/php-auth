@@ -130,7 +130,7 @@ $phpDB->alter('roles',[
 ]);
 
 //Create user
-$phpDB->insert("INSERT INTO users (username, password, token) VALUES (?,?,?)", ["user1",password_hash("pass1", PASSWORD_DEFAULT),hash("sha256", "pass1", false)]);
+$UserID = $phpDB->insert("INSERT INTO users (username, password, token) VALUES (?,?,?)", ["user1",password_hash("pass1", PASSWORD_DEFAULT),hash("sha256", "pass1", false)]);
 
 //Create role
 $RoleID = $phpDB->insert("INSERT INTO roles (name, permissions, members) VALUES (?,?,?)", ["users",json_encode(["users/list" => 1],JSON_UNESCAPED_SLASHES),json_encode([["users" => $UserID]],JSON_UNESCAPED_SLASHES)]);
