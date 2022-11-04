@@ -162,20 +162,6 @@ use LaswitchTech\phpAUTH\Auth;
 //Load Composer's autoloader
 require 'vendor/autoload.php';
 
-//Initiate Auth
-$phpAUTH = new Auth();
-```
-
-#### Initiate Auth
-```php
-
-//Import Auth class into the global namespace
-//These must be at the top of your script, not inside a function
-use LaswitchTech\phpAUTH\Auth;
-
-//Load Composer's autoloader
-require 'vendor/autoload.php';
-
 //Define Configuration Information
 //Auth Information
 define("AUTH_F_TYPE", "BEARER"); //Default is BEARER
