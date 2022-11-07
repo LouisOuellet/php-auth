@@ -45,7 +45,7 @@ class Bearer {
     $headers = $this->getAuthorizationHeader();
     if (!empty($headers)) {
       if (preg_match('/Bearer\s(\S+)/', $headers, $matches) && isset($matches[1]) && !empty($matches[1])) {
-        return [ "token" => $matches[1] ];
+        return [ "token" => base64_decode($matches[1]) ];
       }
     }
     return null;

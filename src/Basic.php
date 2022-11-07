@@ -45,7 +45,7 @@ class Basic {
     $headers = $this->getAuthorizationHeader();
     if (!empty($headers)) {
       if (str_contains($headers, 'Basic') && isset($_SERVER['PHP_AUTH_USER']) && !empty($_SERVER['PHP_AUTH_USER']) && !empty($_SERVER['PHP_AUTH_PW'])) {
-        return [ "username" => $_SERVER['PHP_AUTH_USER'], "password" => $_SERVER['PHP_AUTH_PW'] ];
+        return [ "username" => base64_decode($_SERVER['PHP_AUTH_USER']), "password" => base64_decode($_SERVER['PHP_AUTH_USER']) ];
       }
     }
     return null;
