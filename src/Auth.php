@@ -138,6 +138,9 @@ class Auth {
 
   protected function logout(){
     if($this->isConnected() && (isset($this->URI['logout']) || isset($this->URI['signout']))){
+      // clear session variables
+      if(isset($_SESSION) && !empty($_SESSION)){ $_SESSION = []; }
+
       // remove all session variables
       session_unset();
 
