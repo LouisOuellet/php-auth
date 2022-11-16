@@ -238,9 +238,10 @@ class Auth {
           $this->User['sessionID'] = session_id();
           $this->Database->select("SELECT * FROM users WHERE id = ?", [$this->User['id']]);
           $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
-          $id = $this->Database->insert("INSERT INTO sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
-          // echo 'Session Row ID: ' . json_encode($id, JSON_PRETTY_PRINT) . PHP_EOL . '<br>' . '<br>';
-          $_SESSION['sessionID'] = $this->User['sessionID'];
+          if($this->User['sessionID'] != ''){
+            $this->Database->insert("INSERT INTO sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
+            $_SESSION['sessionID'] = $this->User['sessionID'];
+          }
         }
       }
     } else {
