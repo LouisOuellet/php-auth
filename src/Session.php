@@ -3,7 +3,7 @@
 //Declaring namespace
 namespace LaswitchTech\phpAUTH;
 
-class SQL {
+class Session {
 
   protected $Authentication = null;
   protected $Base64 = true;

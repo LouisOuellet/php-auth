@@ -7,7 +7,7 @@ namespace LaswitchTech\phpAUTH;
 use LaswitchTech\phpDB\Database;
 use LaswitchTech\phpAUTH\Basic;
 use LaswitchTech\phpAUTH\Bearer;
-use LaswitchTech\phpAUTH\SQL;
+use LaswitchTech\phpAUTH\Session;
 
 class Auth {
 
@@ -15,7 +15,7 @@ class Auth {
   protected $Authentication = null;
   protected $Authorization = null;
   protected $FrontEndDBType = null;
-  protected $FrontEndDBTypes = ["SQL", "BASIC", "BEARER"];
+  protected $FrontEndDBTypes = ["SESSION", "BASIC", "BEARER"];
   protected $BackEndDBType = null;
   protected $BackEndDBTypes = ["SQL"];
   protected $OutputType = null;
@@ -25,6 +25,7 @@ class Auth {
   protected $Return = "HEADER";
   protected $Returns = ["BOOLEAN","HEADER"];
   protected $User = null;
+  protected $URI = null;
 
   public function __construct($fronttype = null, $backtype = null, $roles = null, $groups = null, $output = null, $return = null){
 
@@ -52,9 +53,10 @@ class Auth {
         $this->FrontEndDBType = $fronttype;
         $this->Authentication = new Bearer();
         break;
-      case"SQL":
+      case"SESSION":
+      default:
         $this->FrontEndDBType = $fronttype;
-        $this->Authentication = new SQL();
+        $this->Authentication = new Session();
         break;
     }
 
@@ -66,6 +68,12 @@ class Auth {
 
     //Setup Return
     $this->setReturn($return);
+
+    //Parse URI
+    $this->parseURI();
+
+    //Logout User
+    $this->logout();
 
     //Retrieve User
     $this->getUser();
@@ -113,6 +121,31 @@ class Auth {
     }
   }
 
+  protected function parseURI(){
+    if($this->URI == null){
+      if(count(explode('?',$_SERVER['REQUEST_URI'])) > 1){
+        $vars = explode('?',$_SERVER['REQUEST_URI'])[1];
+        $this->URI = [];
+        foreach(explode('&',$vars) as $var){
+          $params = explode('=',$var);
+          if(count($params) > 1){ $this->URI[$params[0]] = $params[1]; }
+          else { $this->URI[$params[0]] = true; }
+        }
+      }
+    }
+    return $this->URI;
+  }
+
+  protected function logout(){
+    if($this->isConnected() && (isset($this->URI['logout']) || isset($this->URI['signout']))){
+      // remove all session variables
+      session_unset();
+
+      // destroy the session
+      session_destroy();
+    }
+  }
+
   public function getUser(){
     if($this->Authentication->isSet()){
       if($this->Database == null){ $this->connect(); }
@@ -137,8 +170,9 @@ class Auth {
             $user = $this->Database->select("SELECT * FROM users WHERE token = ?", [hash("sha256", $this->Authentication->getAuth('token'), false)]);
             if(count($user) > 0){ $this->User = $user[0]; }
             break;
-          case"SQL":
-            // echo json_encode($this->Authentication->getAuth('sessionID'), JSON_PRETTY_PRINT) . PHP_EOL;
+          case"SESSION":
+            // echo 'username' . json_encode($this->Authentication->getAuth('username'), JSON_PRETTY_PRINT) . PHP_EOL . '<br>' . '<br>';
+            // echo 'sessionID' . json_encode($this->Authentication->getAuth('sessionID'), JSON_PRETTY_PRINT) . PHP_EOL . '<br>' . '<br>';
             if(!is_array($this->Authentication->getAuth('username'))){
               $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
               if(count($user) > 0){
@@ -154,14 +188,12 @@ class Auth {
                 }
               }
             } elseif(!is_array($this->Authentication->getAuth('sessionID'))){
-              // echo json_encode($this->Authentication->getAuth('sessionID'), JSON_PRETTY_PRINT) . PHP_EOL;
               $user = $this->Database->select("SELECT * FROM users WHERE sessionID = ?", [$this->Authentication->getAuth('sessionID')]);
               if(count($user) > 0){ $this->User = $user[0]; }
             }
             break;
         }
       }
-      // echo json_encode($this->User, JSON_PRETTY_PRINT) . PHP_EOL;
       if($this->User != null){
         if(!isset($_SESSION['sessionID'])){
           $this->Database->select("SELECT * FROM users WHERE id = ?", [$this->User['id']]);

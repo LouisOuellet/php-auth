@@ -11,6 +11,7 @@
     - Front-End
       - BASIC
       - BEARER (Much faster then BASIC)
+      - SESSION (Best used for GUI)
     - Back-End
       - SQL
   - Authorization Support
