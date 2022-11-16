@@ -146,6 +146,41 @@ class Auth {
     }
   }
 
+	protected function getClientIP(){
+	  $ipaddress = '';
+	  if(getenv('HTTP_CLIENT_IP')){
+	    $ipaddress = getenv('HTTP_CLIENT_IP');
+	  } elseif(getenv('HTTP_X_FORWARDED_FOR')){
+	    $ipaddress = getenv('HTTP_X_FORWARDED_FOR');
+	  } elseif(getenv('HTTP_X_FORWARDED')){
+	    $ipaddress = getenv('HTTP_X_FORWARDED');
+	  } elseif(getenv('HTTP_FORWARDED_FOR')){
+	    $ipaddress = getenv('HTTP_FORWARDED_FOR');
+	  } elseif(getenv('HTTP_FORWARDED')){
+	    $ipaddress = getenv('HTTP_FORWARDED');
+	  } elseif(getenv('REMOTE_ADDR')){
+	    $ipaddress = getenv('REMOTE_ADDR');
+    } elseif(defined('STDIN')){
+      $ipaddress = 'LOCALHOST';
+	  } else {
+	    $ipaddress = 'UNKNOWN';
+		}
+    if(in_array($ipaddress,['127.0.0.1','127.0.1.1','::1'])){ $ipaddress = 'LOCALHOST'; }
+	  return $ipaddress;
+	}
+
+  protected function getClientBrowser(){
+    $t = strtolower($_SERVER['HTTP_USER_AGENT']);
+    $t = " " . $t;
+    if     (strpos($t, 'opera'     ) || strpos($t, 'opr/')     ) return 'Opera'            ;
+    elseif (strpos($t, 'edge'      )                           ) return 'Edge'             ;
+    elseif (strpos($t, 'chrome'    )                           ) return 'Chrome'           ;
+    elseif (strpos($t, 'safari'    )                           ) return 'Safari'           ;
+    elseif (strpos($t, 'firefox'   )                           ) return 'Firefox'          ;
+    elseif (strpos($t, 'msie'      ) || strpos($t, 'trident/7')) return 'Internet Explorer';
+    return 'Unkown';
+  }
+
   public function getUser($field = null){
     if($this->Authentication->isSet()){
       if($this->Database == null){ $this->connect(); }
@@ -171,8 +206,8 @@ class Auth {
             if(count($user) > 0){ $this->User = $user[0]; }
             break;
           case"SESSION":
-            // echo 'username' . json_encode($this->Authentication->getAuth('username'), JSON_PRETTY_PRINT) . PHP_EOL . '<br>' . '<br>';
-            // echo 'sessionID' . json_encode($this->Authentication->getAuth('sessionID'), JSON_PRETTY_PRINT) . PHP_EOL . '<br>' . '<br>';
+            // echo 'username: ' . json_encode($this->Authentication->getAuth('username'), JSON_PRETTY_PRINT) . PHP_EOL . '<br>' . '<br>';
+            // echo 'sessionID: ' . json_encode($this->Authentication->getAuth('sessionID'), JSON_PRETTY_PRINT) . PHP_EOL . '<br>' . '<br>';
             if(!is_array($this->Authentication->getAuth('username'))){
               $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
               if(count($user) > 0){
@@ -195,9 +230,13 @@ class Auth {
         }
       }
       if($this->User != null){
+        // echo 'Session: ' . json_encode(session_id(), JSON_PRETTY_PRINT) . PHP_EOL . '<br>' . '<br>';
         if(!isset($_SESSION['sessionID'])){
+          $this->User['sessionID'] = session_id();
           $this->Database->select("SELECT * FROM users WHERE id = ?", [$this->User['id']]);
-          $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [session_id(),$this->User['id']]);
+          $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
+          $id = $this->Database->insert("INSERT INTO sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
+          // echo 'Session Row ID: ' . json_encode($id, JSON_PRETTY_PRINT) . PHP_EOL . '<br>' . '<br>';
           $_SESSION['sessionID'] = $this->User['sessionID'];
         }
       }
