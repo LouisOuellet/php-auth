@@ -146,6 +146,9 @@ class Auth {
 
       // destroy the session
       session_destroy();
+
+      // redirect header
+      header('Location: /');
     }
   }
 
