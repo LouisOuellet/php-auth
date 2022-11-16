@@ -146,7 +146,7 @@ class Auth {
     }
   }
 
-  public function getUser(){
+  public function getUser($field = null){
     if($this->Authentication->isSet()){
       if($this->Database == null){ $this->connect(); }
       if($this->User == null){
@@ -204,8 +204,12 @@ class Auth {
     } else {
       $this->sendOutput('Unable to Retrieve Authentication', array('HTTP/1.1 403 Permission Denied'));
     }
-    if($this->User != null){ return $this->User; }
-    else { $this->sendOutput('Unable to Validate Authentication', array('HTTP/1.1 403 Permission Denied')); }
+    if($this->User != null){
+      if($field != null && is_string($field) && isset($this->User[$field])){ return $this->User[$field]; }
+      return $this->User;
+    } else {
+      $this->sendOutput('Unable to Validate Authentication', array('HTTP/1.1 403 Permission Denied'));
+    }
   }
 
   public function isAuthorized($name, $level = 1){
