@@ -7,55 +7,62 @@ namespace LaswitchTech\phpAUTH;
 use LaswitchTech\phpDB\Database;
 use LaswitchTech\phpAUTH\Basic;
 use LaswitchTech\phpAUTH\Bearer;
+use LaswitchTech\phpAUTH\SQL;
 
 class Auth {
 
   protected $Database = null;
   protected $Authentication = null;
   protected $Authorization = null;
-  protected $FrontType = null;
-  protected $FrontTypes = ["BASIC", "BEARER"];
-  protected $BackType = null;
-  protected $BackTypes = ["SQL"];
+  protected $FrontEndDBType = null;
+  protected $FrontEndDBTypes = ["SQL", "BASIC", "BEARER"];
+  protected $BackEndDBType = null;
+  protected $BackEndDBTypes = ["SQL"];
+  protected $OutputType = null;
+  protected $OutputTypes = ["HEADER","STRING"];
   protected $Roles = false;
   protected $Groups = false;
   protected $Return = "HEADER";
   protected $Returns = ["BOOLEAN","HEADER"];
   protected $User = null;
 
-  public function __construct($fronttype = null, $backtype = null, $roles = null, $groups = null, $return = null){
-
-    //Setup Front-End Authentication
-    if($fronttype == null && defined('AUTH_F_TYPE')){ $fronttype = AUTH_F_TYPE; }
-    if($fronttype == null){ $fronttype = "BEARER"; }
-    $fronttype = strtoupper($fronttype);
-    if(in_array($fronttype,$this->FrontTypes)){ $this->FrontType = $fronttype; } else {
-      $this->sendOutput('Unknown Front-End Type', array('HTTP/1.1 500 Internal Server Error'));
-    }
-    switch($this->FrontType){
-      case"BASIC":
-        $this->FrontType = $fronttype;
-        $this->Authentication = new Basic();
-        break;
-      case"BEARER":
-        $this->FrontType = $fronttype;
-        $this->Authentication = new Bearer();
-        break;
-    }
+  public function __construct($fronttype = null, $backtype = null, $roles = null, $groups = null, $output = null, $return = null){
 
     //Setup Back-End Authentication
     if($backtype == null && defined('AUTH_B_TYPE')){ $backtype = AUTH_B_TYPE; }
     if($backtype == null){ $backtype = "SQL"; }
     $backtype = strtoupper($backtype);
-    if(in_array($backtype,$this->BackTypes)){ $this->BackType = $backtype; } else {
+    if(in_array($backtype,$this->BackEndDBTypes)){ $this->BackEndDBType = $backtype; } else {
       $this->sendOutput('Unknown Back-End Type', array('HTTP/1.1 500 Internal Server Error'));
     }
 
-    //Setup Roles
-    $this->setRoles($roles);
+    //Setup Front-End Authentication
+    if($fronttype == null && defined('AUTH_F_TYPE')){ $fronttype = AUTH_F_TYPE; }
+    if($fronttype == null){ $fronttype = "BEARER"; }
+    $fronttype = strtoupper($fronttype);
+    if(in_array($fronttype,$this->FrontEndDBTypes)){ $this->FrontEndDBType = $fronttype; } else {
+      $this->sendOutput('Unknown Front-End Type', array('HTTP/1.1 500 Internal Server Error'));
+    }
+    switch($this->FrontEndDBType){
+      case"BASIC":
+        $this->FrontEndDBType = $fronttype;
+        $this->Authentication = new Basic();
+        break;
+      case"BEARER":
+        $this->FrontEndDBType = $fronttype;
+        $this->Authentication = new Bearer();
+        break;
+      case"SQL":
+        $this->FrontEndDBType = $fronttype;
+        $this->Authentication = new SQL();
+        break;
+    }
 
     //Setup Groups
     $this->setGroups($groups);
+
+    //Setup Output
+    $this->setOutputType($output);
 
     //Setup Return
     $this->setReturn($return);
@@ -65,7 +72,13 @@ class Auth {
   }
 
   public function __call($name, $arguments) {
-    $this->sendOutput('Unknown Method', array('HTTP/1.1 500 Internal Server Error'));
+    $this->sendOutput('Unknown Method: '.$name, array('HTTP/1.1 500 Internal Server Error'));
+  }
+
+  public function setOutputType($output = null){
+    if($output == null && defined('AUTH_OUTPUT_TYPE')){ $output = AUTH_OUTPUT_TYPE; }
+    if(in_array(strtoupper($output), $this->OutputTypes)){ $this->OutputType = strtoupper($output); }
+    return $this->OutputType;
   }
 
   public function setReturn($return = null){
@@ -91,20 +104,26 @@ class Auth {
     if($username == null && defined('DB_USERNAME')){ $username = DB_USERNAME; }
     if($password == null && defined('DB_PASSWORD')){ $password = DB_PASSWORD; }
     if($database == null && defined('DB_DATABASE_NAME')){ $database = DB_DATABASE_NAME; }
-    $this->Database = new Database($host, $username, $password, $database);
+    if($host != null && $username != null && $password != null && $database != null){
+      $this->Database = new Database($host, $username, $password, $database);
+      if(!defined('DB_HOST')){ define('DB_HOST',$host); }
+      if(!defined('DB_USERNAME')){ define('DB_USERNAME',$username); }
+      if(!defined('DB_PASSWORD')){ define('DB_PASSWORD',$password); }
+      if(!defined('DB_DATABASE_NAME')){ define('DB_DATABASE_NAME',$database); }
+    }
   }
 
   public function getUser(){
     if($this->Authentication->isSet()){
       if($this->Database == null){ $this->connect(); }
       if($this->User == null){
-        switch($this->FrontType){
+        switch($this->FrontEndDBType){
           case"BASIC":
             $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
             if(count($user) > 0){
               $user = $user[0];
-              if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackTypes)){ $backtype = strtoupper($user['type']); }
-              else { $backtype = $this->BackType; }
+              if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
+              else { $backtype = $this->BackEndDBType; }
               switch($backtype){
                 case"SQL":
                   if(password_verify($this->Authentication->getAuth('password'), $user['password'])){
@@ -116,10 +135,38 @@ class Auth {
             break;
           case"BEARER":
             $user = $this->Database->select("SELECT * FROM users WHERE token = ?", [hash("sha256", $this->Authentication->getAuth('token'), false)]);
-            if(count($user) > 0){
-              $this->User = $user[0];
+            if(count($user) > 0){ $this->User = $user[0]; }
+            break;
+          case"SQL":
+            // echo json_encode($this->Authentication->getAuth('sessionID'), JSON_PRETTY_PRINT) . PHP_EOL;
+            if(!is_array($this->Authentication->getAuth('username'))){
+              $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
+              if(count($user) > 0){
+                $user = $user[0];
+                if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
+                else { $backtype = $this->BackEndDBType; }
+                switch($backtype){
+                  case"SQL":
+                    if(password_verify($this->Authentication->getAuth('password'), $user['password'])){
+                      $this->User = $user;
+                    }
+                    break;
+                }
+              }
+            } elseif(!is_array($this->Authentication->getAuth('sessionID'))){
+              // echo json_encode($this->Authentication->getAuth('sessionID'), JSON_PRETTY_PRINT) . PHP_EOL;
+              $user = $this->Database->select("SELECT * FROM users WHERE sessionID = ?", [$this->Authentication->getAuth('sessionID')]);
+              if(count($user) > 0){ $this->User = $user[0]; }
             }
             break;
+        }
+      }
+      // echo json_encode($this->User, JSON_PRETTY_PRINT) . PHP_EOL;
+      if($this->User != null){
+        if(!isset($_SESSION['sessionID'])){
+          $this->Database->select("SELECT * FROM users WHERE id = ?", [$this->User['id']]);
+          $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [session_id(),$this->User['id']]);
+          $_SESSION['sessionID'] = $this->User['sessionID'];
         }
       }
     } else {
@@ -151,14 +198,23 @@ class Auth {
     }
   }
 
+  public function isConnected(){ return isset($_SESSION,$_SESSION['sessionID']); }
+
   protected function sendOutput($data, $httpHeaders=array()) {
-    header_remove('Set-Cookie');
-    if (is_array($httpHeaders) && count($httpHeaders)) {
-      foreach ($httpHeaders as $httpHeader) {
-        header($httpHeader);
-      }
+    switch($this->OutputType){
+      case"STRING":
+        return $data;
+        break;
+      case"HEADER":
+        header_remove('Set-Cookie');
+        if (is_array($httpHeaders) && count($httpHeaders)) {
+          foreach ($httpHeaders as $httpHeader) {
+            header($httpHeader);
+          }
+        }
+        echo $data;
+        exit;
+        break;
     }
-    echo $data;
-    exit;
   }
 }

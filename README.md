@@ -85,7 +85,7 @@ $phpDB->alter('users',[
   ]
 ]);
 
-//If you enable Roles, you will need a roles table and a roles column to your users table.
+//If you enable Roles, you will need a roles table.
 $phpDB->create('roles',[
   'id' => [
     'type' => 'BIGINT(10)',
@@ -117,6 +117,67 @@ $phpDB->alter('users',[
 
 //Other Suggestions
 $phpDB->alter('roles',[
+  'created' => [
+    'action' => 'ADD',
+    'type' => 'DATETIME',
+    'extra' => ['DEFAULT CURRENT_TIMESTAMP']
+  ],
+  'modified' => [
+    'action' => 'ADD',
+    'type' => 'DATETIME',
+    'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+  ]
+]);
+
+//If you use SQL Login, you will need a sessions table.
+$phpDB->create('sessions',[
+  'id' => [
+    'type' => 'BIGINT(10)',
+    'extra' => ['UNSIGNED','AUTO_INCREMENT','PRIMARY KEY']
+  ],
+  'sessionID' => [
+    'type' => 'VARCHAR(255)',
+    'extra' => ['NOT NULL','UNIQUE']
+  ],
+  'userID' => [
+    'type' => 'BIGINT(10)',
+    'extra' => ['NOT NULL']
+  ],
+  'userAgent' => [
+    'type' => 'VARCHAR(255)',
+    'extra' => ['NULL']
+  ],
+  'userBrowser' => [
+    'type' => 'VARCHAR(255)',
+    'extra' => ['NULL']
+  ],
+  'userIP' => [
+    'type' => 'VARCHAR(255)',
+    'extra' => ['NULL']
+  ],
+  'userData' => [
+    'type' => 'VARCHAR(255)',
+    'extra' => ['NULL']
+  ],
+  'userActivity' => [
+    'action' => 'ADD',
+    'type' => 'DATETIME',
+    'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+  ]
+]);
+
+//Optionally you may want to add a session column if you want to quickly access the user's session.
+
+$phpDB->alter('users',[
+  'sessionID' => [
+    'action' => 'ADD',
+    'type' => 'VARCHAR(255)',
+    'extra' => ['NOT NULL','UNIQUE']
+  ]
+]);
+
+//Other Suggestions
+$phpDB->alter('sessions',[
   'created' => [
     'action' => 'ADD',
     'type' => 'DATETIME',
