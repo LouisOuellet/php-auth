@@ -263,8 +263,9 @@ class Auth {
             $_SESSION['timestamp'] = $this->Authentication->getAuth('timestamp');
           }
         }
-        if(isset($_SESSION['cookiesAccept'])){
+        if(isset($_SESSION['cookiesAccept']) && !isset($_SESSION['cookiesConsentSaved'])){
           $this->Database->update("UPDATE sessions SET userConsent = ? WHERE sessionID = ?", [json_encode($_SESSION),$this->User['sessionID']]);
+          $_SESSION['cookiesConsentSaved'] = true;
         }
       }
     } else {
