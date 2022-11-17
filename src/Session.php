@@ -29,9 +29,13 @@ class Session {
 
   protected function getSQLAuth(){
     if(isset($_SESSION,$_SESSION['sessionID'])){
-      return [ "sessionID" => $_SESSION['sessionID'] ];
+      return [ "sessionID" => $_SESSION['sessionID'], "timestamp" => $_SESSION['timestamp'] ];
+    } elseif(isset($_COOKIE,$_COOKIE['sessionID'],$_COOKIE['timestamp'])){
+      return [ "sessionID" => $_COOKIE['sessionID'], "timestamp" => $_COOKIE['timestamp'] ];
     } elseif(isset($_POST,$_POST['username'],$_POST['password'])){
-      return [ "username" => $_POST['username'], "password" => $_POST['password'] ];
+      $return = [ "username" => $_POST['username'], "password" => $_POST['password'], "timestamp" => time() ];
+      if(isset($_POST['remember'])){ $return['timestamp'] = time() + (86400 * 30); }
+      return $return;
     }
     return null;
   }

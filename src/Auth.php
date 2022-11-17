@@ -139,7 +139,21 @@ class Auth {
   protected function logout(){
     if($this->isConnected() && (isset($this->URI['logout']) || isset($this->URI['signout']))){
       // clear session variables
-      if(isset($_SESSION) && !empty($_SESSION)){ $_SESSION = []; }
+      if(isset($_SESSION) && !empty($_SESSION)){
+        foreach($_SESSION as $key => $value){ unset($_SESSION[$key]); }
+      }
+      
+      // clear cookie variables
+      if(isset($_SERVER['HTTP_COOKIE'])){
+        $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
+        foreach($cookies as $cookie){
+          $parts = explode('=', $cookie);
+          $name = trim($parts[0]);
+          unset($_COOKIE[$name]);
+          setcookie($name, null, -1);
+          setcookie($name, null, -1, '/');
+        }
+      }
 
       // remove all session variables
       session_unset();
@@ -243,7 +257,10 @@ class Auth {
           $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
           if($this->User['sessionID'] != ''){
             $this->Database->insert("INSERT INTO sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
+            if(!isset($_COOKIE['sessionID'])){ setcookie( "sessionID", $this->User['sessionID'], $this->Authentication->getAuth('timestamp') ); }
+            if(!isset($_COOKIE['timestamp'])){ setcookie( "timestamp", $this->Authentication->getAuth('timestamp'), $this->Authentication->getAuth('timestamp') ); }
             $_SESSION['sessionID'] = $this->User['sessionID'];
+            $_SESSION['timestamp'] = $this->Authentication->getAuth('timestamp');
           }
         }
       }
