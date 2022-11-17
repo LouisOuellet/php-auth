@@ -35,10 +35,21 @@ class Session {
         if(isset($_POST['cookiesAccept'])){
           setcookie( "cookiesAccept", true, $this->Timestamp + 86400 );
           setcookie( "cookiesAcceptEssentials", true, $this->Timestamp + 86400 );
+          $_SESSION['cookiesAccept'] = true;
+          $_SESSION['cookiesAcceptEssentials'] = true;
         }
-        if(isset($_POST['cookiesAcceptPerformance'])){ setcookie( "cookiesAcceptPerformance", true, $this->Timestamp + 86400 ); }
-        if(isset($_POST['cookiesAcceptQuality'])){ setcookie( "cookiesAcceptQuality", true, $this->Timestamp + 86400 ); }
-        if(isset($_POST['cookiesAcceptPersonalisations'])){ setcookie( "cookiesAcceptPersonalisations", true, $this->Timestamp + 86400 ); }
+        if(isset($_POST['cookiesAcceptPerformance'])){
+          setcookie( "cookiesAcceptPerformance", true, $this->Timestamp + 86400 );
+          $_SESSION['cookiesAcceptPerformance'] = true;
+        }
+        if(isset($_POST['cookiesAcceptQuality'])){
+          setcookie( "cookiesAcceptQuality", true, $this->Timestamp + 86400 );
+          $_SESSION['cookiesAcceptQuality'] = true;
+        }
+        if(isset($_POST['cookiesAcceptPersonalisations'])){
+          setcookie( "cookiesAcceptPersonalisations", true, $this->Timestamp + 86400 );
+          $_SESSION['cookiesAcceptPersonalisations'] = true;
+        }
       }
     }
   }
