@@ -142,7 +142,7 @@ class Auth {
       if(isset($_SESSION) && !empty($_SESSION)){
         foreach($_SESSION as $key => $value){ unset($_SESSION[$key]); }
       }
-      
+
       // clear cookie variables
       if(isset($_SERVER['HTTP_COOKIE'])){
         $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
@@ -262,6 +262,9 @@ class Auth {
             $_SESSION['sessionID'] = $this->User['sessionID'];
             $_SESSION['timestamp'] = $this->Authentication->getAuth('timestamp');
           }
+        }
+        if(isset($_SESSION['cookiesAccept'])){
+          $this->Database->update("UPDATE sessions SET userConsent = ? WHERE sessionID = ?", [json_encode($_SESSION),$this->User['sessionID']]);
         }
       }
     } else {
