@@ -261,9 +261,8 @@ class Auth {
             }
           }
         }
-        if(isset($_SESSION['cookiesAccept']) && !isset($_SESSION['cookiesConsentSaved'])){
+        if(isset($_SESSION['cookiesAccept'])){
           $this->Database->update("UPDATE sessions SET userConsent = ? WHERE sessionID = ?", [json_encode($_SESSION),$this->User['sessionID']]);
-          $_SESSION['cookiesConsentSaved'] = true;
         }
       }
     } else {

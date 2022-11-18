@@ -12,7 +12,8 @@
     "minimum-stability": "stable",
     "require": {
         "php": "^8.0",
-        "laswitchtech/php-database": "^2.1"
+        "laswitchtech/php-database": "^2.1",
+        "components/jquery": "^3.6"
     },
     "autoload": {
         "psr-4": {

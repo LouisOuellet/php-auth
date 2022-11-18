@@ -15,6 +15,9 @@
     - Back-End
       - SQL
   - Authorization Support
+  - GDPR Cookie Compliance
+  - CCPA Cookie Compliance
+  - JavaScript class available for GDPR & CCPA Cookie Compliance
 
 ## Why you might need it
 If you are looking for an easy way to setup authentication and authorization in your project. This PHP Class is for you.
