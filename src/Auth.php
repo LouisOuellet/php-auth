@@ -85,6 +85,7 @@ class Auth {
 
   public function setOutputType($output = null){
     if($output == null && defined('AUTH_OUTPUT_TYPE')){ $output = AUTH_OUTPUT_TYPE; }
+    if($output == null){ $output = "HEADER"; }
     if(in_array(strtoupper($output), $this->OutputTypes)){ $this->OutputType = strtoupper($output); }
     return $this->OutputType;
   }
