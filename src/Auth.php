@@ -201,6 +201,25 @@ class Auth {
     return 'Unkown';
   }
 
+  public function getDiag(){
+    return [
+      "DB_STATUS" => ($this->Database != null),
+      "DB_HOST" => DB_HOST,
+      "DB_USERNAME" => DB_USERNAME,
+      "DB_PASSWORD" => DB_PASSWORD,
+      "DB_DATABASE_NAME" => DB_DATABASE_NAME,
+      "session_id" => session_id(),
+      "isSet" => $this->Authentication->isSet(),
+      "getAuth" => $this->Authentication->getAuth(),
+      "isUsername" => !is_array($this->Authentication->getAuth('username')),
+      "isSession" => !is_array($this->Authentication->getAuth('sessionID')),
+      "sessionID" => $this->Authentication->getAuth('sessionID'),
+      "User" => $this->User,
+      "FrontEndDBType" => $this->FrontEndDBType,
+      "getUser" => $this->getUser(),
+    ];
+  }
+
   public function getUser($field = null){
     if($this->Authentication->isSet()){
       if($this->Database == null){ $this->connect(); }
@@ -244,23 +263,23 @@ class Auth {
               $user = $this->Database->select("SELECT * FROM users WHERE sessionID = ?", [$this->Authentication->getAuth('sessionID')]);
               if(count($user) > 0){ $this->User = $user[0]; }
             }
+            if($this->User != null){
+              if(!isset($_SESSION['sessionID']) || $this->User['sessionID'] != session_id()){
+                $this->User['sessionID'] = session_id();
+                $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
+                if($this->User['sessionID'] != ''){
+                  $this->Database->insert("INSERT INTO sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
+                  if(!isset($_COOKIE['sessionID'])){ setcookie( "sessionID", $this->User['sessionID'], $this->Authentication->getAuth('timestamp') ); }
+                  if(!isset($_COOKIE['timestamp'])){ setcookie( "timestamp", $this->Authentication->getAuth('timestamp'), $this->Authentication->getAuth('timestamp') ); }
+                  $_SESSION['sessionID'] = $this->User['sessionID'];
+                  $_SESSION['timestamp'] = $this->Authentication->getAuth('timestamp');
+                }
+              }
+              if(isset($_SESSION['cookiesAccept'])){
+                $this->Database->update("UPDATE sessions SET userConsent = ? WHERE sessionID = ?", [json_encode($_SESSION),$this->User['sessionID']]);
+              }
+            }
             break;
-        }
-      }
-      if($this->User != null){
-        if(!isset($_SESSION['sessionID']) || $this->User['sessionID'] != session_id()){
-          $this->User['sessionID'] = session_id();
-          $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
-          if($this->User['sessionID'] != ''){
-            $this->Database->insert("INSERT INTO sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
-            if(!isset($_COOKIE['sessionID'])){ setcookie( "sessionID", $this->User['sessionID'], $this->Authentication->getAuth('timestamp') ); }
-            if(!isset($_COOKIE['timestamp'])){ setcookie( "timestamp", $this->Authentication->getAuth('timestamp'), $this->Authentication->getAuth('timestamp') ); }
-            $_SESSION['sessionID'] = $this->User['sessionID'];
-            $_SESSION['timestamp'] = $this->Authentication->getAuth('timestamp');
-          }
-        }
-        if(isset($_SESSION['cookiesAccept'])){
-          $this->Database->update("UPDATE sessions SET userConsent = ? WHERE sessionID = ?", [json_encode($_SESSION),$this->User['sessionID']]);
         }
       }
     } else {
