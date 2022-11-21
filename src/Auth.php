@@ -222,7 +222,7 @@ class Auth {
             }
             break;
           case"BEARER":
-            $user = $this->Database->select("SELECT * FROM users WHERE token = ?", [hash("sha256", $this->Authentication->getAuth('token'), false)]);
+            $user = $this->Database->select("SELECT * FROM users WHERE token = ?", [$this->Authentication->getAuth('token')]);
             if(count($user) > 0){ $this->User = $user[0]; }
             break;
           case"SESSION":
