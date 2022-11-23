@@ -60,6 +60,9 @@ class Auth {
         break;
     }
 
+    //Setup Roles
+    $this->setRoles($roles);
+
     //Setup Groups
     $this->setGroups($groups);
 
