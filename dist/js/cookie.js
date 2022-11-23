@@ -75,7 +75,7 @@ class phpAuthCookie {
 			self.#object = $(document.createElement('div')).addClass('offcanvas offcanvas-bottom h-auto user-select-none').attr('data-bs-backdrop','static').attr('tabindex','-1').attr('id','OffcanvasCookie').attr('aria-labelledby','OffcanvasCookieLabel');
 			self.#object.id = self.#object.attr('id');
 			self.#object.header = $(document.createElement('div')).addClass('offcanvas-header').appendTo(self.#object);
-			self.#object.title = $(document.createElement('h4')).addClass('offcanvas-title').attr('id','OffcanvasCookieLabel').html(self.#fields['Your choice on cookies']).appendTo(self.#object.header);
+			self.#object.title = $(document.createElement('h5')).addClass('offcanvas-title fs-2 fw-light').attr('id','OffcanvasCookieLabel').html('<i class="bi-person-lock me-2"></i>'+self.#fields['Your choice on cookies']).appendTo(self.#object.header);
 			self.#object.body = $(document.createElement('div')).addClass('offcanvas-body d-flex justify-content-center flex-column p-0').appendTo(self.#object);
 			self.#object.form = $(document.createElement('form')).addClass('overflow-auto p-3').attr('method','post').appendTo(self.#object.body);
 			self.#object.description = $(document.createElement('p')).html(self.#fields["We use essential cookies to make sure our application works. We'd also like to set optional cookies to improve the quality and performance of our application and enable personalised features. Change preferences by clicking Cookie Settings. Allow all cookies by clicking Accept."]).appendTo(self.#object.form);
@@ -124,5 +124,3 @@ class phpAuthCookie {
 		}
 	}
 }
-
-const Cookie = new phpAuthCookie()
