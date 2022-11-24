@@ -290,7 +290,7 @@ class Auth {
       $this->sendOutput('Unable to Retrieve Authentication', array('HTTP/1.1 403 Permission Denied'));
     }
     if($this->User != null){
-      if($field != null && is_string($field) && isset($this->User[$field])){ return $this->User[$field]; }
+      if($field != null && is_string($field) && (isset($this->User[$field]) || $this->User[$field] == null)){ return $this->User[$field]; }
       return $this->User;
     } else {
       $this->sendOutput('Unable to Validate Authentication', array('HTTP/1.1 403 Permission Denied'));
