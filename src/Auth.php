@@ -14,7 +14,7 @@ class Auth {
   protected $Database = null;
   protected $Authentication = null;
   protected $Authorization = null;
-  protected $FrontEndDBType = null;
+  protected $FrontEndDBType = "SESSION";
   protected $FrontEndDBTypes = ["SESSION", "BASIC", "BEARER"];
   protected $BackEndDBType = null;
   protected $BackEndDBTypes = ["SQL"];
@@ -38,26 +38,25 @@ class Auth {
     }
 
     //Setup Front-End Authentication
-    if($fronttype == null && defined('AUTH_F_TYPE')){ $fronttype = AUTH_F_TYPE; }
-    if($fronttype == null){ $fronttype = "BEARER"; }
-    $fronttype = strtoupper($fronttype);
-    if(in_array($fronttype,$this->FrontEndDBTypes)){ $this->FrontEndDBType = $fronttype; } else {
-      $this->sendOutput('Unknown Front-End Type', array('HTTP/1.1 500 Internal Server Error'));
-    }
-    switch($this->FrontEndDBType){
-      case"BASIC":
-        $this->FrontEndDBType = $fronttype;
-        $this->Authentication = new Basic();
-        break;
-      case"BEARER":
-        $this->FrontEndDBType = $fronttype;
-        $this->Authentication = new Bearer();
-        break;
-      case"SESSION":
-      default:
-        $this->FrontEndDBType = $fronttype;
-        $this->Authentication = new Session();
-        break;
+    $this->Authentication = new Session();
+    if(!$this->Authentication->isSet()){
+      $this->Authentication = null;
+      $this->FrontEndDBType = "BEARER";
+      if($fronttype != null && in_array(strtoupper($fronttype),$this->FrontEndDBTypes)){ $this->FrontEndDBType = strtoupper($fronttype); }
+      if(defined('AUTH_F_TYPE') && in_array(strtoupper(AUTH_F_TYPE),$this->FrontEndDBTypes)){ $this->FrontEndDBType = strtoupper(AUTH_F_TYPE); }
+      switch($this->FrontEndDBType){
+        case"BASIC":
+          $this->FrontEndDBType = $fronttype;
+          $this->Authentication = new Basic();
+          break;
+        case"BEARER":
+          $this->FrontEndDBType = $fronttype;
+          $this->Authentication = new Bearer();
+          break;
+        default:
+          $this->Authentication = new Session();
+          break;
+      }
     }
 
     //Setup Roles
