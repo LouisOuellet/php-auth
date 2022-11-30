@@ -46,11 +46,9 @@ class Auth {
       if(defined('AUTH_F_TYPE') && in_array(strtoupper(AUTH_F_TYPE),$this->FrontEndDBTypes)){ $this->FrontEndDBType = strtoupper(AUTH_F_TYPE); }
       switch($this->FrontEndDBType){
         case"BASIC":
-          $this->FrontEndDBType = $fronttype;
           $this->Authentication = new Basic();
           break;
         case"BEARER":
-          $this->FrontEndDBType = $fronttype;
           $this->Authentication = new Bearer();
           break;
         default:
