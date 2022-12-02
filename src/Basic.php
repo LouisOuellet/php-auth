@@ -12,7 +12,7 @@ class Basic {
   }
 
   public function __call($name, $arguments) {
-    $this->sendOutput('Unknown Method', array('HTTP/1.1 500 Internal Server Error'));
+    $this->sendOutput($name, array('HTTP/1.1 501 Not Implemented'));
   }
 
   public function getAuth($field = null){

@@ -80,7 +80,7 @@ class Auth {
   }
 
   public function __call($name, $arguments) {
-    $this->sendOutput('Unknown Method: '.$name, array('HTTP/1.1 500 Internal Server Error'));
+    $this->sendOutput($name, array('HTTP/1.1 501 Not Implemented'));
   }
 
   public function setOutputType($output = null){
@@ -284,13 +284,13 @@ class Auth {
         }
       }
     } else {
-      $this->sendOutput('Unable to Retrieve Authentication', array('HTTP/1.1 403 Permission Denied'));
+      $this->sendOutput('Unable to Retrieve Authentication', array('HTTP/1.1 511 Network Authentication Required'));
     }
     if($this->User != null){
       if($field != null && is_string($field) && (isset($this->User[$field]) || $this->User[$field] == null)){ return $this->User[$field]; }
       return $this->User;
     } else {
-      $this->sendOutput('Unable to Validate Authentication', array('HTTP/1.1 403 Permission Denied'));
+      $this->sendOutput('Unable to Validate Authentication', array('HTTP/1.1 511 Network Authentication Required'));
     }
   }
 
