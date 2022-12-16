@@ -57,16 +57,16 @@
         },
         {
             "name": "laswitchtech/php-database",
-            "version": "v2.1.5",
+            "version": "v2.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/LouisOuellet/php-database.git",
-                "reference": "926c61b339a911f8214bb21eae6c516aac2ef86c"
+                "reference": "c2aa5bbac0a00b0aa770b74bc5ae1ad6f6d57fd7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/LouisOuellet/php-database/zipball/926c61b339a911f8214bb21eae6c516aac2ef86c",
-                "reference": "926c61b339a911f8214bb21eae6c516aac2ef86c",
+                "url": "https://api.github.com/repos/LouisOuellet/php-database/zipball/c2aa5bbac0a00b0aa770b74bc5ae1ad6f6d57fd7",
+                "reference": "c2aa5bbac0a00b0aa770b74bc5ae1ad6f6d57fd7",
                 "shasum": ""
             },
             "require": {
@@ -91,9 +91,9 @@
             "description": "Database Class for PHP",
             "support": {
                 "issues": "https://github.com/LouisOuellet/php-database/issues",
-                "source": "https://github.com/LouisOuellet/php-database/tree/v2.1.5"
+                "source": "https://github.com/LouisOuellet/php-database/tree/v2.1.6"
             },
-            "time": "2022-12-02T15:51:25+00:00"
+            "time": "2022-12-16T16:11:40+00:00"
         }
     ],
     "packages-dev": [],
