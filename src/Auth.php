@@ -224,29 +224,10 @@ class Auth {
   public function getUser($field = null){
     if($this->Authentication->isSet()){
       if($this->Database == null){ $this->connect(); }
-      if($this->User == null){
-        switch($this->FrontEndDBType){
-          case"BASIC":
-            $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
-            if(count($user) > 0){
-              $user = $user[0];
-              if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
-              else { $backtype = $this->BackEndDBType; }
-              switch($backtype){
-                case"SQL":
-                  if(password_verify($this->Authentication->getAuth('password'), $user['password'])){
-                    $this->User = $user;
-                  }
-                  break;
-              }
-            }
-            break;
-          case"BEARER":
-            $user = $this->Database->select("SELECT * FROM users WHERE token = ?", [$this->Authentication->getAuth('token')]);
-            if(count($user) > 0){ $this->User = $user[0]; }
-            break;
-          case"SESSION":
-            if(!is_array($this->Authentication->getAuth('username'))){
+      if($this->Database->isConnected()){
+        if($this->User == null){
+          switch($this->FrontEndDBType){
+            case"BASIC":
               $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
               if(count($user) > 0){
                 $user = $user[0];
@@ -260,27 +241,48 @@ class Auth {
                     break;
                 }
               }
-            } elseif(!is_array($this->Authentication->getAuth('sessionID'))){
-              $user = $this->Database->select("SELECT * FROM users WHERE sessionID = ?", [$this->Authentication->getAuth('sessionID')]);
+              break;
+            case"BEARER":
+              $user = $this->Database->select("SELECT * FROM users WHERE token = ?", [$this->Authentication->getAuth('token')]);
               if(count($user) > 0){ $this->User = $user[0]; }
-            }
-            if($this->User != null){
-              if(!isset($_SESSION['sessionID']) || $this->User['sessionID'] != session_id()){
-                $this->User['sessionID'] = session_id();
-                $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
-                if($this->User['sessionID'] != ''){
-                  $this->Database->insert("INSERT INTO sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
-                  if(!isset($_COOKIE['sessionID'])){ setcookie( "sessionID", $this->User['sessionID'], $this->Authentication->getAuth('timestamp') ); }
-                  if(!isset($_COOKIE['timestamp'])){ setcookie( "timestamp", $this->Authentication->getAuth('timestamp'), $this->Authentication->getAuth('timestamp') ); }
-                  $_SESSION['sessionID'] = $this->User['sessionID'];
-                  $_SESSION['timestamp'] = $this->Authentication->getAuth('timestamp');
+              break;
+            case"SESSION":
+              if(!is_array($this->Authentication->getAuth('username'))){
+                $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
+                if(count($user) > 0){
+                  $user = $user[0];
+                  if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
+                  else { $backtype = $this->BackEndDBType; }
+                  switch($backtype){
+                    case"SQL":
+                      if(password_verify($this->Authentication->getAuth('password'), $user['password'])){
+                        $this->User = $user;
+                      }
+                      break;
+                  }
+                }
+              } elseif(!is_array($this->Authentication->getAuth('sessionID'))){
+                $user = $this->Database->select("SELECT * FROM users WHERE sessionID = ?", [$this->Authentication->getAuth('sessionID')]);
+                if(count($user) > 0){ $this->User = $user[0]; }
+              }
+              if($this->User != null){
+                if(!isset($_SESSION['sessionID']) || $this->User['sessionID'] != session_id()){
+                  $this->User['sessionID'] = session_id();
+                  $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
+                  if($this->User['sessionID'] != ''){
+                    $this->Database->insert("INSERT INTO sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
+                    if(!isset($_COOKIE['sessionID'])){ setcookie( "sessionID", $this->User['sessionID'], $this->Authentication->getAuth('timestamp') ); }
+                    if(!isset($_COOKIE['timestamp'])){ setcookie( "timestamp", $this->Authentication->getAuth('timestamp'), $this->Authentication->getAuth('timestamp') ); }
+                    $_SESSION['sessionID'] = $this->User['sessionID'];
+                    $_SESSION['timestamp'] = $this->Authentication->getAuth('timestamp');
+                  }
+                }
+                if(isset($_SESSION['cookiesAccept'])){
+                  $this->Database->update("UPDATE sessions SET userConsent = ? WHERE sessionID = ?", [json_encode($_SESSION),$this->User['sessionID']]);
                 }
               }
-              if(isset($_SESSION['cookiesAccept'])){
-                $this->Database->update("UPDATE sessions SET userConsent = ? WHERE sessionID = ?", [json_encode($_SESSION),$this->User['sessionID']]);
-              }
-            }
-            break;
+              break;
+          }
         }
       }
     } else {
