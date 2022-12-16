@@ -223,7 +223,7 @@ class Auth {
 
   public function getUser($field = null){
     if($this->Authentication->isSet()){
-      if(!$this->Database->isConnected()){ $this->connect(); }
+      if($this->Database == null){ $this->connect(); }
       if($this->User == null){
         switch($this->FrontEndDBType){
           case"BASIC":
