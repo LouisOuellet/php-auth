@@ -226,7 +226,7 @@ In this documentations, we will use a table called users for our examples.
 
 //Import Auth class into the global namespace
 //These must be at the top of your script, not inside a function
-use LaswitchTech\phpAUTH\Auth;
+use LaswitchTech\phpAUTH\phpAUTH;
 
 //Load Composer's autoloader
 require 'vendor/autoload.php';
@@ -253,7 +253,7 @@ $phpAUTH = new phpAUTH();
 
 //Import Auth class into the global namespace
 //These must be at the top of your script, not inside a function
-use LaswitchTech\phpAUTH\Auth;
+use LaswitchTech\phpAUTH\phpAUTH;
 
 //Load Composer's autoloader
 require 'vendor/autoload.php';
@@ -270,7 +270,7 @@ $phpAUTH->connect("localhost","demo","demo","demo");
 
 //Import Auth class into the global namespace
 //These must be at the top of your script, not inside a function
-use LaswitchTech\phpAUTH\Auth;
+use LaswitchTech\phpAUTH\phpAUTH;
 
 //Load Composer's autoloader
 require 'vendor/autoload.php';
@@ -290,7 +290,7 @@ $user = $phpAUTH->getUser();
 
 //Import Auth class into the global namespace
 //These must be at the top of your script, not inside a function
-use LaswitchTech\phpAUTH\Auth;
+use LaswitchTech\phpAUTH\phpAUTH;
 
 //Load Composer's autoloader
 require 'vendor/autoload.php';
@@ -310,7 +310,7 @@ $Authorization = $phpAUTH->isAuthorized("users/list");
 
 //Import Auth class into the global namespace
 //These must be at the top of your script, not inside a function
-use LaswitchTech\phpAUTH\Auth;
+use LaswitchTech\phpAUTH\phpAUTH;
 
 //Load Composer's autoloader
 require 'vendor/autoload.php';
