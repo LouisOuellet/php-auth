@@ -228,7 +228,7 @@ class Auth {
         if($this->User == null){
           switch($this->FrontEndDBType){
             case"BASIC":
-              $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
+              $user = $this->Database->select("SELECT * FROM users WHERE username = ? AND isActive = ?", [$this->Authentication->getAuth('username'), 1]);
               if(count($user) > 0){
                 $user = $user[0];
                 if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
@@ -243,12 +243,12 @@ class Auth {
               }
               break;
             case"BEARER":
-              $user = $this->Database->select("SELECT * FROM users WHERE token = ?", [$this->Authentication->getAuth('token')]);
+              $user = $this->Database->select("SELECT * FROM users WHERE token = ? AND isActive = ?", [$this->Authentication->getAuth('token'), 1]);
               if(count($user) > 0){ $this->User = $user[0]; }
               break;
             case"SESSION":
               if(!is_array($this->Authentication->getAuth('username'))){
-                $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
+                $user = $this->Database->select("SELECT * FROM users WHERE username = ? AND isActive = ?", [$this->Authentication->getAuth('username'), 1]);
                 if(count($user) > 0){
                   $user = $user[0];
                   if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
@@ -262,7 +262,7 @@ class Auth {
                   }
                 }
               } elseif(!is_array($this->Authentication->getAuth('sessionID'))){
-                $user = $this->Database->select("SELECT * FROM users WHERE sessionID = ?", [$this->Authentication->getAuth('sessionID')]);
+                $user = $this->Database->select("SELECT * FROM users WHERE sessionID = ? AND isActive = ?", [$this->Authentication->getAuth('sessionID'), 1]);
                 if(count($user) > 0){ $this->User = $user[0]; }
               }
               if($this->User != null){

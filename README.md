@@ -63,6 +63,10 @@ $phpDB->create('users',[
   'token' => [
     'type' => 'VARCHAR(100)',
     'extra' => ['NOT NULL','UNIQUE']
+  ],
+  'isActive' => [
+    'type' => 'int(1)',
+    'extra' => ['NOT NULL','DEFAULT "0"']
   ]
 ]);
 
