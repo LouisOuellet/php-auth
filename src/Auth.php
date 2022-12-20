@@ -9,7 +9,7 @@ use LaswitchTech\phpAUTH\Basic;
 use LaswitchTech\phpAUTH\Bearer;
 use LaswitchTech\phpAUTH\Session;
 
-class Auth {
+class phpAUTH {
 
   protected $Database = null;
   protected $Authentication = null;

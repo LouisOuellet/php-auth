@@ -22,7 +22,7 @@ define("DB_DATABASE_NAME", "demo");
 define("DB_DEBUG", false);
 
 //Initiate Auth
-$phpAUTH = new Auth("SESSION");
+$phpAUTH = new phpAUTH("SESSION");
 
 //Render
 ?>

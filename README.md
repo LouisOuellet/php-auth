@@ -245,7 +245,7 @@ define("DB_PASSWORD", "demo");
 define("DB_DATABASE_NAME", "demo");
 
 //Initiate Auth
-$phpAUTH = new Auth();
+$phpAUTH = new phpAUTH();
 ```
 
 #### Initiate Auth Without Using Constants
@@ -259,7 +259,7 @@ use LaswitchTech\phpAUTH\Auth;
 require 'vendor/autoload.php';
 
 //Initiate Auth
-$phpAUTH = new Auth("BASIC", "SQL", true, false, "HEADER");
+$phpAUTH = new phpAUTH("BASIC", "SQL", true, false, "HEADER");
 
 //Initiate Database
 $phpAUTH->connect("localhost","demo","demo","demo");
@@ -276,7 +276,7 @@ use LaswitchTech\phpAUTH\Auth;
 require 'vendor/autoload.php';
 
 //Initiate Auth
-$phpAUTH = new Auth("BASIC", "SQL", true, false, "HEADER");
+$phpAUTH = new phpAUTH("BASIC", "SQL", true, false, "HEADER");
 
 //Initiate Database
 $phpAUTH->connect("localhost","demo","demo","demo");
@@ -296,7 +296,7 @@ use LaswitchTech\phpAUTH\Auth;
 require 'vendor/autoload.php';
 
 //Initiate Auth
-$phpAUTH = new Auth("BASIC", "SQL", true, false, "BOOLEAN");
+$phpAUTH = new phpAUTH("BASIC", "SQL", true, false, "BOOLEAN");
 
 //Initiate Database
 $phpAUTH->connect("localhost","demo","demo","demo");
@@ -316,7 +316,7 @@ use LaswitchTech\phpAUTH\Auth;
 require 'vendor/autoload.php';
 
 //Initiate Auth
-$phpAUTH = new Auth("BASIC", "SQL", true, false, "HEADER");
+$phpAUTH = new phpAUTH("BASIC", "SQL", true, false, "HEADER");
 
 //Initiate Database
 $phpAUTH->connect("localhost","demo","demo","demo");
