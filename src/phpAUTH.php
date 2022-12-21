@@ -279,7 +279,7 @@ class phpAUTH {
                   $this->User['sessionID'] = session_id();
                   $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
                   if($this->User['sessionID'] != ''){
-                    $this->Database->insert("INSERT INTO sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
+                    $this->Database->insert("INSERT INTO sessions (sessionID,CSRFToken,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?,?)", [$this->User['sessionID'],$this->hex(),$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
                     if(!isset($_COOKIE['sessionID'])){ setcookie( "sessionID", $this->User['sessionID'], $this->Authentication->getAuth('timestamp') ); }
                     if(!isset($_COOKIE['timestamp'])){ setcookie( "timestamp", $this->Authentication->getAuth('timestamp'), $this->Authentication->getAuth('timestamp') ); }
                     $_SESSION['sessionID'] = $this->User['sessionID'];
@@ -303,6 +303,10 @@ class phpAUTH {
     } else {
       $this->sendOutput('Unable to Validate Authentication', array('HTTP/1.1 511 Network Authentication Required'));
     }
+  }
+
+  protected function hex($length = 16){
+    return bin2hex(openssl_random_pseudo_bytes($length));
   }
 
   public function isAuthorized($name, $level = 1){
