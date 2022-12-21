@@ -327,7 +327,7 @@ class phpAUTH {
     }
   }
 
-  public function isConnected(){ return ($this->User == null); }
+  public function isConnected(){ return ($this->User != null); }
 
   protected function sendOutput($data, $httpHeaders=array()) {
     switch($this->OutputType){
