@@ -30,7 +30,7 @@ $phpAUTH = new phpAUTH("SESSION");
     <p><a href="/">Home</a></p>
     <p><a href="install.php">Install</a></p>
     <?php if($phpAUTH->isConnected()){ ?>
-      <p><a href="?logout">Logout</a></p>
+      <p><a href="?logout&csrf=<?= $phpAUTH->CSRF->token() ?>">Logout</a></p>
       <p>User: <?= json_encode($phpAUTH->getUser(), JSON_PRETTY_PRINT) ?></p>
       <p>BASE64 [pass1]: <?= json_encode(base64_encode("pass1"), JSON_PRETTY_PRINT) ?></p>
       <p>Session ID: <?= json_encode(session_id(), JSON_PRETTY_PRINT) ?></p>

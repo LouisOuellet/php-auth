@@ -30,6 +30,7 @@ class phpAUTH {
   protected $Return = "HEADER";
   protected $Returns = ["BOOLEAN","HEADER"];
   protected $User = null;
+  protected $Status = null;
   protected $URI = null;
   public $CSRF = null;
 
@@ -146,10 +147,10 @@ class phpAUTH {
     return $this->URI;
   }
 
-  protected function logout(){
-    if(isset($this->URI['logout']) || isset($this->URI['signout'])){
+  protected function logout($force = false){
+    if(isset($this->URI['logout']) || isset($this->URI['signout']) || $force){
       // CSRF Protection
-      if($this->CSRF->validate()){
+      if($this->CSRF->validate() || $force){
 
         // clear session variables
         if(isset($_SESSION) && !empty($_SESSION)){
@@ -232,6 +233,58 @@ class phpAUTH {
       "FrontEndDBType" => $this->FrontEndDBType,
       "getUser" => $this->getUser(),
     ];
+  }
+
+  public function getStatus(){
+    if($this->Authentication->isSet()){
+      if($this->Database == null){ $this->connect(); }
+      if($this->Database->isConnected()){
+        if($this->Status == null){
+          switch($this->FrontEndDBType){
+            case"BASIC":
+              $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
+              if(count($user) > 0){
+                $user = $user[0];
+                if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
+                else { $backtype = $this->BackEndDBType; }
+                switch($backtype){
+                  case"SQL":
+                    if(password_verify($this->Authentication->getAuth('password'), $user['password'])){
+                      $this->Status = $user['status'];
+                    }
+                    break;
+                }
+              }
+              break;
+            case"BEARER":
+              $user = $this->Database->select("SELECT * FROM users WHERE token = ?", [$this->Authentication->getAuth('token')]);
+              if(count($user) > 0){ $this->Status = $user[0]['status']; }
+              break;
+            case"SESSION":
+              if(!is_array($this->Authentication->getAuth('username'))){
+                $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
+                if(count($user) > 0){
+                  $user = $user[0];
+                  if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
+                  else { $backtype = $this->BackEndDBType; }
+                  switch($backtype){
+                    case"SQL":
+                      if(password_verify($this->Authentication->getAuth('password'), $user['password'])){
+                        $this->Status = $user['status'];
+                      }
+                      break;
+                  }
+                }
+              } elseif(!is_array($this->Authentication->getAuth('sessionID'))){
+                $user = $this->Database->select("SELECT * FROM users WHERE sessionID = ?", [$this->Authentication->getAuth('sessionID')]);
+                if(count($user) > 0){ $this->Status = $user[0]['status']; }
+              }
+              break;
+          }
+        }
+      }
+    }
+    return $this->Status;
   }
 
   public function getUser($field = null){
