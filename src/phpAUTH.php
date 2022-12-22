@@ -3,11 +3,16 @@
 //Declaring namespace
 namespace LaswitchTech\phpAUTH;
 
-//Import Classes into the global namespace
+//Import phpDB's Database Class into the global namespace
 use LaswitchTech\phpDB\Database;
+
+//Import phpAUTH's Classes into the global namespace
 use LaswitchTech\phpAUTH\Basic;
 use LaswitchTech\phpAUTH\Bearer;
 use LaswitchTech\phpAUTH\Session;
+
+//Import phpCSRF's phpCSRF Class into the global namespace
+use LaswitchTech\phpCSRF\phpCSRF;
 
 class phpAUTH {
 
@@ -26,8 +31,12 @@ class phpAUTH {
   protected $Returns = ["BOOLEAN","HEADER"];
   protected $User = null;
   protected $URI = null;
+  public $CSRF = null;
 
   public function __construct($fronttype = null, $backtype = null, $roles = null, $groups = null, $output = null, $return = null){
+
+    //Initiate CSRF Protection
+    $this->CSRF = new phpCSRF();
 
     //Setup Back-End Authentication
     if($backtype == null && defined('AUTH_B_TYPE')){ $backtype = AUTH_B_TYPE; }
@@ -138,32 +147,36 @@ class phpAUTH {
   }
 
   protected function logout(){
-    if($this->isConnected() && (isset($this->URI['logout']) || isset($this->URI['signout']))){
-      // clear session variables
-      if(isset($_SESSION) && !empty($_SESSION)){
-        foreach($_SESSION as $key => $value){ unset($_SESSION[$key]); }
-      }
+    if(isset($this->URI['logout']) || isset($this->URI['signout'])){
+      // CSRF Protection
+      if($this->CSRF->validate()){
 
-      // clear cookie variables
-      if(isset($_SERVER['HTTP_COOKIE'])){
-        $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
-        foreach($cookies as $cookie){
-          $parts = explode('=', $cookie);
-          $name = trim($parts[0]);
-          unset($_COOKIE[$name]);
-          setcookie($name, null, -1);
-          setcookie($name, null, -1, '/');
+        // clear session variables
+        if(isset($_SESSION) && !empty($_SESSION)){
+          foreach($_SESSION as $key => $value){ unset($_SESSION[$key]); }
         }
+
+        // clear cookie variables
+        if(isset($_SERVER['HTTP_COOKIE'])){
+          $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
+          foreach($cookies as $cookie){
+            $parts = explode('=', $cookie);
+            $name = trim($parts[0]);
+            unset($_COOKIE[$name]);
+            setcookie($name, null, -1);
+            setcookie($name, null, -1, '/');
+          }
+        }
+
+        // remove all session variables
+        session_unset();
+
+        // destroy the session
+        session_destroy();
+
+        // redirect header
+        header('Location: /');
       }
-
-      // remove all session variables
-      session_unset();
-
-      // destroy the session
-      session_destroy();
-
-      // redirect header
-      header('Location: /');
     }
   }
 
@@ -279,7 +292,7 @@ class phpAUTH {
                   $this->User['sessionID'] = session_id();
                   $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
                   if($this->User['sessionID'] != ''){
-                    $this->Database->insert("INSERT INTO sessions (sessionID,CSRFToken,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?,?)", [$this->User['sessionID'],$this->hex(),$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
+                    $this->Database->insert("INSERT INTO sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
                     if(!isset($_COOKIE['sessionID'])){ setcookie( "sessionID", $this->User['sessionID'], $this->Authentication->getAuth('timestamp') ); }
                     if(!isset($_COOKIE['timestamp'])){ setcookie( "timestamp", $this->Authentication->getAuth('timestamp'), $this->Authentication->getAuth('timestamp') ); }
                     $_SESSION['sessionID'] = $this->User['sessionID'];

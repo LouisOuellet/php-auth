@@ -3,13 +3,22 @@
 //Declaring namespace
 namespace LaswitchTech\phpAUTH;
 
+//Import phpCSRF's phpCSRF Class into the global namespace
+use LaswitchTech\phpCSRF\phpCSRF;
+
 class Session {
 
+  protected $CSRF = null;
   protected $Authentication = null;
   protected $Base64 = true;
   protected $Timestamp = null;
 
   public function __construct(){
+
+    //Initiate CSRF Protection
+    $this->CSRF = new phpCSRF();
+
+    //Construct
     $this->Authentication = $this->getSQLAuth();
     $this->setCookieSettings();
   }
@@ -31,22 +40,22 @@ class Session {
 
   protected function setCookieSettings(){
     if(isset($_SESSION,$_SESSION['sessionID']) || isset($_COOKIE,$_COOKIE['sessionID'])){
-      if(isset($_POST,$_POST['cookiesAccept']) && !isset($_COOKIE['cookiesAccept'])){
-        if(isset($_POST['cookiesAccept'])){
+      if(isset($_REQUEST,$_REQUEST['cookiesAccept']) && !isset($_COOKIE['cookiesAccept'])){
+        if(isset($_REQUEST['cookiesAccept'])){
           setcookie( "cookiesAccept", true, $this->Timestamp + 86400 );
           setcookie( "cookiesAcceptEssentials", true, $this->Timestamp + 86400 );
           $_SESSION['cookiesAccept'] = true;
           $_SESSION['cookiesAcceptEssentials'] = true;
         }
-        if(isset($_POST['cookiesAcceptPerformance'])){
+        if(isset($_REQUEST['cookiesAcceptPerformance'])){
           setcookie( "cookiesAcceptPerformance", true, $this->Timestamp + 86400 );
           $_SESSION['cookiesAcceptPerformance'] = true;
         }
-        if(isset($_POST['cookiesAcceptQuality'])){
+        if(isset($_REQUEST['cookiesAcceptQuality'])){
           setcookie( "cookiesAcceptQuality", true, $this->Timestamp + 86400 );
           $_SESSION['cookiesAcceptQuality'] = true;
         }
-        if(isset($_POST['cookiesAcceptPersonalisations'])){
+        if(isset($_REQUEST['cookiesAcceptPersonalisations'])){
           setcookie( "cookiesAcceptPersonalisations", true, $this->Timestamp + 86400 );
           $_SESSION['cookiesAcceptPersonalisations'] = true;
         }
@@ -60,9 +69,12 @@ class Session {
       $return = [ "sessionID" => $_SESSION['sessionID'], "timestamp" => $_SESSION['timestamp'] ];
     } elseif(isset($_COOKIE,$_COOKIE['sessionID'],$_COOKIE['timestamp'])){
       $return = [ "sessionID" => $_COOKIE['sessionID'], "timestamp" => $_COOKIE['timestamp'] ];
-    } elseif(isset($_POST,$_POST['username'],$_POST['password'])){
-      $return = [ "username" => $_POST['username'], "password" => $_POST['password'], "timestamp" => time() ];
-      if(isset($_POST['remember'])){ $return['timestamp'] = time() + (86400 * 30); }
+    } elseif(isset($_REQUEST,$_REQUEST['username'],$_REQUEST['password'],$_REQUEST['csrf'])){
+      // CSRF Protection
+      if($this->CSRF->validate()){
+        $return = [ "username" => $_REQUEST['username'], "password" => $_REQUEST['password'], "timestamp" => time() ];
+        if(isset($_REQUEST['remember'])){ $return['timestamp'] = time() + (86400 * 30); }
+      }
     }
     if($return != null){ $this->Timestamp = $return['timestamp']; } else { $this->Timestamp = time(); }
     return $return;

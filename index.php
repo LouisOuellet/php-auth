@@ -10,7 +10,6 @@ use LaswitchTech\phpAUTH\phpAUTH;
 require 'vendor/autoload.php';
 
 //Define Auth Information
-define("AUTH_F_TYPE", "SQL");
 define("AUTH_RETURN", "BOOLEAN");
 define("AUTH_OUTPUT_TYPE", "STRING");
 
@@ -40,6 +39,7 @@ $phpAUTH = new phpAUTH("SESSION");
         <input type="text" name="username">
         <input type="password" name="password">
         <input type="checkbox" name="remember">
+        <input type="hidden" name="csrf" value="<?= $phpAUTH->CSRF->token() ?>">
         <input type="submit" name="login">
       </form>
     <?php } ?>
@@ -51,6 +51,9 @@ $phpAUTH = new phpAUTH("SESSION");
     <?php } ?>
     <?php if(isset($_POST)){ ?>
       <p>_POST: <?= json_encode($_POST, JSON_PRETTY_PRINT) ?></p>
+    <?php } ?>
+    <?php if(isset($_REQUEST)){ ?>
+      <p>_REQUEST: <?= json_encode($_REQUEST, JSON_PRETTY_PRINT) ?></p>
     <?php } ?>
     <script src="/vendor/components/jquery/jquery.min.js"></script>
     <script src="/dist/js/cookie.js"></script>

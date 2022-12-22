@@ -13,11 +13,12 @@
       - BEARER (Much faster then BASIC)
       - SESSION (Best used for GUI)
     - Back-End
-      - SQL
+      - SQL ([phpDB](https://github.com/LouisOuellet/php-database))
   - Authorization Support
   - GDPR Cookie Compliance
   - CCPA Cookie Compliance
   - JavaScript class available for GDPR & CCPA Cookie Compliance
+  - Cross-site Request Forgery Protection ([phpCSRF](https://github.com/LouisOuellet/php-csrf))
 
 ## Why you might need it
 If you are looking for an easy way to setup authentication and authorization in your project. This PHP Class is for you.
