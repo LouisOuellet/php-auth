@@ -36,6 +36,9 @@ class phpAUTH {
 
   public function __construct($fronttype = null, $backtype = null, $roles = null, $groups = null, $output = null, $return = null){
 
+    ini_set('session.cookie_samesite', 'None');
+    session_set_cookie_params(['samesite' => 'None']);
+
     //Initiate CSRF Protection
     $this->CSRF = new phpCSRF();
 
