@@ -1,4 +1,5 @@
 <?php
+session_set_cookie_params(['samesite' => 'None']);
 //Initiate Session
 session_start();
 
