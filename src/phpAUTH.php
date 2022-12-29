@@ -258,6 +258,13 @@ class phpAUTH {
             setcookie($name, null, -1, '/');
           }
         }
+        if(isset($_COOKIE) && !empty($_COOKIE)){
+          foreach($_COOKIE as $key => $value){
+            unset($_COOKIE[$key]);
+            setcookie($key, null, -1);
+            setcookie($key, null, -1, '/');
+          }
+        }
 
         // remove all session variables
         session_unset();
