@@ -33,11 +33,17 @@ class phpAUTH {
   protected $Status = null;
   protected $URI = null;
   public $CSRF = null;
+  protected $CookieOptions = [];
+  protected $Domains = [];
+  protected $Domain = null;
 
   public function __construct($fronttype = null, $backtype = null, $roles = null, $groups = null, $output = null, $return = null){
 
     // Configure Cookie Scope
-    ini_set('session.cookie_samesite', 'None');
+    if(session_status() < 2){
+      ini_set('session.cookie_samesite', 'Strict');
+      ini_set('session.cookie_secure', 'On');
+    }
 
     //Initiate CSRF Protection
     $this->CSRF = new phpCSRF();
@@ -70,6 +76,13 @@ class phpAUTH {
       }
     }
 
+    //Setup Domains
+    $this->setDomains();
+    $this->setDomain();
+
+    //Setup Cookie Options
+    $this->setCookieOptions();
+
     //Setup Roles
     $this->setRoles($roles);
 
@@ -94,6 +107,72 @@ class phpAUTH {
 
   public function __call($name, $arguments) {
     $this->sendOutput($name, array('HTTP/1.1 501 Not Implemented'));
+  }
+
+  public function setDomains($domains = null){
+    if($domains == null && defined('AUTH_DOMAINS')){ $domains = AUTH_DOMAINS; }
+    if($domains == null){ $domains = []; }
+    $this->Domains = $domains;
+  }
+
+  public function setDomain(){
+    if(isset($_SERVER['HTTP_HOST']) && $this->validateDomain($_SERVER['HTTP_HOST'])){
+      $this->Domain = $_SERVER['HTTP_HOST'];
+    }
+    if(!isset($_SERVER['HTTP_HOST'])){
+      $this->Domain = $this->Domains[array_key_first($this->Domains)];
+    }
+  }
+
+  public function validateDomain($domain = null){
+    if($domain == null){ $domain = $this->Domain; }
+    if($domain == null || !in_array($domain, $this->Domains) || count($this->Domains) <= 0){
+      if(!in_array('*', $this->Domains)){
+        $this->sendOutput('This host is not authorized', array('HTTP/1.1 400 Bad Request'), true);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public function setCookieOptions($options = null){
+    $defaults = [
+      'secure' => true,
+      'httponly' => true,
+      'domain' => $this->Domain,
+      'samesite' => 'Strict',
+      'expires' => time() + 60*60*24*30,
+    ];
+    if($options == null && defined('AUTH_COOKIE_OPTIONS')){ $options = AUTH_COOKIE_OPTIONS; }
+    if($options == null){ $options = []; }
+    foreach ($options as $key => $value) {
+      if(isset($defaults[$key])){
+        $defaults[$key] = $value;
+      }
+    }
+    if(isset($_SESSION,$_SESSION['sessionID']) || isset($_COOKIE,$_COOKIE['sessionID'])){
+      if(isset($_REQUEST,$_REQUEST['cookiesAccept']) && !isset($_COOKIE['cookiesAccept'])){
+        if(isset($_REQUEST['cookiesAccept'])){
+          setcookie( "cookiesAccept", true, $defaults );
+          setcookie( "cookiesAcceptEssentials", true, $defaults );
+          $_SESSION['cookiesAccept'] = true;
+          $_SESSION['cookiesAcceptEssentials'] = true;
+        }
+        if(isset($_REQUEST['cookiesAcceptPerformance'])){
+          setcookie( "cookiesAcceptPerformance", true, $defaults );
+          $_SESSION['cookiesAcceptPerformance'] = true;
+        }
+        if(isset($_REQUEST['cookiesAcceptQuality'])){
+          setcookie( "cookiesAcceptQuality", true, $defaults );
+          $_SESSION['cookiesAcceptQuality'] = true;
+        }
+        if(isset($_REQUEST['cookiesAcceptPersonalisations'])){
+          setcookie( "cookiesAcceptPersonalisations", true, $defaults );
+          $_SESSION['cookiesAcceptPersonalisations'] = true;
+        }
+      }
+    }
+    $this->CookieOptions = $defaults;
   }
 
   public function setOutputType($output = null){
@@ -349,8 +428,10 @@ class phpAUTH {
                   $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
                   if($this->User['sessionID'] != ''){
                     $this->Database->insert("INSERT INTO sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
-                    if(!isset($_COOKIE['sessionID'])){ setcookie( "sessionID", $this->User['sessionID'], $this->Authentication->getAuth('timestamp') ); }
-                    if(!isset($_COOKIE['timestamp'])){ setcookie( "timestamp", $this->Authentication->getAuth('timestamp'), $this->Authentication->getAuth('timestamp') ); }
+                    $options = $this->CookieOptions;
+                    $options['expires'] = $this->Authentication->getAuth('timestamp');
+                    if(!isset($_COOKIE['sessionID'])){ setcookie( "sessionID", $this->User['sessionID'], $options ); }
+                    if(!isset($_COOKIE['timestamp'])){ setcookie( "timestamp", $this->Authentication->getAuth('timestamp'), $options ); }
                     $_SESSION['sessionID'] = $this->User['sessionID'];
                     $_SESSION['timestamp'] = $this->Authentication->getAuth('timestamp');
                   }
@@ -402,20 +483,26 @@ class phpAUTH {
 
   public function isConnected(){ return ($this->User != null); }
 
-  protected function sendOutput($data, $httpHeaders=array()) {
+  protected function sendHeader($data, $httpHeaders=array()){
+    header_remove('Set-Cookie');
+    if (is_array($httpHeaders) && count($httpHeaders)) {
+      foreach ($httpHeaders as $httpHeader) {
+        header($httpHeader);
+      }
+    }
+    echo $data;
+    exit;
+  }
+
+  protected function sendOutput($data, $httpHeaders=array(), $force = false){
     switch($this->OutputType){
+      case NULL:
       case"STRING":
-        return $data;
+        if($force){ $this->sendHeader($data, $httpHeaders); }
+        else { return $data; }
         break;
       case"HEADER":
-        header_remove('Set-Cookie');
-        if (is_array($httpHeaders) && count($httpHeaders)) {
-          foreach ($httpHeaders as $httpHeader) {
-            header($httpHeader);
-          }
-        }
-        echo $data;
-        exit;
+        $this->sendHeader($data, $httpHeaders);
         break;
     }
   }

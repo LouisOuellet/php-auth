@@ -13,6 +13,7 @@ require 'vendor/autoload.php';
 //Define Auth Information
 define("AUTH_RETURN", "BOOLEAN");
 define("AUTH_OUTPUT_TYPE", "STRING");
+define("AUTH_DOMAINS", ['*']);
 
 //Define Database Information
 define("DB_HOST", "localhost");

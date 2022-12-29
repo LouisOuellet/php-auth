@@ -20,7 +20,6 @@ class Session {
 
     //Construct
     $this->Authentication = $this->getSQLAuth();
-    $this->setCookieSettings();
   }
 
   public function __call($name, $arguments) {
@@ -36,31 +35,6 @@ class Session {
 
   public function isSet(){
     return is_array($this->Authentication);
-  }
-
-  protected function setCookieSettings(){
-    if(isset($_SESSION,$_SESSION['sessionID']) || isset($_COOKIE,$_COOKIE['sessionID'])){
-      if(isset($_REQUEST,$_REQUEST['cookiesAccept']) && !isset($_COOKIE['cookiesAccept'])){
-        if(isset($_REQUEST['cookiesAccept'])){
-          setcookie( "cookiesAccept", true, $this->Timestamp + 86400 );
-          setcookie( "cookiesAcceptEssentials", true, $this->Timestamp + 86400 );
-          $_SESSION['cookiesAccept'] = true;
-          $_SESSION['cookiesAcceptEssentials'] = true;
-        }
-        if(isset($_REQUEST['cookiesAcceptPerformance'])){
-          setcookie( "cookiesAcceptPerformance", true, $this->Timestamp + 86400 );
-          $_SESSION['cookiesAcceptPerformance'] = true;
-        }
-        if(isset($_REQUEST['cookiesAcceptQuality'])){
-          setcookie( "cookiesAcceptQuality", true, $this->Timestamp + 86400 );
-          $_SESSION['cookiesAcceptQuality'] = true;
-        }
-        if(isset($_REQUEST['cookiesAcceptPersonalisations'])){
-          setcookie( "cookiesAcceptPersonalisations", true, $this->Timestamp + 86400 );
-          $_SESSION['cookiesAcceptPersonalisations'] = true;
-        }
-      }
-    }
   }
 
   protected function getSQLAuth(){
