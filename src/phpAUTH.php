@@ -248,21 +248,16 @@ class phpAUTH {
         }
 
         // clear cookie variables
-        if(isset($_COOKIE) && !empty($_COOKIE)){
-          foreach($_COOKIE as $key => $value){
-            unset($_COOKIE[$key]);
-            setcookie($key, null, -1);
-            setcookie($key, null, -1, '/');
-          }
-        }
+        $options = $this->CookieOptions;
+        $options['expires'] = -1;
         if(isset($_SERVER['HTTP_COOKIE'])){
           $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
           foreach($cookies as $cookie){
             $parts = explode('=', $cookie);
             $name = trim($parts[0]);
             unset($_COOKIE[$name]);
-            setcookie($name, null, -1);
-            setcookie($name, null, -1, '/');
+            setcookie($name, null, $options);
+            setcookie($name, null, $options);
           }
         }
 
