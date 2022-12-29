@@ -127,7 +127,7 @@ class phpAUTH {
     }
   }
 
-  public getDomain(){
+  public function getDomain(){
     return $this->Domain;
   }
 
