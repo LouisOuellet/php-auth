@@ -127,6 +127,10 @@ class phpAUTH {
     }
   }
 
+  public getDomain(){
+    return $this->Domain;
+  }
+
   public function validateDomain($domain = null){
     if($domain == null){ $domain = $this->Domain; }
     if($domain == null || !in_array($domain, $this->Domains) || count($this->Domains) <= 0){
