@@ -102,7 +102,7 @@ class phpAUTH {
     $this->parseURI();
 
     //Logout User
-    $this->logout();
+    $this->logout(isset($_SESSION['sessionID']) && !isset($_COOKIE['sessionID']));
 
     //Retrieve User
     $this->getUser();
