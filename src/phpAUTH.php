@@ -83,6 +83,9 @@ class phpAUTH {
     //Setup Cookie Options
     $this->setCookieOptions();
 
+    //GDPR & CCPA Cookie Compliance
+    $this->certification();
+
     //Setup Roles
     $this->setRoles($roles);
 
@@ -138,7 +141,7 @@ class phpAUTH {
   public function setCookieOptions($options = null){
     $defaults = [
       'secure' => true,
-      'httponly' => true,
+      'httponly' => false,
       'domain' => $this->Domain,
       'samesite' => 'Strict',
       'expires' => time() + 60*60*24*30,
@@ -150,29 +153,34 @@ class phpAUTH {
         $defaults[$key] = $value;
       }
     }
+    $this->CookieOptions = $defaults;
+  }
+
+  protected function certification(){
     if(isset($_SESSION,$_SESSION['sessionID']) || isset($_COOKIE,$_COOKIE['sessionID'])){
       if(isset($_REQUEST,$_REQUEST['cookiesAccept']) && !isset($_COOKIE['cookiesAccept'])){
+        $options = $this->CookieOptions;
+        $options['httponly'] = false;
         if(isset($_REQUEST['cookiesAccept'])){
-          setcookie( "cookiesAccept", true, $defaults );
-          setcookie( "cookiesAcceptEssentials", true, $defaults );
+          setcookie( "cookiesAccept", true, $options );
+          setcookie( "cookiesAcceptEssentials", true, $options );
           $_SESSION['cookiesAccept'] = true;
           $_SESSION['cookiesAcceptEssentials'] = true;
         }
         if(isset($_REQUEST['cookiesAcceptPerformance'])){
-          setcookie( "cookiesAcceptPerformance", true, $defaults );
+          setcookie( "cookiesAcceptPerformance", true, $options );
           $_SESSION['cookiesAcceptPerformance'] = true;
         }
         if(isset($_REQUEST['cookiesAcceptQuality'])){
-          setcookie( "cookiesAcceptQuality", true, $defaults );
+          setcookie( "cookiesAcceptQuality", true, $options );
           $_SESSION['cookiesAcceptQuality'] = true;
         }
         if(isset($_REQUEST['cookiesAcceptPersonalisations'])){
-          setcookie( "cookiesAcceptPersonalisations", true, $defaults );
+          setcookie( "cookiesAcceptPersonalisations", true, $options );
           $_SESSION['cookiesAcceptPersonalisations'] = true;
         }
       }
     }
-    $this->CookieOptions = $defaults;
   }
 
   public function setOutputType($output = null){
