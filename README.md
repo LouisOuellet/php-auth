@@ -69,15 +69,14 @@ $phpDB->create('auth_users',[
   'isActive' => [
     'type' => 'int(1)',
     'extra' => ['NOT NULL','DEFAULT "0"']
-  ]
-]);
-
-//Optionally you may want to add a type column if you want to support multiple Authentication Back-Ends like LDAP, SMTP, IMAP, etc.
-$phpDB->alter('auth_users',[
-  'type' => [
-    'action' => 'ADD',
+  ],
+  'database' => [
     'type' => 'VARCHAR(10)',
     'extra' => ['NOT NULL','DEFAULT "SQL"']
+  ],
+  'server' => [
+    'type' => 'VARCHAR(255)',
+    'extra' => ['NULL']
   ]
 ]);
 

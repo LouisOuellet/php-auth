@@ -14,6 +14,12 @@ use LaswitchTech\phpAUTH\Session;
 //Import phpCSRF's phpCSRF Class into the global namespace
 use LaswitchTech\phpCSRF\phpCSRF;
 
+//Import IMAP's phpIMAP Class into the global namespace
+use LaswitchTech\IMAP\phpIMAP;
+
+//Import SMTP's phpSMTP Class into the global namespace
+use LaswitchTech\SMTP\phpSMTP;
+
 class phpAUTH {
 
   protected $Database = null;
@@ -21,8 +27,6 @@ class phpAUTH {
   protected $Authorization = null;
   protected $FrontEndDBType = "SESSION";
   protected $FrontEndDBTypes = ["SESSION", "BASIC", "BEARER"];
-  protected $BackEndDBType = null;
-  protected $BackEndDBTypes = ["SQL"];
   protected $OutputType = null;
   protected $OutputTypes = ["HEADER","STRING"];
   protected $Roles = false;
@@ -36,8 +40,10 @@ class phpAUTH {
   protected $CookieOptions = [];
   protected $Domains = [];
   protected $Domain = null;
+  protected $SMTP = null;
+  protected $IMAP = null;
 
-  public function __construct($fronttype = null, $backtype = null, $roles = null, $groups = null, $output = null, $return = null){
+  public function __construct($fronttype = null, $roles = null, $groups = null, $output = null, $return = null){
 
     // Configure Cookie Scope
     if(session_status() < 2){
@@ -48,21 +54,13 @@ class phpAUTH {
     //Initiate CSRF Protection
     $this->CSRF = new phpCSRF();
 
-    //Setup Back-End Authentication
-    if($backtype == null && defined('AUTH_B_TYPE')){ $backtype = AUTH_B_TYPE; }
-    if($backtype == null){ $backtype = "SQL"; }
-    $backtype = strtoupper($backtype);
-    if(in_array($backtype,$this->BackEndDBTypes)){ $this->BackEndDBType = $backtype; } else {
-      $this->sendOutput('Unknown Back-End Type', array('HTTP/1.1 500 Internal Server Error'));
-    }
-
     //Setup Front-End Authentication
     $this->Authentication = new Session();
     if(!$this->Authentication->isSet()){
       $this->Authentication = null;
       $this->FrontEndDBType = "BEARER";
       if($fronttype != null && in_array(strtoupper($fronttype),$this->FrontEndDBTypes)){ $this->FrontEndDBType = strtoupper($fronttype); }
-      if(defined('AUTH_F_TYPE') && in_array(strtoupper(AUTH_F_TYPE),$this->FrontEndDBTypes)){ $this->FrontEndDBType = strtoupper(AUTH_F_TYPE); }
+      if(defined('AUTH_TYPE') && in_array(strtoupper(AUTH_TYPE),$this->FrontEndDBTypes)){ $this->FrontEndDBType = strtoupper(AUTH_TYPE); }
       switch($this->FrontEndDBType){
         case"BASIC":
           $this->Authentication = new Basic();
@@ -341,11 +339,24 @@ class phpAUTH {
               $user = $this->Database->select("SELECT * FROM auth_users WHERE username = ?", [$this->Authentication->getAuth('username')]);
               if(count($user) > 0){
                 $user = $user[0];
-                if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
-                else { $backtype = $this->BackEndDBType; }
-                switch($backtype){
+                $user['server'] = json_decode($user['server'],true);
+                switch($user['database']){
                   case"SQL":
                     if(password_verify($this->Authentication->getAuth('password'), $user['password'])){
+                      $this->Status = $user['status'];
+                    }
+                    break;
+                  case"IMAP":
+                    $phpIMAP = new phpIMAP();
+                    $status = $phpIMAP->login($this->Authentication->getAuth('username'),$this->Authentication->getAuth('password'),$user['server']['host'],$user['server']['port'],$user['server']['encryption']);
+                    if($status){
+                      $this->Status = $user['status'];
+                    }
+                    break;
+                  case"SMTP":
+                    $phpSMTP = new phpSMTP();
+                    $status = $phpSMTP->login($this->Authentication->getAuth('username'),$this->Authentication->getAuth('password'),$user['server']['host'],$user['server']['port'],$user['server']['encryption']);
+                    if($status){
                       $this->Status = $user['status'];
                     }
                     break;
@@ -361,11 +372,23 @@ class phpAUTH {
                 $user = $this->Database->select("SELECT * FROM auth_users WHERE username = ?", [$this->Authentication->getAuth('username')]);
                 if(count($user) > 0){
                   $user = $user[0];
-                  if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
-                  else { $backtype = $this->BackEndDBType; }
-                  switch($backtype){
+                  switch($user['database']){
                     case"SQL":
                       if(password_verify($this->Authentication->getAuth('password'), $user['password'])){
+                        $this->Status = $user['status'];
+                      }
+                      break;
+                    case"IMAP":
+                      $phpIMAP = new phpIMAP();
+                      $status = $phpIMAP->login($this->Authentication->getAuth('username'),$this->Authentication->getAuth('password'),$user['server']['host'],$user['server']['port'],$user['server']['encryption']);
+                      if($status){
+                        $this->Status = $user['status'];
+                      }
+                      break;
+                    case"SMTP":
+                      $phpSMTP = new phpSMTP();
+                      $status = $phpSMTP->login($this->Authentication->getAuth('username'),$this->Authentication->getAuth('password'),$user['server']['host'],$user['server']['port'],$user['server']['encryption']);
+                      if($status){
                         $this->Status = $user['status'];
                       }
                       break;
@@ -393,11 +416,23 @@ class phpAUTH {
               $user = $this->Database->select("SELECT * FROM auth_users WHERE username = ?", [$this->Authentication->getAuth('username')]);
               if(count($user) > 0){
                 $user = $user[0];
-                if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
-                else { $backtype = $this->BackEndDBType; }
-                switch($backtype){
+                switch($user['database']){
                   case"SQL":
                     if(password_verify($this->Authentication->getAuth('password'), $user['password'])){
+                      $this->User = $user;
+                    }
+                    break;
+                  case"IMAP":
+                    $phpIMAP = new phpIMAP();
+                    $status = $phpIMAP->login($this->Authentication->getAuth('username'),$this->Authentication->getAuth('password'),$user['server']['host'],$user['server']['port'],$user['server']['encryption']);
+                    if($status){
+                      $this->User = $user;
+                    }
+                    break;
+                  case"SMTP":
+                    $phpSMTP = new phpSMTP();
+                    $status = $phpSMTP->login($this->Authentication->getAuth('username'),$this->Authentication->getAuth('password'),$user['server']['host'],$user['server']['port'],$user['server']['encryption']);
+                    if($status){
                       $this->User = $user;
                     }
                     break;
@@ -413,11 +448,23 @@ class phpAUTH {
                 $user = $this->Database->select("SELECT * FROM auth_users WHERE username = ?", [$this->Authentication->getAuth('username')]);
                 if(count($user) > 0){
                   $user = $user[0];
-                  if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
-                  else { $backtype = $this->BackEndDBType; }
-                  switch($backtype){
+                  switch($user['database']){
                     case"SQL":
                       if(password_verify($this->Authentication->getAuth('password'), $user['password'])){
+                        $this->User = $user;
+                      }
+                      break;
+                    case"IMAP":
+                      $phpIMAP = new phpIMAP();
+                      $status = $phpIMAP->login($this->Authentication->getAuth('username'),$this->Authentication->getAuth('password'),$user['server']['host'],$user['server']['port'],$user['server']['encryption']);
+                      if($status){
+                        $this->User = $user;
+                      }
+                      break;
+                    case"SMTP":
+                      $phpSMTP = new phpSMTP();
+                      $status = $phpSMTP->login($this->Authentication->getAuth('username'),$this->Authentication->getAuth('password'),$user['server']['host'],$user['server']['port'],$user['server']['encryption']);
+                      if($status){
                         $this->User = $user;
                       }
                       break;
