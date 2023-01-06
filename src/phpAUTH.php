@@ -338,7 +338,7 @@ class phpAUTH {
         if($this->Status == null){
           switch($this->FrontEndDBType){
             case"BASIC":
-              $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
+              $user = $this->Database->select("SELECT * FROM auth_users WHERE username = ?", [$this->Authentication->getAuth('username')]);
               if(count($user) > 0){
                 $user = $user[0];
                 if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
@@ -353,12 +353,12 @@ class phpAUTH {
               }
               break;
             case"BEARER":
-              $user = $this->Database->select("SELECT * FROM users WHERE token = ?", [$this->Authentication->getAuth('token')]);
+              $user = $this->Database->select("SELECT * FROM auth_users WHERE token = ?", [$this->Authentication->getAuth('token')]);
               if(count($user) > 0){ $this->Status = $user[0]['status']; }
               break;
             case"SESSION":
               if(!is_array($this->Authentication->getAuth('username'))){
-                $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
+                $user = $this->Database->select("SELECT * FROM auth_users WHERE username = ?", [$this->Authentication->getAuth('username')]);
                 if(count($user) > 0){
                   $user = $user[0];
                   if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
@@ -372,7 +372,7 @@ class phpAUTH {
                   }
                 }
               } elseif(!is_array($this->Authentication->getAuth('sessionID'))){
-                $user = $this->Database->select("SELECT * FROM users WHERE sessionID = ?", [$this->Authentication->getAuth('sessionID')]);
+                $user = $this->Database->select("SELECT * FROM auth_users WHERE sessionID = ?", [$this->Authentication->getAuth('sessionID')]);
                 if(count($user) > 0){ $this->Status = $user[0]['status']; }
               }
               break;
@@ -390,7 +390,7 @@ class phpAUTH {
         if($this->User == null){
           switch($this->FrontEndDBType){
             case"BASIC":
-              $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
+              $user = $this->Database->select("SELECT * FROM auth_users WHERE username = ?", [$this->Authentication->getAuth('username')]);
               if(count($user) > 0){
                 $user = $user[0];
                 if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
@@ -405,12 +405,12 @@ class phpAUTH {
               }
               break;
             case"BEARER":
-              $user = $this->Database->select("SELECT * FROM users WHERE token = ?", [$this->Authentication->getAuth('token')]);
+              $user = $this->Database->select("SELECT * FROM auth_users WHERE token = ?", [$this->Authentication->getAuth('token')]);
               if(count($user) > 0){ $this->User = $user[0]; }
               break;
             case"SESSION":
               if(!is_array($this->Authentication->getAuth('username'))){
-                $user = $this->Database->select("SELECT * FROM users WHERE username = ?", [$this->Authentication->getAuth('username')]);
+                $user = $this->Database->select("SELECT * FROM auth_users WHERE username = ?", [$this->Authentication->getAuth('username')]);
                 if(count($user) > 0){
                   $user = $user[0];
                   if(isset($user['type']) && in_array(strtoupper($user['type']),$this->BackEndDBTypes)){ $backtype = strtoupper($user['type']); }
@@ -424,14 +424,14 @@ class phpAUTH {
                   }
                 }
               } elseif(!is_array($this->Authentication->getAuth('sessionID'))){
-                $user = $this->Database->select("SELECT * FROM users WHERE sessionID = ?", [$this->Authentication->getAuth('sessionID')]);
+                $user = $this->Database->select("SELECT * FROM auth_users WHERE sessionID = ?", [$this->Authentication->getAuth('sessionID')]);
                 if(count($user) > 0){ $this->User = $user[0]; }
               }
               if($this->User != null){
                 if($this->User['isActive'] == 0 && $this->User['token'] != null && isset($_GET['token'])){
                   if(base64_decode($_GET['token']) == $this->User['token']){
                     $this->User['isActive'] = 1;
-                    $this->Database->update("UPDATE users SET token = ?, isActive = ? WHERE id = ?", [null,1,$this->User['id']]);
+                    $this->Database->update("UPDATE auth_users SET token = ?, isActive = ? WHERE id = ?", [null,1,$this->User['id']]);
                   }
                 }
                 if($this->User['isActive'] == 0){ $this->User = null; }
@@ -439,9 +439,9 @@ class phpAUTH {
               if($this->User != null){
                 if(!isset($_SESSION['sessionID']) || $this->User['sessionID'] != session_id()){
                   $this->User['sessionID'] = session_id();
-                  $this->Database->update("UPDATE users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
+                  $this->Database->update("UPDATE auth_users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
                   if($this->User['sessionID'] != ''){
-                    $this->Database->insert("INSERT INTO sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
+                    $this->Database->insert("INSERT INTO auth_sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
                     $options = $this->CookieOptions;
                     $options['expires'] = $this->Authentication->getAuth('timestamp');
                     if(!isset($_COOKIE['sessionID'])){ setcookie( "sessionID", $this->User['sessionID'], $options ); }
@@ -451,7 +451,7 @@ class phpAUTH {
                   }
                 }
                 if(isset($_SESSION['cookiesAccept'])){
-                  $this->Database->update("UPDATE sessions SET userConsent = ? WHERE sessionID = ?", [json_encode($_SESSION),$this->User['sessionID']]);
+                  $this->Database->update("UPDATE auth_sessions SET userConsent = ? WHERE sessionID = ?", [json_encode($_SESSION),$this->User['sessionID']]);
                 }
               }
               break;
@@ -477,7 +477,7 @@ class phpAUTH {
     $return = false;
     if($this->User != null){
       if($this->Roles){
-        $roles = $this->Database->select("SELECT * FROM roles WHERE members LIKE ? AND permissions LIKE ?", ['%'.json_encode(["users" => $this->User['id']],JSON_UNESCAPED_SLASHES).'%','%'.json_encode($name,JSON_UNESCAPED_SLASHES).':%']);
+        $roles = $this->Database->select("SELECT * FROM auth_roles WHERE members LIKE ? AND permissions LIKE ?", ['%'.json_encode(["users" => $this->User['id']],JSON_UNESCAPED_SLASHES).'%','%'.json_encode($name,JSON_UNESCAPED_SLASHES).':%']);
         if(count($roles) > 0){
           foreach($roles as $role){
             $role['permissions'] = json_decode($role['permissions'],true);

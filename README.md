@@ -19,6 +19,7 @@
   - CCPA Cookie Compliance
   - JavaScript class available for GDPR & CCPA Cookie Compliance
   - Cross-site Request Forgery Protection ([phpCSRF](https://github.com/LouisOuellet/php-csrf))
+  - Host Validation
 
 ## Why you might need it
 If you are looking for an easy way to setup authentication and authorization in your project. This PHP Class is for you.
@@ -48,7 +49,7 @@ require 'vendor/autoload.php';
 $phpDB = new Database("localhost","demo","demo","demo");
 
 //Create the users table
-$phpDB->create('users',[
+$phpDB->create('auth_users',[
   'id' => [
     'type' => 'BIGINT(10)',
     'extra' => ['UNSIGNED','AUTO_INCREMENT','PRIMARY KEY']
@@ -72,7 +73,7 @@ $phpDB->create('users',[
 ]);
 
 //Optionally you may want to add a type column if you want to support multiple Authentication Back-Ends like LDAP, SMTP, IMAP, etc.
-$phpDB->alter('users',[
+$phpDB->alter('auth_users',[
   'type' => [
     'action' => 'ADD',
     'type' => 'VARCHAR(10)',
@@ -81,7 +82,7 @@ $phpDB->alter('users',[
 ]);
 
 //Other Suggestions
-$phpDB->alter('users',[
+$phpDB->alter('auth_users',[
   'created' => [
     'action' => 'ADD',
     'type' => 'DATETIME',
@@ -95,7 +96,7 @@ $phpDB->alter('users',[
 ]);
 
 //If you enable Roles, you will need a roles table.
-$phpDB->create('roles',[
+$phpDB->create('auth_roles',[
   'id' => [
     'type' => 'BIGINT(10)',
     'extra' => ['UNSIGNED','AUTO_INCREMENT','PRIMARY KEY']
@@ -116,7 +117,7 @@ $phpDB->create('roles',[
 
 //Optionally you may want to add a roles column if you want to quickly list roles memberships.
 
-$phpDB->alter('users',[
+$phpDB->alter('auth_users',[
   'roles' => [
     'action' => 'ADD',
     'type' => 'LONGTEXT',
@@ -125,7 +126,7 @@ $phpDB->alter('users',[
 ]);
 
 //Other Suggestions
-$phpDB->alter('roles',[
+$phpDB->alter('auth_roles',[
   'created' => [
     'action' => 'ADD',
     'type' => 'DATETIME',
@@ -139,7 +140,7 @@ $phpDB->alter('roles',[
 ]);
 
 //If you use SQL Login, you will need a sessions table.
-$phpDB->create('sessions',[
+$phpDB->create('auth_sessions',[
   'id' => [
     'type' => 'BIGINT(10)',
     'extra' => ['UNSIGNED','AUTO_INCREMENT','PRIMARY KEY']
@@ -177,7 +178,7 @@ $phpDB->create('sessions',[
 
 //Optionally you may want to add a session column if you want to quickly access the user's session.
 
-$phpDB->alter('users',[
+$phpDB->alter('auth_users',[
   'sessionID' => [
     'action' => 'ADD',
     'type' => 'VARCHAR(255)',
@@ -186,7 +187,7 @@ $phpDB->alter('users',[
 ]);
 
 //Other Suggestions
-$phpDB->alter('sessions',[
+$phpDB->alter('auth_sessions',[
   'created' => [
     'action' => 'ADD',
     'type' => 'DATETIME',
@@ -200,13 +201,13 @@ $phpDB->alter('sessions',[
 ]);
 
 //Create user
-$UserID = $phpDB->insert("INSERT INTO users (username, password, token) VALUES (?,?,?)", ["user1",password_hash("pass1", PASSWORD_DEFAULT),hash("sha256", "pass1", false)]);
+$UserID = $phpDB->insert("INSERT INTO auth_users (username, password, token) VALUES (?,?,?)", ["user1",password_hash("pass1", PASSWORD_DEFAULT),hash("sha256", "pass1", false)]);
 
 //Create role
-$RoleID = $phpDB->insert("INSERT INTO roles (name, permissions, members) VALUES (?,?,?)", ["users",json_encode(["users/list" => 1],JSON_UNESCAPED_SLASHES),json_encode([["users" => $UserID]],JSON_UNESCAPED_SLASHES)]);
+$RoleID = $phpDB->insert("INSERT INTO auth_roles (name, permissions, members) VALUES (?,?,?)", ["users",json_encode(["users/list" => 1],JSON_UNESCAPED_SLASHES),json_encode([["users" => $UserID]],JSON_UNESCAPED_SLASHES)]);
 
 //Update user
-$phpDB->update("UPDATE users SET roles = ? WHERE id = ?", [json_encode([["roles" => $RoleID]],JSON_UNESCAPED_SLASHES),$UserID]);
+$phpDB->update("UPDATE auth_users SET roles = ? WHERE id = ?", [json_encode([["roles" => $RoleID]],JSON_UNESCAPED_SLASHES),$UserID]);
 ```
 
 ## Security
