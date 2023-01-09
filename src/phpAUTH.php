@@ -478,7 +478,7 @@ class phpAUTH {
                 if($this->User['isActive'] == 0 && $this->User['token'] != null && isset($_GET['token'])){
                   if(base64_decode($_GET['token']) == $this->User['token']){
                     $this->User['isActive'] = 1;
-                    $this->Database->update("UPDATE auth_users SET token = ?, isActive = ? WHERE id = ?", [null,1,$this->User['id']]);
+                    $this->Database->update("UPDATE auth_users SET token = ?, isActive = ? WHERE username = ?", [null,1,$this->User['username']]);
                   }
                 }
                 if($this->User['isActive'] == 0){ $this->User = null; }
@@ -486,9 +486,9 @@ class phpAUTH {
               if($this->User != null){
                 if(!isset($_SESSION['sessionID']) || $this->User['sessionID'] != session_id()){
                   $this->User['sessionID'] = session_id();
-                  $this->Database->update("UPDATE auth_users SET sessionID = ? WHERE id = ?", [$this->User['sessionID'],$this->User['id']]);
+                  $this->Database->update("UPDATE auth_users SET sessionID = ? WHERE username = ?", [$this->User['sessionID'],$this->User['username']]);
                   if($this->User['sessionID'] != ''){
-                    $this->Database->insert("INSERT INTO auth_sessions (sessionID,userID,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['id'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
+                    $this->Database->insert("INSERT INTO auth_sessions (sessionID,username,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['username'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
                     $options = $this->CookieOptions;
                     $options['expires'] = $this->Authentication->getAuth('timestamp');
                     if(!isset($_COOKIE['sessionID'])){ setcookie( "sessionID", $this->User['sessionID'], $options ); }
@@ -524,7 +524,7 @@ class phpAUTH {
     $return = false;
     if($this->User != null){
       if($this->Roles){
-        $roles = $this->Database->select("SELECT * FROM auth_roles WHERE members LIKE ? AND permissions LIKE ?", ['%'.json_encode(["users" => $this->User['id']],JSON_UNESCAPED_SLASHES).'%','%'.json_encode($name,JSON_UNESCAPED_SLASHES).':%']);
+        $roles = $this->Database->select("SELECT * FROM auth_roles WHERE members LIKE ? AND permissions LIKE ?", ['%'.json_encode(["users" => $this->User['username']],JSON_UNESCAPED_SLASHES).'%','%'.json_encode($name,JSON_UNESCAPED_SLASHES).':%']);
         if(count($roles) > 0){
           foreach($roles as $role){
             $role['permissions'] = json_decode($role['permissions'],true);

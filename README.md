@@ -148,8 +148,8 @@ $phpDB->create('auth_sessions',[
     'type' => 'VARCHAR(255)',
     'extra' => ['NOT NULL','UNIQUE']
   ],
-  'userID' => [
-    'type' => 'BIGINT(10)',
+  'username' => [
+    'type' => 'VARCHAR(255)',
     'extra' => ['NOT NULL']
   ],
   'userAgent' => [
