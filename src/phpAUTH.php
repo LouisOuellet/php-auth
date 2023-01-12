@@ -165,6 +165,8 @@ class phpAUTH {
         $defaults[$key] = $value;
       }
     }
+    if($data == null){ $data = ''; }
+    if(is_array($data)){ $data = json_encode($data,JSON_UNESCAPED_SLASHES); }
     setcookie($name, $data, $defaults);
   }
 
