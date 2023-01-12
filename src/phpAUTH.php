@@ -158,27 +158,35 @@ class phpAUTH {
     $this->CookieOptions = $defaults;
   }
 
+  public function setCookie($name, $data = null, $options = []){
+    $defaults = $this->CookieOptions;
+    foreach ($options as $key => $value) {
+      if(isset($defaults[$key])){
+        $defaults[$key] = $value;
+      }
+    }
+    setcookie($name, $data, $defaults);
+  }
+
   protected function certification(){
     if(isset($_SESSION,$_SESSION['sessionID']) || isset($_COOKIE,$_COOKIE['sessionID'])){
       if(isset($_REQUEST,$_REQUEST['cookiesAccept']) && !isset($_COOKIE['cookiesAccept'])){
-        $options = $this->CookieOptions;
-        $options['httponly'] = false;
         if(isset($_REQUEST['cookiesAccept'])){
-          setcookie( "cookiesAccept", true, $options );
-          setcookie( "cookiesAcceptEssentials", true, $options );
+          $this->setCookie( "cookiesAccept", true, ['httponly' => false] );
+          $this->setCookie( "cookiesAcceptEssentials", true, ['httponly' => false] );
           $_SESSION['cookiesAccept'] = true;
           $_SESSION['cookiesAcceptEssentials'] = true;
         }
         if(isset($_REQUEST['cookiesAcceptPerformance'])){
-          setcookie( "cookiesAcceptPerformance", true, $options );
+          $this->setCookie( "cookiesAcceptPerformance", true, ['httponly' => false] );
           $_SESSION['cookiesAcceptPerformance'] = true;
         }
         if(isset($_REQUEST['cookiesAcceptQuality'])){
-          setcookie( "cookiesAcceptQuality", true, $options );
+          $this->setCookie( "cookiesAcceptQuality", true, ['httponly' => false] );
           $_SESSION['cookiesAcceptQuality'] = true;
         }
         if(isset($_REQUEST['cookiesAcceptPersonalisations'])){
-          setcookie( "cookiesAcceptPersonalisations", true, $options );
+          $this->setCookie( "cookiesAcceptPersonalisations", true, ['httponly' => false] );
           $_SESSION['cookiesAcceptPersonalisations'] = true;
         }
       }
@@ -258,8 +266,8 @@ class phpAUTH {
             $parts = explode('=', $cookie);
             $name = trim($parts[0]);
             unset($_COOKIE[$name]);
-            setcookie($name, null, $options);
-            setcookie($name, null, $options);
+            $this->setCookie($name, null, ['expires' => -1]);
+            $this->setCookie($name, null, ['expires' => -1]);
           }
         }
 
@@ -489,10 +497,8 @@ class phpAUTH {
                   $this->Database->update("UPDATE auth_users SET sessionID = ? WHERE username = ?", [$this->User['sessionID'],$this->User['username']]);
                   if($this->User['sessionID'] != ''){
                     $this->Database->insert("INSERT INTO auth_sessions (sessionID,username,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['username'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
-                    $options = $this->CookieOptions;
-                    $options['expires'] = $this->Authentication->getAuth('timestamp');
-                    if(!isset($_COOKIE['sessionID'])){ setcookie( "sessionID", $this->User['sessionID'], $options ); }
-                    if(!isset($_COOKIE['timestamp'])){ setcookie( "timestamp", $this->Authentication->getAuth('timestamp'), $options ); }
+                    if(!isset($_COOKIE['sessionID'])){ $this->setCookie( "sessionID", $this->User['sessionID'], ['expires' => $this->Authentication->getAuth('timestamp')] ); }
+                    if(!isset($_COOKIE['timestamp'])){ $this->setCookie( "timestamp", $this->Authentication->getAuth('timestamp'), ['expires' => $this->Authentication->getAuth('timestamp')] ); }
                     $_SESSION['sessionID'] = $this->User['sessionID'];
                     $_SESSION['timestamp'] = $this->Authentication->getAuth('timestamp');
                   }
