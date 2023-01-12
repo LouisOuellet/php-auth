@@ -94,16 +94,16 @@
         },
         {
             "name": "laswitchtech/php-database",
-            "version": "v2.1.11",
+            "version": "v2.1.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/LouisOuellet/php-database.git",
-                "reference": "607c25ca1eee34654f571137091cb0c0382c0d78"
+                "reference": "695b78418144c2509d08087c599ef9ddd4ad5f77"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/LouisOuellet/php-database/zipball/607c25ca1eee34654f571137091cb0c0382c0d78",
-                "reference": "607c25ca1eee34654f571137091cb0c0382c0d78",
+                "url": "https://api.github.com/repos/LouisOuellet/php-database/zipball/695b78418144c2509d08087c599ef9ddd4ad5f77",
+                "reference": "695b78418144c2509d08087c599ef9ddd4ad5f77",
                 "shasum": ""
             },
             "require": {
@@ -128,9 +128,9 @@
             "description": "Database Class for PHP",
             "support": {
                 "issues": "https://github.com/LouisOuellet/php-database/issues",
-                "source": "https://github.com/LouisOuellet/php-database/tree/v2.1.11"
+                "source": "https://github.com/LouisOuellet/php-database/tree/v2.1.12"
             },
-            "time": "2023-01-12T17:14:25+00:00"
+            "time": "2023-01-12T17:41:04+00:00"
         },
         {
             "name": "laswitchtech/php-imap",
@@ -174,24 +174,24 @@
         },
         {
             "name": "laswitchtech/php-smtp",
-            "version": "v1.0.13",
+            "version": "v1.0.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/LouisOuellet/php-smtp.git",
-                "reference": "49fd8bf935a6605c7b3281cbcebba4f8dd946525"
+                "reference": "65bc5eef26a84545d42910bb02fdc96d01343fd3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/LouisOuellet/php-smtp/zipball/49fd8bf935a6605c7b3281cbcebba4f8dd946525",
-                "reference": "49fd8bf935a6605c7b3281cbcebba4f8dd946525",
+                "url": "https://api.github.com/repos/LouisOuellet/php-smtp/zipball/65bc5eef26a84545d42910bb02fdc96d01343fd3",
+                "reference": "65bc5eef26a84545d42910bb02fdc96d01343fd3",
                 "shasum": ""
             },
             "require": {
                 "ext-ctype": "*",
                 "ext-filter": "*",
                 "ext-hash": "*",
-                "php": ">=5.5.0",
-                "phpmailer/phpmailer": "^6.5"
+                "php": "*",
+                "phpmailer/phpmailer": "^6.7"
             },
             "suggest": {
                 "ext-mbstring": "Needed to send email in multibyte encoding charset or decode encoded addresses",
@@ -220,9 +220,9 @@
             "description": "PHP Class extending features of PHPMailer",
             "support": {
                 "issues": "https://github.com/LouisOuellet/php-smtp/issues",
-                "source": "https://github.com/LouisOuellet/php-smtp/tree/v1.0.13"
+                "source": "https://github.com/LouisOuellet/php-smtp/tree/v1.0.14"
             },
-            "time": "2022-12-15T00:30:54+00:00"
+            "time": "2023-01-12T17:40:52+00:00"
         },
         {
             "name": "phpmailer/phpmailer",
