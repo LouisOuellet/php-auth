@@ -94,16 +94,16 @@
         },
         {
             "name": "laswitchtech/php-database",
-            "version": "v2.1.9",
+            "version": "v2.1.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/LouisOuellet/php-database.git",
-                "reference": "7456b3d65b0eebda7b3fb000bf9b2a7d8e57843f"
+                "reference": "d17516688002f76450c75c5dd6d76d8a4456df35"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/LouisOuellet/php-database/zipball/7456b3d65b0eebda7b3fb000bf9b2a7d8e57843f",
-                "reference": "7456b3d65b0eebda7b3fb000bf9b2a7d8e57843f",
+                "url": "https://api.github.com/repos/LouisOuellet/php-database/zipball/d17516688002f76450c75c5dd6d76d8a4456df35",
+                "reference": "d17516688002f76450c75c5dd6d76d8a4456df35",
                 "shasum": ""
             },
             "require": {
@@ -128,9 +128,9 @@
             "description": "Database Class for PHP",
             "support": {
                 "issues": "https://github.com/LouisOuellet/php-database/issues",
-                "source": "https://github.com/LouisOuellet/php-database/tree/v2.1.9"
+                "source": "https://github.com/LouisOuellet/php-database/tree/v2.1.10"
             },
-            "time": "2023-01-12T16:42:22+00:00"
+            "time": "2023-01-12T17:04:07+00:00"
         },
         {
             "name": "laswitchtech/php-imap",
