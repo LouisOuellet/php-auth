@@ -144,6 +144,7 @@ class phpAUTH {
     $defaults = [
       'secure' => true,
       'httponly' => false,
+      'path' => '/',
       'domain' => $this->Domain,
       'samesite' => 'Strict',
       'expires' => time() + 60*60*24*30,
@@ -155,6 +156,11 @@ class phpAUTH {
         $defaults[$key] = $value;
       }
     }
+    $defaults['expires'] = intval($defaults['expires']);
+    $defaults['path'] = strval($defaults['path']);
+    $defaults['domain'] = strval($defaults['domain']);
+    $defaults['secure'] = boolval($defaults['secure']);
+    $defaults['httponly'] = boolval($defaults['httponly']);
     $this->CookieOptions = $defaults;
   }
 
@@ -165,6 +171,11 @@ class phpAUTH {
         $defaults[$key] = $value;
       }
     }
+    $defaults['expires'] = intval($defaults['expires']);
+    $defaults['path'] = strval($defaults['path']);
+    $defaults['domain'] = strval($defaults['domain']);
+    $defaults['secure'] = boolval($defaults['secure']);
+    $defaults['httponly'] = boolval($defaults['httponly']);
     if($data == null){ $data = ''; }
     if(is_array($data)){ $data = json_encode($data,JSON_UNESCAPED_SLASHES); }
     setcookie($name, $data, $defaults);
@@ -498,7 +509,13 @@ class phpAUTH {
                   $this->User['sessionID'] = session_id();
                   $this->Database->update("UPDATE auth_users SET sessionID = ? WHERE username = ?", [$this->User['sessionID'],$this->User['username']]);
                   if($this->User['sessionID'] != ''){
-                    $this->Database->insert("INSERT INTO auth_sessions (sessionID,username,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['username'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
+                    $sessions = $this->Database->select("SELECT * FROM auth_sessions WHERE sessionID = ?", [$this->User['sessionID']]);
+                    if(count($sessions) > 0){
+                      $session = $sessions[0];
+                      $this->Database->update("UPDATE auth_sessions SET username = ?, userAgent = ?, userBrowser = ?, userIP = ?, userData = ? WHERE id = ?", [$this->User['username'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User),$session['id']]);
+                    } else {
+                      $this->Database->insert("INSERT INTO auth_sessions (sessionID,username,userAgent,userBrowser,userIP,userData) VALUES (?,?,?,?,?,?)", [$this->User['sessionID'],$this->User['username'],$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIP(),json_encode($this->User)]);
+                    }
                     if(!isset($_COOKIE['sessionID'])){ $this->setCookie( "sessionID", $this->User['sessionID'], ['expires' => $this->Authentication->getAuth('timestamp')] ); }
                     if(!isset($_COOKIE['timestamp'])){ $this->setCookie( "timestamp", $this->Authentication->getAuth('timestamp'), ['expires' => $this->Authentication->getAuth('timestamp')] ); }
                     $_SESSION['sessionID'] = $this->User['sessionID'];
