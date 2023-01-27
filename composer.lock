@@ -134,20 +134,20 @@
         },
         {
             "name": "laswitchtech/php-imap",
-            "version": "v1.0.4",
+            "version": "v1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/LouisOuellet/php-imap.git",
-                "reference": "a5da2f4a94c03bb0f35c2f9e21926637808d812c"
+                "reference": "abf3113ffb82c2046eb498798114bc99b9511822"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/LouisOuellet/php-imap/zipball/a5da2f4a94c03bb0f35c2f9e21926637808d812c",
-                "reference": "a5da2f4a94c03bb0f35c2f9e21926637808d812c",
+                "url": "https://api.github.com/repos/LouisOuellet/php-imap/zipball/abf3113ffb82c2046eb498798114bc99b9511822",
+                "reference": "abf3113ffb82c2046eb498798114bc99b9511822",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5.0"
+                "php": "*"
             },
             "type": "library",
             "autoload": {
@@ -168,9 +168,9 @@
             "description": "phpIMAP is a full-featured mailbox management class for PHP",
             "support": {
                 "issues": "https://github.com/LouisOuellet/php-imap/issues",
-                "source": "https://github.com/LouisOuellet/php-imap/tree/v1.0.4"
+                "source": "https://github.com/LouisOuellet/php-imap/tree/v1.0.5"
             },
-            "time": "2023-01-05T17:19:05+00:00"
+            "time": "2023-01-27T14:25:23+00:00"
         },
         {
             "name": "laswitchtech/php-smtp",
