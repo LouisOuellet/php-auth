@@ -1,0 +1,98 @@
+<?php
+// Initiate Session
+session_start();
+
+// Import Auth class into the global namespace
+// These must be at the top of your script, not inside a function
+use LaswitchTech\phpAUTH\phpAUTH;
+use LaswitchTech\phpCSRF\phpCSRF;
+
+// Load Composer's autoloader
+require 'vendor/autoload.php';
+
+// Initiate phpAUTH
+$phpAUTH = new phpAUTH();
+
+// Initiate phpCSRF
+$phpCSRF = new phpCSRF();
+
+//Render
+?>
+<!doctype html>
+<html lang="en" class="h-100 w-100">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <title>Index</title>
+  </head>
+  <body class="h-100 w-100">
+    <div class="row h-100 w-100 m-0 p-0">
+      <div class="col-6 h-100 m-0 p-0" style="background-image: url('https://coredb.local/img/blue-network-flip.jpg');">
+        <div class="container h-100 p-5">
+          <div class="d-flex flex-column h-100 align-items-center justify-content-center text-light text-break p-5 rounded-5" style="background-color: rgba(0, 0, 0, 0.7)">
+            <?php if(isset($_SESSION)){ ?>
+              <p>_SESSION ID: <?= json_encode(session_id(), JSON_PRETTY_PRINT) ?></p>
+              <p>_SESSION: <?= json_encode($_SESSION, JSON_PRETTY_PRINT) ?></p>
+            <?php } ?>
+            <?php if(isset($_COOKIE)){ ?>
+              <p>_COOKIE: <?= json_encode($_COOKIE, JSON_PRETTY_PRINT) ?></p>
+            <?php } ?>
+            <?php if(isset($_POST)){ ?>
+              <p>_POST: <?= json_encode($_POST, JSON_PRETTY_PRINT) ?></p>
+            <?php } ?>
+            <?php if(isset($_REQUEST)){ ?>
+              <p>_REQUEST: <?= json_encode($_REQUEST, JSON_PRETTY_PRINT) ?></p>
+            <?php } ?>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 h-100 m-0 p-0">
+        <div class="container h-100">
+          <div class="d-flex h-100 row align-items-center justify-content-center">
+            <div class="col-7">
+              <?php if($phpAUTH->Authentication->isConnected()){ ?>
+                <h3>Logged in to <strong>phpAUTH</strong></h3>
+                <p class="mb-4">
+                  <p>User: <?= $phpAUTH->Authentication->User->get('username') ?></p>
+                  <p>BASE64 [pass1]: <?= base64_encode("pass1") ?></p>
+                  <p>Session ID: <?= session_id() ?></p>
+                </p>
+                <div class="btn-group w-100 border shadow">
+                  <a href="/" class="btn btn-block btn-light">Refresh</a>
+                  <a href="manage.php?type=user" class="btn btn-block btn-primary">Management</a>
+                  <a href="install.php" class="btn btn-block btn-warning">Re-Install</a>
+                  <a href="?logout&csrf=<?= $phpCSRF->token() ?>" class="btn btn-block btn-primary">Log Out</a>
+                </div>
+              <?php } else { ?>
+                <h3 class="mb-4">Login to <strong>phpAUTH</strong></h3>
+                <form method="post">
+                  <div class="form-floating my-3">
+                    <input type="text" name="username" class="form-control form-control-lg" placeholder="username@domain.com" id="username">
+                    <label for="username">Username</label>
+                  </div>
+                  <div class="form-floating my-3">
+                    <input type="password" name="password" class="form-control form-control-lg" placeholder="*******************" id="password">
+                    <label for="password">Password</label>
+                  </div>
+                  <div class="form-check my-3 mb-5 form-switch">
+                    <input class="form-check-input" style="margin-left: -1.4em; margin-right: 1.4em;transform: scale(1.8);" type="checkbox" role="switch" name="remember" id="remember">
+                    <label class="form-check-label" for="remember">Remember me</label>
+                  </div>
+                  <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
+                  <div class="btn-group w-100 border shadow">
+                    <a href="install.php" class="btn btn-block btn-light">Install</a>
+                    <button type="submit" name="login" class="btn btn-block btn-primary">Log In</button>
+                  </div>
+                </form>
+              <?php } ?>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/vendor/components/jquery/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/dist/js/cookie.js"></script>
+  </body>
+</html>

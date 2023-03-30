@@ -1,6 +1,6 @@
 {
     "name": "laswitchtech/php-auth",
-    "description": "Auth Class for PHP",
+    "description": "Authentication and Authorization Library for PHP",
     "type": "library",
     "license": "GPL-3.0-only",
     "authors": [
@@ -11,12 +11,13 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": "*",
-        "laswitchtech/php-database": "^2.1",
         "components/jquery": "^3.6",
+        "laswitchtech/php-database": "^2.2",
         "laswitchtech/php-csrf": "^1.0",
-        "laswitchtech/php-imap": "^1.0",
-        "laswitchtech/php-smtp": "^1.0"
+        "laswitchtech/php-imap": "^2.0",
+        "laswitchtech/php-smtp": "^2.0",
+        "laswitchtech/php-logger": "^1.1",
+        "laswitchtech/php-configurator": "^1.0"
     },
     "autoload": {
         "psr-4": {
