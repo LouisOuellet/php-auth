@@ -51,7 +51,7 @@ This library also includes support for relationships. Here are the ones already 
 * Group - Role : Group is a member of the Role.
 
 ## Understanding Roles and Groups
-When using this library, permissions are assigned on roles. Roles can be assigned directly to a user or through a group of users. The highest permission level provided is used for validation. For example, if a user is member of role `Administrator` and `User`, both possess the permission `Dashboard`, `Administrator`'s level is set to 4 and `User`'s level is set to 1, then the effective permission level is 4.
+When using this library, permissions are assigned on roles. Roles can be assigned directly to a user or through a group of users. The highest permission level provided is used for validation. For example, if a user is member of role `Administrator` and `User`, both possess the permission `Dashboard`, `Administrator`'s level is set to `4` and `User`'s level is set to `1`, then the effective permission level is `4`.
 
 ### Permission Levels
 * __0__: No access allowed
@@ -67,7 +67,6 @@ composer require laswitchtech/php-auth
 ```
 
 ## How do I use it?
-In this documentations, we will use a table called users for our examples.
 
 ### Examples
 There are many examples for you to check out in the [example](example) folder.
