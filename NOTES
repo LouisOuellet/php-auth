@@ -1,6 +1,0 @@
-configure Auth to check for session authentication before checking anything else.
-Then check the configured authentication method and use that one.
-
-This way Web GUI and Web API can be used without sharing a BEARER Token.
-
-set BackEndDBType as an array so you can enable multiple authentication backend
