@@ -67,6 +67,7 @@ composer require laswitchtech/php-auth
 ```
 
 ## How do I use it?
+IMPORTANT NOTICE, `phpAUTH` does not handle http headers. `phpAUTH` relies on your application to handle those. If you want your application to throw `403` headers for exemple, you will need to use the related method for validation and then throw your headers accordingly.
 
 ### Examples
 There are many examples for you to check out in the [example](example) folder.
@@ -178,12 +179,4 @@ $Configurator = new phpConfigurator('auth');
 // Configure phpConfigurator
 $Configurator->set('auth','basic',false)->set('auth','bearer',false)->set('auth','request',true)->set('auth','cookie',true)->set('auth','session',true);
 $Configurator->set('auth','maxAttempts',5)->set('auth','maxRequests',1000)->set('auth','lockoutDuration',1800)->set('auth','windowAttempts',100)->set('auth','windowRequests',60);
-```
-
-### Lorem
-```php
-```
-
-### Lorem
-```php
 ```
