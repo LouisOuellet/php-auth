@@ -2,7 +2,6 @@
 // Initiate Session
 session_start();
 
-// Import Auth class into the global namespace
 // These must be at the top of your script, not inside a function
 use LaswitchTech\phpAUTH\phpAUTH;
 use LaswitchTech\phpDB\Database;
@@ -38,7 +37,10 @@ $API = $Installer->create("api",["username" => "api@domain.com"]);
 
 // Initiate phpConfigurator
 $Configurator = new phpConfigurator('auth');
+
+// Configure phpConfigurator
 $Configurator->set('auth','basic',false)->set('auth','bearer',false)->set('auth','request',true)->set('auth','cookie',true)->set('auth','session',true);
+$Configurator->set('auth','maxAttempts',5)->set('auth','maxRequests',1000)->set('auth','lockoutDuration',1800)->set('auth','windowAttempts',100)->set('auth','windowRequests',60);
 
 //Render
 ?>

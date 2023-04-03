@@ -7,19 +7,14 @@
 ![Version](https://img.shields.io/github/v/release/LouisOuellet/php-auth?label=Version&style=for-the-badge)
 
 ## Features
-  - Authentication Support
-    - Front-End
-      - BASIC
-      - BEARER (Much faster then BASIC)
-      - SESSION (Best used for GUI)
-    - Back-End
-      - SQL ([phpDB](https://github.com/LouisOuellet/php-database))
+  - Authentication Support BASIC, BEARER and SESSION
+  - 3rd-party Authentication Support through SMTP or IMAP
   - Authorization Support
-  - GDPR Cookie Compliance
-  - CCPA Cookie Compliance
-  - JavaScript class available for GDPR & CCPA Cookie Compliance
   - Cross-site Request Forgery Protection ([phpCSRF](https://github.com/LouisOuellet/php-csrf))
-  - Host Validation
+  <!-- - GDPR Cookie Compliance -->
+  <!-- - CCPA Cookie Compliance -->
+  <!-- - JavaScript class available for GDPR & CCPA Cookie Compliance -->
+  <!-- - Host Validation -->
 
 ## Why you might need it
 If you are looking for an easy way to setup authentication and authorization in your project. This PHP Class is for you.
@@ -31,186 +26,39 @@ Sure!
 This software is distributed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) license. Please read [LICENSE](LICENSE) for information on the software availability and distribution.
 
 ## Requirements
-* PHP >= 5.6.0
+* PHP >= 7.3.0
 * MySQL or MariaDB
-
-### SQL Requirements
-To support authentication in your application, you will need at least one table called users. Since phpAUTH is packed with phpDB, you can create the table like this:
-```php
-
-//Import Database class into the global namespace
-//These must be at the top of your script, not inside a function
-use LaswitchTech\phpDB\Database;
-
-//Load Composer's autoloader
-require 'vendor/autoload.php';
-
-//Initiate Database
-$phpDB = new Database("localhost","demo","demo","demo");
-
-//Create the users table
-$phpDB->create('auth_users',[
-  'id' => [
-    'type' => 'BIGINT(10)',
-    'extra' => ['UNSIGNED','AUTO_INCREMENT','PRIMARY KEY']
-  ],
-  'username' => [
-    'type' => 'VARCHAR(60)',
-    'extra' => ['NOT NULL','UNIQUE']
-  ],
-  'password' => [
-    'type' => 'VARCHAR(100)',
-    'extra' => ['NOT NULL']
-  ],
-  'token' => [
-    'type' => 'VARCHAR(100)',
-    'extra' => ['NOT NULL','UNIQUE']
-  ],
-  'isActive' => [
-    'type' => 'int(1)',
-    'extra' => ['NOT NULL','DEFAULT "0"']
-  ],
-  'database' => [
-    'type' => 'VARCHAR(10)',
-    'extra' => ['NOT NULL','DEFAULT "SQL"']
-  ],
-  'server' => [
-    'type' => 'VARCHAR(255)',
-    'extra' => ['NULL']
-  ]
-]);
-
-//Other Suggestions
-$phpDB->alter('auth_users',[
-  'created' => [
-    'action' => 'ADD',
-    'type' => 'DATETIME',
-    'extra' => ['DEFAULT CURRENT_TIMESTAMP']
-  ],
-  'modified' => [
-    'action' => 'ADD',
-    'type' => 'DATETIME',
-    'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
-  ]
-]);
-
-//If you enable Roles, you will need a roles table.
-$phpDB->create('auth_roles',[
-  'id' => [
-    'type' => 'BIGINT(10)',
-    'extra' => ['UNSIGNED','AUTO_INCREMENT','PRIMARY KEY']
-  ],
-  'name' => [
-    'type' => 'VARCHAR(60)',
-    'extra' => ['NOT NULL','UNIQUE']
-  ],
-  'permissions' => [
-    'type' => 'LONGTEXT',
-    'extra' => ['NULL']
-  ],
-  'members' => [
-    'type' => 'LONGTEXT',
-    'extra' => ['NULL']
-  ]
-]);
-
-//Optionally you may want to add a roles column if you want to quickly list roles memberships.
-
-$phpDB->alter('auth_users',[
-  'roles' => [
-    'action' => 'ADD',
-    'type' => 'LONGTEXT',
-    'extra' => ['NULL']
-  ]
-]);
-
-//Other Suggestions
-$phpDB->alter('auth_roles',[
-  'created' => [
-    'action' => 'ADD',
-    'type' => 'DATETIME',
-    'extra' => ['DEFAULT CURRENT_TIMESTAMP']
-  ],
-  'modified' => [
-    'action' => 'ADD',
-    'type' => 'DATETIME',
-    'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
-  ]
-]);
-
-//If you use SQL Login, you will need a sessions table.
-$phpDB->create('auth_sessions',[
-  'id' => [
-    'type' => 'BIGINT(10)',
-    'extra' => ['UNSIGNED','AUTO_INCREMENT','PRIMARY KEY']
-  ],
-  'sessionID' => [
-    'type' => 'VARCHAR(255)',
-    'extra' => ['NOT NULL','UNIQUE']
-  ],
-  'username' => [
-    'type' => 'VARCHAR(255)',
-    'extra' => ['NOT NULL']
-  ],
-  'userAgent' => [
-    'type' => 'VARCHAR(255)',
-    'extra' => ['NULL']
-  ],
-  'userBrowser' => [
-    'type' => 'VARCHAR(255)',
-    'extra' => ['NULL']
-  ],
-  'userIP' => [
-    'type' => 'VARCHAR(255)',
-    'extra' => ['NULL']
-  ],
-  'userData' => [
-    'type' => 'VARCHAR(255)',
-    'extra' => ['NULL']
-  ],
-  'userActivity' => [
-    'action' => 'ADD',
-    'type' => 'DATETIME',
-    'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
-  ]
-]);
-
-//Optionally you may want to add a session column if you want to quickly access the user's session.
-
-$phpDB->alter('auth_users',[
-  'sessionID' => [
-    'action' => 'ADD',
-    'type' => 'VARCHAR(255)',
-    'extra' => ['NOT NULL','UNIQUE']
-  ]
-]);
-
-//Other Suggestions
-$phpDB->alter('auth_sessions',[
-  'created' => [
-    'action' => 'ADD',
-    'type' => 'DATETIME',
-    'extra' => ['DEFAULT CURRENT_TIMESTAMP']
-  ],
-  'modified' => [
-    'action' => 'ADD',
-    'type' => 'DATETIME',
-    'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
-  ]
-]);
-
-//Create user
-$UserID = $phpDB->insert("INSERT INTO auth_users (username, password, token) VALUES (?,?,?)", ["user1",password_hash("pass1", PASSWORD_DEFAULT),hash("sha256", "pass1", false)]);
-
-//Create role
-$RoleID = $phpDB->insert("INSERT INTO auth_roles (name, permissions, members) VALUES (?,?,?)", ["users",json_encode(["users/list" => 1],JSON_UNESCAPED_SLASHES),json_encode([["users" => $UserID]],JSON_UNESCAPED_SLASHES)]);
-
-//Update user
-$phpDB->update("UPDATE auth_users SET roles = ? WHERE id = ?", [json_encode([["roles" => $RoleID]],JSON_UNESCAPED_SLASHES),$UserID]);
-```
 
 ## Security
 Please disclose any vulnerabilities found responsibly – report security issues to the maintainers privately.
+
+## Objects
+* User
+* Organization
+* Group
+* Role
+* Permission
+
+## Relationships
+This library also includes support for relationships. Here are the ones already used in `phpAUTH`:
+
+* User - Organization : User is a member of the Organization.
+* User - Group : User is a member of the Group.
+* User - Role : User is a member of the Role.
+* Organization - Organization : Organization is a member of the Organization. Also known as a Subsidiary.
+* Organization - Group : Organization can use the Group to manager it's members.
+* Organization - Role : Organization can use the Role to manager it's members.
+* Group - Role : Group is a member of the Role.
+
+## Understanding Roles and Groups
+When using this library, permissions are assigned on roles. Roles can be assigned directly to a user or through a group of users. The highest permission level provided is used for validation. For example, if a user is member of role `Administrator` and `User`, both possess the permission `Dashboard`, `Administrator`'s level is set to 4 and `User`'s level is set to 1, then the effective permission level is 4.
+
+### Permission Levels
+* __0__: No access allowed
+* __1__: Read access allowed
+* __2__: Create access allowed
+* __3__: Edit access allowed
+* __4__: Delete access allowed
 
 ## Installation
 Using Composer:
@@ -221,107 +69,122 @@ composer require laswitchtech/php-auth
 ## How do I use it?
 In this documentations, we will use a table called users for our examples.
 
-### Example
-#### Initiate Auth
+### Examples
+There are many examples for you to check out in the [example](example) folder.
+
+### Initiate
 ```php
 
-//Import Auth class into the global namespace
-//These must be at the top of your script, not inside a function
+// Initiate Session
+session_start();
+
+// These must be at the top of your script, not inside a function
 use LaswitchTech\phpAUTH\phpAUTH;
 
-//Load Composer's autoloader
+// Load Composer's autoloader
 require 'vendor/autoload.php';
 
-//Define Configuration Information
-//Auth Information
-define("AUTH_F_TYPE", "BEARER"); //Default is BEARER
-define("AUTH_B_TYPE", "SQL"); //Default is SQL
-define("AUTH_ROLES", false); //Default is false
-define("AUTH_GROUPS", false); //Default is false
-define("AUTH_RETURN", "HEADER"); //Default is HEADER
-//Database Information
-define("DB_HOST", "localhost");
-define("DB_USERNAME", "demo");
-define("DB_PASSWORD", "demo");
-define("DB_DATABASE_NAME", "demo");
-
-//Initiate Auth
+// Initiate phpAUTH
 $phpAUTH = new phpAUTH();
 ```
 
-#### Initiate Auth Without Using Constants
+### Check if a User was authenticated
 ```php
-
-//Import Auth class into the global namespace
-//These must be at the top of your script, not inside a function
-use LaswitchTech\phpAUTH\phpAUTH;
-
-//Load Composer's autoloader
-require 'vendor/autoload.php';
-
-//Initiate Auth
-$phpAUTH = new phpAUTH("BASIC", "SQL", true, false, "HEADER");
-
-//Initiate Database
-$phpAUTH->connect("localhost","demo","demo","demo");
+// Check if a User was authenticated
+$phpAUTH->Authentication->isConnected()
 ```
 
-#### Retrieve User Information
+### Check if a User has a specific permission
 ```php
-
-//Import Auth class into the global namespace
-//These must be at the top of your script, not inside a function
-use LaswitchTech\phpAUTH\phpAUTH;
-
-//Load Composer's autoloader
-require 'vendor/autoload.php';
-
-//Initiate Auth
-$phpAUTH = new phpAUTH("BASIC", "SQL", true, false, "HEADER");
-
-//Initiate Database
-$phpAUTH->connect("localhost","demo","demo","demo");
-
-//Retrieve User Information
-$user = $phpAUTH->getUser();
+// Check if a User has a specific permission
+$phpAUTH->Authorization->hasPermission($Name, $Level)
 ```
 
-#### Retrieve Authorization
+### Using Managers
+First managers allow you to manage objects such as Users, Organizations, Groups, Roles and Permissions
 ```php
+// Create a Manager
+$Manager = $phpAUTH->manage("users");
 
-//Import Auth class into the global namespace
-//These must be at the top of your script, not inside a function
-use LaswitchTech\phpAUTH\phpAUTH;
+// Retrieve all Objects
+$Objects = $Manager->read();
 
-//Load Composer's autoloader
-require 'vendor/autoload.php';
-
-//Initiate Auth
-$phpAUTH = new phpAUTH("BASIC", "SQL", true, false, "BOOLEAN");
-
-//Initiate Database
-$phpAUTH->connect("localhost","demo","demo","demo");
-
-//Retrieve Authorization
-$Authorization = $phpAUTH->isAuthorized("users/list");
+// Retrieve single Object
+$Objects = $Manager->read($Identifier);
 ```
 
-#### Handle Authorization
+### Using Objects
 ```php
+// Create
+$Manager->create($Fields);
 
-//Import Auth class into the global namespace
-//These must be at the top of your script, not inside a function
+// Read
+$Object->get($Field);
+
+// Update
+$Object->save($Fields);
+// Or
+$Manager->update($Identifier, $Fields);
+
+// Delete
+$Object->delete();
+// Or
+$Manager->delete($Identifier);
+
+// Link
+$Object->link($Table, $Id);
+
+// Unlink
+$Object->unlink($Table, $Id);
+```
+
+### Installer
+```php
+// These must be at the top of your script, not inside a function
 use LaswitchTech\phpAUTH\phpAUTH;
+use LaswitchTech\phpDB\Database;
+use LaswitchTech\phpLogger\phpLogger;
+use LaswitchTech\phpConfigurator\phpConfigurator;
 
-//Load Composer's autoloader
+// Load Composer's autoloader
 require 'vendor/autoload.php';
 
-//Initiate Auth
-$phpAUTH = new phpAUTH("BASIC", "SQL", true, false, "HEADER");
+// Initialize Database
+$phpLogger = new phpLogger();
 
-//Initiate Database
-$phpAUTH->connect("localhost","demo","demo","demo");
+// Configure phpLogger
+$phpLogger->config('level',5);
 
-//Handle Authorization
-$phpAUTH->isAuthorized("users/list");
+// Initialize Database
+$phpDB = new Database();
+
+// Configure Database
+$phpDB->config("host","localhost")->config("username","demo")->config("password","demo")->config("database","demo2");
+
+// Initiate phpAUTH
+$phpAUTH = new phpAUTH();
+
+// Install phpAUTH
+$Installer = $phpAUTH->install();
+
+// Create a User
+$User = $Installer->create("user",["username" => "username@domain.com"]);
+
+// Create an API
+$API = $Installer->create("api",["username" => "api@domain.com"]);
+
+// Initiate phpConfigurator
+$Configurator = new phpConfigurator('auth');
+
+// Configure phpConfigurator
+$Configurator->set('auth','basic',false)->set('auth','bearer',false)->set('auth','request',true)->set('auth','cookie',true)->set('auth','session',true);
+$Configurator->set('auth','maxAttempts',5)->set('auth','maxRequests',1000)->set('auth','lockoutDuration',1800)->set('auth','windowAttempts',100)->set('auth','windowRequests',60);
+```
+
+### Lorem
+```php
+```
+
+### Lorem
+```php
 ```

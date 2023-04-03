@@ -102,10 +102,8 @@ class User {
   private $Password = null;
   private $maxAttempts = 5;
   private $maxRequests = 1000;
-  private $window = [
-    'requests' => 60,
-    'attempts' => 100,
-  ];
+  private $windowAttempts = 100;
+  private $windowRequests = 60;
   private $lockoutDuration = 1800;
 
   /**
@@ -126,6 +124,13 @@ class User {
     // Retrieve Log Level
     $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
 
+    // Configure Auth Settings
+    $this->maxAttempts = $this->Configurator->get('auth', 'maxAttempts') ?: $this->maxAttempts;
+    $this->maxRequests = $this->Configurator->get('auth', 'maxRequests') ?: $this->maxRequests;
+    $this->lockoutDuration = $this->Configurator->get('auth', 'lockoutDuration') ?: $this->lockoutDuration;
+    $this->windowAttempts = $this->Configurator->get('auth', 'windowAttempts') ?: $this->windowAttempts;
+    $this->windowRequests = $this->Configurator->get('auth', 'windowRequests') ?: $this->windowRequests;
+
     // Initiate Id
     $this->Id = $Id;
 
@@ -145,7 +150,7 @@ class User {
     }
 
     // Initiate Relationship
-    $this->Relationship = new Relationship($Logger, $Database);
+    $this->Relationship = new Relationship($this->Logger, $this->Database);
 
     // Setup Columns
     $this->Columns = $this->Database->getColumns($this->Table);
@@ -1049,11 +1054,11 @@ class User {
     $this->Logger->debug("Request Time Difference is currently at : {$timeDifferenceRequest}");
 
     if($this->get('isAPI')){
-      if ($this->get('requests') >= $this->maxRequests && $timeDifferenceRequest <= $this->window['requests']) {
+      if ($this->get('requests') >= $this->maxRequests && $timeDifferenceRequest <= $this->windowRequests) {
         return true;
       }
     } else {
-      if ($this->get('attempts') >= $this->maxAttempts && $timeDifferenceAttempt <= $this->window['attempts']) {
+      if ($this->get('attempts') >= $this->maxAttempts && $timeDifferenceAttempt <= $this->windowAttempts) {
         return true;
       }
     }
@@ -1103,7 +1108,7 @@ class User {
     ];
 
     // Reset attempts if outside the rate-limiting window
-    if ($timeDifference > $this->window['attempts']) {
+    if ($timeDifference > $this->windowAttempts) {
       $Array['attempts'] = 0;
     }
 
@@ -1133,7 +1138,7 @@ class User {
     ];
 
     // Reset attempts if outside the rate-limiting window
-    if ($timeDifference > $this->window['requests']) {
+    if ($timeDifference > $this->windowRequests) {
       $Array['requests'] = 0;
     }
 
