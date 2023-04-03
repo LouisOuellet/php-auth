@@ -53,9 +53,9 @@ class Installer {
 			}
 
 			// Drop Existing Tables
-			$this->Database->drop('sessions');
-			$this->Database->drop('users');
 			$this->Database->drop('organizations');
+			$this->Database->drop('users');
+			$this->Database->drop('sessions');
 			$this->Database->drop('groups');
 			$this->Database->drop('roles');
 			$this->Database->drop('permissions');
@@ -69,11 +69,11 @@ class Installer {
 				],
 				'created' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP']
 				],
 				'modified' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
 				],
 				'name' => [
 					'type' => 'VARCHAR(60)',
@@ -155,11 +155,11 @@ class Installer {
 				],
 				'created' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP']
 				],
 				'modified' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
 				],
 				'username' => [
 					'type' => 'VARCHAR(60)',
@@ -237,6 +237,14 @@ class Installer {
 					'type' => 'TIMESTAMP',
 					'extra' => ['NULL']
 				],
+				'requests' => [
+					'type' => 'INT(10)',
+					'extra' => ['NOT NULL','DEFAULT "1"']
+				],
+				'lastRequest' => [
+					'type' => 'TIMESTAMP',
+					'extra' => ['NULL']
+				],
 				'isActive' => [
 					'type' => 'INT(1)',
 					'extra' => ['NOT NULL','DEFAULT "0"']
@@ -257,11 +265,11 @@ class Installer {
 				],
 				'created' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP']
 				],
 				'modified' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
 				],
 				'sessionId' => [
 					'type' => 'VARCHAR(255)',
@@ -290,7 +298,7 @@ class Installer {
 				'userActivity' => [
 					'action' => 'ADD',
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
 				],
 			]);
 			$this->Database->create('groups',[
@@ -300,11 +308,11 @@ class Installer {
 				],
 				'created' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP']
 				],
 				'modified' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
 				],
 				'name' => [
 					'type' => 'VARCHAR(60)',
@@ -326,11 +334,11 @@ class Installer {
 				],
 				'created' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP']
 				],
 				'modified' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
 				],
 				'name' => [
 					'type' => 'VARCHAR(60)',
@@ -356,11 +364,11 @@ class Installer {
 				],
 				'created' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP']
 				],
 				'modified' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
 				],
 				'name' => [
 					'type' => 'VARCHAR(60)',
@@ -382,11 +390,11 @@ class Installer {
 				],
 				'created' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP']
 				],
 				'modified' => [
 					'type' => 'DATETIME',
-					'extra' => ['DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+					'extra' => ['NOT NULL','DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
 				],
 				'sourceTable' => [
 					'type' => 'VARCHAR(255)',
@@ -445,6 +453,22 @@ class Installer {
 
 			// Iterate through available Object Types
 			switch($Type){
+				case"API":
+
+					// Check that a username was provided
+					if(!isset($Data['username'])){
+						throw new Exception("No username provided.");
+					}
+
+					// Create a User Object
+					$User = new User($Data['username'], 'username', $this->Logger, $this->Database);
+
+					// Create the User
+					$User->new($Data, true);
+
+					// Return the User Object
+					return $User;
+					break;
 				case"USER":
 
 					// Check that a username was provided
@@ -460,6 +484,7 @@ class Installer {
 
 					// Return the User Object
 					return $User;
+					break;
 				default:
 
 					// Throw an exception if type of object does not exist

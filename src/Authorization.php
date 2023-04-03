@@ -3,10 +3,20 @@
 // Declaring namespace
 namespace LaswitchTech\phpAUTH;
 
+//Import phpConfigurator class into the global namespace
+use LaswitchTech\phpConfigurator\phpConfigurator;
+
+// Import phpLogger class into the global namespace
+use LaswitchTech\phpLogger\phpLogger;
+
 class Authorization {
 
 	// Logger
 	private $Logger;
+	private $Level = 1;
+
+  // Configurator
+  private $Configurator = null;
 
 	// User
   private $User = null;
@@ -27,13 +37,22 @@ class Authorization {
    * @param  Object  $Logger
    * @return void
    */
-  public function __construct($User, $Logger){
+  public function __construct($User, $Logger = null){
+
+    // Initialize Configurator
+    $this->Configurator = new phpConfigurator('auth');
+
+    // Retrieve Log Level
+    $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
 
     // Initialize User
     $this->User = $User;
 
     // Initialize phpLogger
     $this->Logger = $Logger;
+    if(!$this->Logger){
+      $this->Logger = new phpLogger('auth');
+    }
   }
 
   /**

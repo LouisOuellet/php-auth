@@ -7,6 +7,7 @@ session_start();
 use LaswitchTech\phpAUTH\phpAUTH;
 use LaswitchTech\phpDB\Database;
 use LaswitchTech\phpLogger\phpLogger;
+use LaswitchTech\phpConfigurator\phpConfigurator;
 
 // Load Composer's autoloader
 require 'vendor/autoload.php';
@@ -32,6 +33,13 @@ $Installer = $phpAUTH->install();
 // Create a User
 $User = $Installer->create("user",["username" => "username@domain.com"]);
 
+// Create an API
+$API = $Installer->create("api",["username" => "api@domain.com"]);
+
+// Initiate phpConfigurator
+$Configurator = new phpConfigurator('auth');
+$Configurator->set('auth','basic',false)->set('auth','bearer',false)->set('auth','request',true)->set('auth','cookie',true)->set('auth','session',true);
+
 //Render
 ?>
 <!doctype html>
@@ -49,6 +57,14 @@ $User = $Installer->create("user",["username" => "username@domain.com"]);
           <div class="d-flex h-100 row align-items-center justify-content-center">
             <div class="col">
               <h3>Installation <strong>Completed</strong></h3>
+              <p class="mb-4">
+                <span class="me-4">
+                  <strong>Username:</strong> <?= $API->get('username'); ?>
+                </span>
+                <span>
+                  <strong>Token:</strong> <?= $API->getToken(); ?>
+                </span>
+              </p>
               <p class="mb-4">
                 <span class="me-4">
                   <strong>Username:</strong> <?= $User->get('username'); ?>

@@ -3,10 +3,23 @@
 // Declaring namespace
 namespace LaswitchTech\phpAUTH\Objects;
 
+//Import phpConfigurator class into the global namespace
+use LaswitchTech\phpConfigurator\phpConfigurator;
+
+// Import phpLogger class into the global namespace
+use LaswitchTech\phpLogger\phpLogger;
+
+// Import Database Class into the global namespace
+use LaswitchTech\phpDB\Database;
+
 class Relationship {
 
-  // phpLogger
-  private $Logger = null;
+  // Logger
+  private $Logger;
+  private $Level = 1;
+
+  // Configurator
+  private $Configurator = null;
 
   // phpDB
   private $Database = null;
@@ -18,13 +31,25 @@ class Relationship {
    * @param  Object  $Database
    * @return Object  itself
    */
-  public function __construct($Logger, $Database) {
+  public function __construct($Logger = null, $Database = null) {
+
+    // Initialize Configurator
+    $this->Configurator = new phpConfigurator('auth');
+
+    // Retrieve Log Level
+    $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
 
     // Initiate phpLogger
     $this->Logger = $Logger;
+    if(!$this->Logger){
+      $this->Logger = new phpLogger('auth');
+    }
 
     // Initiate phpDB
     $this->Database = $Database;
+    if(!$this->Database){
+      $this->Database = new Database();
+    }
   }
 
   /**

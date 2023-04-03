@@ -3,6 +3,15 @@
 // Declaring namespace
 namespace LaswitchTech\phpAUTH\Types;
 
+//Import phpConfigurator class into the global namespace
+use LaswitchTech\phpConfigurator\phpConfigurator;
+
+// Import phpLogger class into the global namespace
+use LaswitchTech\phpLogger\phpLogger;
+
+// Import Database Class into the global namespace
+use LaswitchTech\phpDB\Database;
+
 // Import User class into the global namespace
 use LaswitchTech\phpAUTH\Objects\User;
 
@@ -13,6 +22,10 @@ class Session {
 
   // phpLogger
   private $Logger = null;
+	private $Level = 1;
+
+  // Configurator
+  private $Configurator = null;
 
   // phpDB
   private $Database = null;
@@ -25,13 +38,25 @@ class Session {
    * @return void
    * @throws Exception
    */
-  public function __construct($Logger, $Database){
+  public function __construct($Logger = null, $Database = null) {
+
+    // Initialize Configurator
+    $this->Configurator = new phpConfigurator('auth');
+
+    // Retrieve Log Level
+    $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
 
     // Initiate phpLogger
     $this->Logger = $Logger;
+    if(!$this->Logger){
+      $this->Logger = new phpLogger('auth');
+    }
 
     // Initiate phpDB
     $this->Database = $Database;
+    if(!$this->Database){
+      $this->Database = new Database();
+    }
 
     // Initialize Library
     $this->init();
@@ -96,6 +121,14 @@ class Session {
 	public function getAuthentication(){
     try {
 
+      // Debug Information
+      $this->Logger->debug("Attempting connection using SESSION");
+
+      // Check if Session Authentication is enabled
+      if(!$this->Configurator->get('auth','session')){
+        throw new Exception("Session Authentication is Disabled");
+      }
+
 			// Retrieve sessionId
       $sessionId = $this->getId();
 
@@ -157,6 +190,11 @@ class Session {
   private function getClientBrowser(){
 
     try{
+
+      if(!isset($_SERVER['HTTP_USER_AGENT'])){
+        // If no recognizable browser was found, return 'Unknown'
+        return 'Unknown';
+      }
 
       // Retrieve the HTTP_USER_AGENT header and convert it to lowercase for easier comparison
       $t = strtolower($_SERVER['HTTP_USER_AGENT']);
@@ -255,16 +293,22 @@ class Session {
       // Find an active session
       $Sessions = $this->Database->select("SELECT * FROM sessions WHERE username = ? AND sessionId = ?", [$User->get('username'),session_id()]);
 
+      // Retrieve User Agent
+      $userAgent = 'Unknown';
+      if(isset($_SERVER['HTTP_USER_AGENT'])){
+        $userAgent = $_SERVER['HTTP_USER_AGENT'];
+      }
+
       // Check if an active session was found
       if(count($Sessions) > 0){
         $Session = $Sessions[0];
 
         // Update the session
-        $this->Database->update("UPDATE sessions SET userAgent = ?, userBrowser = ?, userIP = ? WHERE sessionId = ?", [$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIp(),session_id()]);
+        $this->Database->update("UPDATE sessions SET userAgent = ?, userBrowser = ?, userIP = ? WHERE sessionId = ?", [$userAgent,$this->getClientBrowser(),$this->getClientIp(),session_id()]);
       } else {
 
         // Create the session
-        $this->Database->insert("INSERT INTO sessions (sessionId,username,userAgent,userBrowser,userIP) VALUES (?,?,?,?,?)", [session_id(),$User->get('username'),$_SERVER['HTTP_USER_AGENT'],$this->getClientBrowser(),$this->getClientIp()]);
+        $this->Database->insert("INSERT INTO sessions (sessionId,username,userAgent,userBrowser,userIP) VALUES (?,?,?,?,?)", [session_id(),$User->get('username'),$userAgent,$this->getClientBrowser(),$this->getClientIp()]);
       }
 
       // Update the session id

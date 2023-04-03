@@ -3,6 +3,15 @@
 // Declaring namespace
 namespace LaswitchTech\phpAUTH\Types;
 
+//Import phpConfigurator class into the global namespace
+use LaswitchTech\phpConfigurator\phpConfigurator;
+
+// Import phpLogger class into the global namespace
+use LaswitchTech\phpLogger\phpLogger;
+
+// Import Database Class into the global namespace
+use LaswitchTech\phpDB\Database;
+
 // Import User class into the global namespace
 use LaswitchTech\phpAUTH\Objects\User;
 
@@ -13,6 +22,10 @@ class Bearer {
 
   // phpLogger
   private $Logger = null;
+	private $Level = 1;
+
+  // Configurator
+  private $Configurator = null;
 
   // phpDB
   private $Database = null;
@@ -25,13 +38,25 @@ class Bearer {
    * @return void
    * @throws Exception
    */
-  public function __construct($Logger, $Database){
+  public function __construct($Logger = null, $Database = null) {
+
+    // Initialize Configurator
+    $this->Configurator = new phpConfigurator('auth');
+
+    // Retrieve Log Level
+    $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
 
     // Initiate phpLogger
     $this->Logger = $Logger;
+    if(!$this->Logger){
+      $this->Logger = new phpLogger('auth');
+    }
 
     // Initiate phpDB
     $this->Database = $Database;
+    if(!$this->Database){
+      $this->Database = new Database();
+    }
 
     // Initialize Library
     $this->init();
@@ -134,6 +159,14 @@ class Bearer {
 	public function getAuthentication(){
     try {
 
+      // Debug Information
+      $this->Logger->debug("Attempting connection using BEARER");
+
+      // Check if Bearer Authentication is enabled
+      if(!$this->Configurator->get('auth','bearer')){
+        throw new Exception("Bearer Authentication is Disabled");
+      }
+
 			// Retrieve Bearer Token
       $token = $this->getBearerToken();
 
@@ -163,27 +196,27 @@ class Bearer {
 
       // Check if user exist
       if(!$result){
-        throw new Exception("Could not find User");
+        throw new Exception("Could not find API Token");
       }
-
-			// Check if user is isLockedOut
-			if($User->isLockedOut()){
-				throw new Exception("User is currently locked out");
-			}
-
-			// Check if user is isLockedOut
-			if($User->isRateLimited()){
-				throw new Exception("User has reached the limit of attempts");
-			}
-
-      // Record Authentication Attempt
-      $User->recordAttempt();
 
       // Validate Hash
       // Compare the token hash to the input token hash
       if(!hash_equals($TokenHash, $User->get('bearerToken'))) {
         throw new Exception("Invalid Bearer Token");
       }
+
+			// Check if user is isLockedOut
+			if($User->isLockedOut()){
+				throw new Exception("API Token is currently locked out");
+			}
+
+			// Check if user is isLockedOut
+			if($User->isRateLimited()){
+				throw new Exception("API Token has reached the limit of requests");
+			}
+
+      // Record Authentication Request
+      $User->recordRequest();
 
       // Return the User Object
       return $User;

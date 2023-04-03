@@ -3,6 +3,18 @@
 // Declaring namespace
 namespace LaswitchTech\phpAUTH;
 
+//Import phpConfigurator class into the global namespace
+use LaswitchTech\phpConfigurator\phpConfigurator;
+
+// Import phpLogger class into the global namespace
+use LaswitchTech\phpLogger\phpLogger;
+
+// Import Database Class into the global namespace
+use LaswitchTech\phpDB\Database;
+
+// Import phpCSRF Class into the global namespace
+use LaswitchTech\phpCSRF\phpCSRF;
+
 // Import Session class into the global namespace
 use LaswitchTech\phpAUTH\Types\Session;
 
@@ -25,6 +37,10 @@ class Authentication {
 
 	// Logger
 	private $Logger;
+	private $Level = 1;
+
+  // Configurator
+  private $Configurator = null;
 
 	// phpDB
   private $Database = null;
@@ -62,16 +78,31 @@ class Authentication {
    * @return void
    * @throws Exception
    */
-  public function __construct($Database, $Logger, $CSRF){
+  public function __construct($Logger = null, $Database = null, $CSRF = null) {
 
-    // Initialize phpLogger
+    // Initialize Configurator
+    $this->Configurator = new phpConfigurator('auth');
+
+    // Retrieve Log Level
+    $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
+
+    // Initiate phpLogger
     $this->Logger = $Logger;
+    if(!$this->Logger){
+      $this->Logger = new phpLogger('auth');
+    }
 
-    // Initialize phpDB
+    // Initiate phpDB
     $this->Database = $Database;
+    if(!$this->Database){
+      $this->Database = new Database();
+    }
 
-    // Initialize phpCSRF
+    // Initiate phpCSRF
     $this->CSRF = $CSRF;
+    if(!$this->CSRF){
+      $this->CSRF = new phpCSRF();
+    }
 
     // Initialize Library
     return $this->init();

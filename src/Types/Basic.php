@@ -3,6 +3,15 @@
 // Declaring namespace
 namespace LaswitchTech\phpAUTH\Types;
 
+//Import phpConfigurator class into the global namespace
+use LaswitchTech\phpConfigurator\phpConfigurator;
+
+// Import phpLogger class into the global namespace
+use LaswitchTech\phpLogger\phpLogger;
+
+// Import Database Class into the global namespace
+use LaswitchTech\phpDB\Database;
+
 // Import User class into the global namespace
 use LaswitchTech\phpAUTH\Objects\User;
 
@@ -13,6 +22,10 @@ class Basic {
 
   // phpLogger
   private $Logger = null;
+	private $Level = 1;
+
+  // Configurator
+  private $Configurator = null;
 
   // phpDB
   private $Database = null;
@@ -25,13 +38,25 @@ class Basic {
    * @return void
    * @throws Exception
    */
-  public function __construct($Logger, $Database){
+  public function __construct($Logger = null, $Database = null) {
+
+    // Initialize Configurator
+    $this->Configurator = new phpConfigurator('auth');
+
+    // Retrieve Log Level
+    $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
 
     // Initiate phpLogger
     $this->Logger = $Logger;
+    if(!$this->Logger){
+      $this->Logger = new phpLogger('auth');
+    }
 
     // Initiate phpDB
     $this->Database = $Database;
+    if(!$this->Database){
+      $this->Database = new Database();
+    }
 
     // Initialize Library
     $this->init();
@@ -69,10 +94,14 @@ class Basic {
 
       // Check if Authorization header exists in $_SERVER array and store it in $headers variable
       if(isset($_SERVER['Authorization'])){
+
+        // Save Headers
         $headers = trim($_SERVER['Authorization']);
 
       // Check if HTTP_AUTHORIZATION header exists in $_SERVER array and store it in $headers variable
       } else if (isset($_SERVER['HTTP_AUTHORIZATION'])){
+
+        // Save Headers
         $headers = trim($_SERVER['HTTP_AUTHORIZATION']);
 
       // If apache_request_headers() function exists, use it to retrieve the Authorization header
@@ -134,6 +163,14 @@ class Basic {
 	public function getAuthentication(){
     try {
 
+      // Debug Information
+      $this->Logger->debug("Attempting connection using BASIC");
+
+      // Check if Basic Authentication is enabled
+      if(!$this->Configurator->get('auth','basic')){
+        throw new Exception("Basic Authentication is Disabled");
+      }
+
 			// Retrieve Basic Credentials
       $credentials = $this->getBasicCredentials();
 
@@ -153,23 +190,23 @@ class Basic {
         throw new Exception("Could not find the user");
       }
 
-			// Check if user is isLockedOut
-			if($User->isLockedOut()){
-				throw new Exception("User is currently locked out");
-			}
-
-			// Check if user is isLockedOut
-			if($User->isRateLimited()){
-				throw new Exception("User has reached the limit of attempts");
-			}
-
-      // Record Authentication Attempt
-      $User->recordAttempt();
-
       // Validate Password
       if(!$User->validate($credentials['password'])){
         throw new Exception("Wrong password");
       }
+
+			// Check if user is isLockedOut
+			if($User->isLockedOut()){
+				throw new Exception("API User is currently locked out");
+			}
+
+			// Check if user is isLockedOut
+			if($User->isRateLimited()){
+				throw new Exception("API User has reached the limit of requests");
+			}
+
+      // Record Authentication Request
+      $User->recordRequest();
 
       // Return the User Object
       return $User;

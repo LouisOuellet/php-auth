@@ -80,9 +80,6 @@ class phpAUTH {
     //Initiate phpDB
     $this->Database = new Database();
 
-    // Default Configuration
-    $this->config('level',$this->Level);
-
 		// Initialize
 		$this->init();
   }
@@ -99,21 +96,6 @@ class phpAUTH {
 		try {
 			if(is_string($option)){
 	      switch($option){
-	        case"level":
-	          if(is_int($value)){
-
-							// Logging Level
-	            $this->Level = $value;
-
-							// Configure phpLogger
-					    $this->Logger->config('level',$this->Level);
-
-              // Debug Information
-					    $this->Logger->debug('Logging Level: ' . $this->Level);
-	          } else{
-	            throw new Exception("2nd argument must be an integer.");
-	          }
-	          break;
 	        default:
 	          throw new Exception("unable to configure $option.");
 	          break;
@@ -148,7 +130,7 @@ class phpAUTH {
 			}
 
       // Initialize Authentication
-      $this->Authentication = new Authentication($this->Database, $this->Logger, $this->CSRF);
+      $this->Authentication = new Authentication($this->Logger, $this->Database, $this->CSRF);
 
 			// If a User is authenticated, Initialize Authorization
 			if($this->Authentication && $this->Authentication->isConnected()){

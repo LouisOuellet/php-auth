@@ -3,6 +3,15 @@
 // Declaring namespace
 namespace LaswitchTech\phpAUTH\Types;
 
+//Import phpConfigurator class into the global namespace
+use LaswitchTech\phpConfigurator\phpConfigurator;
+
+// Import phpLogger class into the global namespace
+use LaswitchTech\phpLogger\phpLogger;
+
+// Import Database Class into the global namespace
+use LaswitchTech\phpDB\Database;
+
 // Import User class into the global namespace
 use LaswitchTech\phpAUTH\Objects\User;
 
@@ -13,6 +22,10 @@ class Cookie {
 
   // phpLogger
   private $Logger = null;
+	private $Level = 1;
+
+  // Configurator
+  private $Configurator = null;
 
   // phpDB
   private $Database = null;
@@ -28,13 +41,25 @@ class Cookie {
    * @return void
    * @throws Exception
    */
-  public function __construct($Logger, $Database){
+  public function __construct($Logger = null, $Database = null) {
+
+    // Initialize Configurator
+    $this->Configurator = new phpConfigurator('auth');
+
+    // Retrieve Log Level
+    $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
 
     // Initiate phpLogger
     $this->Logger = $Logger;
+    if(!$this->Logger){
+      $this->Logger = new phpLogger('auth');
+    }
 
     // Initiate phpDB
     $this->Database = $Database;
+    if(!$this->Database){
+      $this->Database = new Database();
+    }
 
     // Set default cookie options
     $this->Options = [
@@ -101,6 +126,14 @@ class Cookie {
    */
 	public function getAuthentication(){
     try {
+
+      // Debug Information
+      $this->Logger->debug("Attempting connection using COOKIE");
+
+      // Check if Cookie Authentication is enabled
+      if(!$this->Configurator->get('auth','cookie')){
+        throw new Exception("Cookie Authentication is Disabled");
+      }
 
 			// Retrieve sessionId
       $sessionId = $this->getId();

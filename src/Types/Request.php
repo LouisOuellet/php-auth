@@ -3,6 +3,18 @@
 // Declaring namespace
 namespace LaswitchTech\phpAUTH\Types;
 
+//Import phpConfigurator class into the global namespace
+use LaswitchTech\phpConfigurator\phpConfigurator;
+
+// Import phpLogger class into the global namespace
+use LaswitchTech\phpLogger\phpLogger;
+
+// Import Database Class into the global namespace
+use LaswitchTech\phpDB\Database;
+
+// Import phpCSRF Class into the global namespace
+use LaswitchTech\phpCSRF\phpCSRF;
+
 // Import User class into the global namespace
 use LaswitchTech\phpAUTH\Objects\User;
 
@@ -13,6 +25,10 @@ class Request {
 
   // phpLogger
   private $Logger = null;
+	private $Level = 1;
+
+  // Configurator
+  private $Configurator = null;
 
   // phpDB
   private $Database = null;
@@ -28,16 +44,31 @@ class Request {
    * @return void
    * @throws Exception
    */
-  public function __construct($Logger, $Database, $CSRF){
+  public function __construct($Logger = null, $Database = null, $CSRF = null) {
+
+    // Initialize Configurator
+    $this->Configurator = new phpConfigurator('auth');
+
+    // Retrieve Log Level
+    $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
 
     // Initiate phpLogger
     $this->Logger = $Logger;
+    if(!$this->Logger){
+      $this->Logger = new phpLogger('auth');
+    }
 
     // Initiate phpDB
     $this->Database = $Database;
+    if(!$this->Database){
+      $this->Database = new Database();
+    }
 
     // Initiate phpCSRF
     $this->CSRF = $CSRF;
+    if(!$this->CSRF){
+      $this->CSRF = new phpCSRF();
+    }
 
     // Initialize Library
     $this->init();
@@ -99,6 +130,14 @@ class Request {
    */
 	public function getAuthentication(){
     try {
+
+      // Debug Information
+      $this->Logger->debug("Attempting connection using REQUEST");
+
+      // Check if Request Authentication is enabled
+      if(!$this->Configurator->get('auth','request')){
+        throw new Exception("Request Authentication is Disabled");
+      }
 
 			// Retrieve Request Credentials
       $credentials = $this->getRequestCredentials();

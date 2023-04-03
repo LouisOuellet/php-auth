@@ -3,6 +3,15 @@
 // Declaring namespace
 namespace LaswitchTech\phpAUTH\Objects;
 
+//Import phpConfigurator class into the global namespace
+use LaswitchTech\phpConfigurator\phpConfigurator;
+
+// Import phpLogger class into the global namespace
+use LaswitchTech\phpLogger\phpLogger;
+
+// Import Database Class into the global namespace
+use LaswitchTech\phpDB\Database;
+
 // Import phpSMTP Class into the global namespace
 use LaswitchTech\phpSMTP\phpSMTP;
 
@@ -27,8 +36,12 @@ class User {
   const minPasswordLength = 8;
   const disallowedPasswords = ['password', '123456', 'qwerty'];
 
-  // phpLogger
-  private $Logger = null;
+	// Logger
+	private $Logger;
+	private $Level = 1;
+
+  // Configurator
+  private $Configurator = null;
 
   // phpDB
   private $Database = null;
@@ -88,7 +101,11 @@ class User {
   private $Token = null;
   private $Password = null;
   private $maxAttempts = 5;
-  private $window = 300;
+  private $maxRequests = 1000;
+  private $window = [
+    'requests' => 60,
+    'attempts' => 100,
+  ];
   private $lockoutDuration = 1800;
 
   /**
@@ -101,7 +118,13 @@ class User {
    * @return void
    * @throws Exception
    */
-  public function __construct($Id, $Identifier, $Logger, $Database, $Object = null){
+  public function __construct($Id, $Identifier, $Logger = null, $Database = null, $Object = null){
+
+    // Initialize Configurator
+    $this->Configurator = new phpConfigurator('auth');
+
+    // Retrieve Log Level
+    $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
 
     // Initiate Id
     $this->Id = $Id;
@@ -111,9 +134,15 @@ class User {
 
     // Initiate phpLogger
     $this->Logger = $Logger;
+    if(!$this->Logger){
+      $this->Logger = new phpLogger('auth');
+    }
 
     // Initiate phpDB
     $this->Database = $Database;
+    if(!$this->Database){
+      $this->Database = new Database();
+    }
 
     // Initiate Relationship
     $this->Relationship = new Relationship($Logger, $Database);
@@ -268,6 +297,11 @@ class User {
       if(!$force && $this->Object !== null){
         return $this;
       }
+
+      // Debug Information
+      $this->Logger->debug("SELECT * FROM " . $this->Table . " WHERE `" . $this->Identifier . "` = ?");
+      $this->Logger->debug($this->Id);
+      $this->Logger->debug([$this->Id]);
 
       // Find the User
       $User = $this->Database->select("SELECT * FROM " . $this->Table . " WHERE `" . $this->Identifier . "` = ?", [$this->Id]);
@@ -1007,13 +1041,21 @@ class User {
    */
   public function isRateLimited() {
     $currentTime = time();
-    $timeDifference = $currentTime - $this->get('lastAttempt');
+    $timeDifferenceAttempt = $currentTime - $this->get('lastAttempt');
+    $timeDifferenceRequest = $currentTime - $this->get('lastRequest');
 
     // Debug Information
-    $this->Logger->debug("Time Difference is currently at : {$timeDifference}");
+    $this->Logger->debug("Attempt Time Difference is currently at : {$timeDifferenceAttempt}");
+    $this->Logger->debug("Request Time Difference is currently at : {$timeDifferenceRequest}");
 
-    if ($this->get('attempts') >= $this->maxAttempts && $timeDifference <= $this->window) {
-      return true;
+    if($this->get('isAPI')){
+      if ($this->get('requests') >= $this->maxRequests && $timeDifferenceRequest <= $this->window['requests']) {
+        return true;
+      }
+    } else {
+      if ($this->get('attempts') >= $this->maxAttempts && $timeDifferenceAttempt <= $this->window['attempts']) {
+        return true;
+      }
     }
 
     return false;
@@ -1026,13 +1068,21 @@ class User {
    */
   public function isLockedOut() {
     $currentTime = time();
-    $timeDifference = $currentTime - $this->get('lastAttempt');
+    $timeDifferenceAttempt = $currentTime - $this->get('lastAttempt');
+    $timeDifferenceRequest = $currentTime - $this->get('lastRequest');
 
     // Debug Information
-    $this->Logger->debug("Time Difference is currently at : {$timeDifference}");
+    $this->Logger->debug("Attempt Time Difference is currently at : {$timeDifferenceAttempt}");
+    $this->Logger->debug("Request Time Difference is currently at : {$timeDifferenceRequest}");
 
-    if ($this->get('attempts') >= $this->maxAttempts && $timeDifference <= $this->lockoutDuration) {
-      return true;
+    if($this->get('isAPI')){
+      if ($this->get('attempts') >= $this->maxAttempts && $timeDifferenceAttempt <= $this->lockoutDuration) {
+        return true;
+      }
+    } else {
+      if ($this->get('requests') >= $this->maxRequests && $timeDifferenceRequest <= $this->lockoutDuration) {
+        return true;
+      }
     }
 
     return false;
@@ -1053,7 +1103,7 @@ class User {
     ];
 
     // Reset attempts if outside the rate-limiting window
-    if ($timeDifference > $this->window) {
+    if ($timeDifference > $this->window['attempts']) {
       $Array['attempts'] = 0;
     }
 
@@ -1064,7 +1114,37 @@ class User {
     // Log Attempt
     $this->Logger->info("User [" . $this->get('username') . "] attempted to authenticate");
 
-    // Save the updated attempts and last_attempt values
+    // Save the updated attempts and lastAttempt values
+    $this->save($Array);
+  }
+
+  /**
+   * record an attempt.
+   *
+   * @return void
+   */
+  public function recordRequest() {
+    $currentTime = time();
+    $timeDifference = $currentTime - $this->get('lastRequest');
+
+    $Array = [
+      "requests" => $this->get('requests'),
+      "lastRequest" => $this->get('lastRequest'),
+    ];
+
+    // Reset attempts if outside the rate-limiting window
+    if ($timeDifference > $this->window['requests']) {
+      $Array['requests'] = 0;
+    }
+
+    // Increment attempts and update last_attempt
+    $Array['requests'] += 1;
+    $Array['lastRequest'] = $currentTime;
+
+    // Log Attempt
+    $this->Logger->info("API Token [" . $this->get('username') . "] requested access");
+
+    // Save the updated requests and lastRequest values
     $this->save($Array);
   }
 
@@ -1082,7 +1162,25 @@ class User {
     // Log Attempt
     $this->Logger->success("User [" . $this->get('username') . "] was authenticated");
 
-    // Save the updated attempts and last_attempt values
+    // Save the updated attempts and lastAttempt values
+    $this->save($Array);
+  }
+
+  /**
+   * reset attempts.
+   *
+   * @return void
+   */
+  public function resetRequests() {
+    $Array = [
+      "requests" => 0,
+      "lastRequest" => NULL,
+    ];
+
+    // Log Attempt
+    $this->Logger->success("API [" . $this->get('username') . "] requests count updated");
+
+    // Save the updated requests and lastRequest values
     $this->save($Array);
   }
 
