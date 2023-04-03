@@ -94,16 +94,16 @@
         },
         {
             "name": "laswitchtech/php-csrf",
-            "version": "v1.1.1",
+            "version": "v1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/LouisOuellet/php-csrf.git",
-                "reference": "0858b491f3d4e9a748ee313cd98d9d6f711b41ce"
+                "reference": "1b7df05fc43e8ef19e5aa6d01ff3bb2c64832387"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/LouisOuellet/php-csrf/zipball/0858b491f3d4e9a748ee313cd98d9d6f711b41ce",
-                "reference": "0858b491f3d4e9a748ee313cd98d9d6f711b41ce",
+                "url": "https://api.github.com/repos/LouisOuellet/php-csrf/zipball/1b7df05fc43e8ef19e5aa6d01ff3bb2c64832387",
+                "reference": "1b7df05fc43e8ef19e5aa6d01ff3bb2c64832387",
                 "shasum": ""
             },
             "require": {
@@ -129,22 +129,22 @@
             "description": "CSRF Protection Library for PHP Applications",
             "support": {
                 "issues": "https://github.com/LouisOuellet/php-csrf/issues",
-                "source": "https://github.com/LouisOuellet/php-csrf/tree/v1.1.1"
+                "source": "https://github.com/LouisOuellet/php-csrf/tree/v1.1.2"
             },
-            "time": "2023-03-30T20:12:47+00:00"
+            "time": "2023-04-03T16:54:02+00:00"
         },
         {
             "name": "laswitchtech/php-database",
-            "version": "v2.3.2",
+            "version": "v2.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/LouisOuellet/php-database.git",
-                "reference": "c858e6661baa669bd42dc85b51e91a2c442c8c83"
+                "reference": "d329b31d38ff432728112ad69032682feafa3cc8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/LouisOuellet/php-database/zipball/c858e6661baa669bd42dc85b51e91a2c442c8c83",
-                "reference": "c858e6661baa669bd42dc85b51e91a2c442c8c83",
+                "url": "https://api.github.com/repos/LouisOuellet/php-database/zipball/d329b31d38ff432728112ad69032682feafa3cc8",
+                "reference": "d329b31d38ff432728112ad69032682feafa3cc8",
                 "shasum": ""
             },
             "require": {
@@ -172,22 +172,22 @@
             "description": "Database Class for PHP",
             "support": {
                 "issues": "https://github.com/LouisOuellet/php-database/issues",
-                "source": "https://github.com/LouisOuellet/php-database/tree/v2.3.2"
+                "source": "https://github.com/LouisOuellet/php-database/tree/v2.3.3"
             },
-            "time": "2023-03-30T20:12:00+00:00"
+            "time": "2023-04-03T16:53:21+00:00"
         },
         {
             "name": "laswitchtech/php-imap",
-            "version": "v2.1.0",
+            "version": "v2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/LouisOuellet/php-imap.git",
-                "reference": "6334314d78a59816f648767abacfcb4795c93994"
+                "reference": "a2822c7048287bc9e73efbe5b42c2a9013bef45a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/LouisOuellet/php-imap/zipball/6334314d78a59816f648767abacfcb4795c93994",
-                "reference": "6334314d78a59816f648767abacfcb4795c93994",
+                "url": "https://api.github.com/repos/LouisOuellet/php-imap/zipball/a2822c7048287bc9e73efbe5b42c2a9013bef45a",
+                "reference": "a2822c7048287bc9e73efbe5b42c2a9013bef45a",
                 "shasum": ""
             },
             "require": {
@@ -214,9 +214,9 @@
             "description": "phpIMAP is a full-featured mailbox management class for PHP",
             "support": {
                 "issues": "https://github.com/LouisOuellet/php-imap/issues",
-                "source": "https://github.com/LouisOuellet/php-imap/tree/v2.1.0"
+                "source": "https://github.com/LouisOuellet/php-imap/tree/v2.1.1"
             },
-            "time": "2023-03-30T20:18:24+00:00"
+            "time": "2023-04-03T16:55:17+00:00"
         },
         {
             "name": "laswitchtech/php-logger",
@@ -260,16 +260,16 @@
         },
         {
             "name": "laswitchtech/php-net",
-            "version": "v1.1.4",
+            "version": "v1.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/LouisOuellet/php-net.git",
-                "reference": "21250424703a2e983cd37b5b45343e26534fd872"
+                "reference": "489901d0f56a0681997d55e7b11400917d933992"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/LouisOuellet/php-net/zipball/21250424703a2e983cd37b5b45343e26534fd872",
-                "reference": "21250424703a2e983cd37b5b45343e26534fd872",
+                "url": "https://api.github.com/repos/LouisOuellet/php-net/zipball/489901d0f56a0681997d55e7b11400917d933992",
+                "reference": "489901d0f56a0681997d55e7b11400917d933992",
                 "shasum": ""
             },
             "require": {
@@ -294,22 +294,22 @@
             "description": "Network Tools Library for PHP",
             "support": {
                 "issues": "https://github.com/LouisOuellet/php-net/issues",
-                "source": "https://github.com/LouisOuellet/php-net/tree/v1.1.4"
+                "source": "https://github.com/LouisOuellet/php-net/tree/v1.1.5"
             },
-            "time": "2023-03-30T20:11:27+00:00"
+            "time": "2023-04-03T16:52:44+00:00"
         },
         {
             "name": "laswitchtech/php-smtp",
-            "version": "v2.1.0",
+            "version": "v2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/LouisOuellet/php-smtp.git",
-                "reference": "e34cf73074c8e1146d7d8789ab85979e450f0fd7"
+                "reference": "514795adbb47e3dab0776d56423a16151476b425"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/LouisOuellet/php-smtp/zipball/e34cf73074c8e1146d7d8789ab85979e450f0fd7",
-                "reference": "e34cf73074c8e1146d7d8789ab85979e450f0fd7",
+                "url": "https://api.github.com/repos/LouisOuellet/php-smtp/zipball/514795adbb47e3dab0776d56423a16151476b425",
+                "reference": "514795adbb47e3dab0776d56423a16151476b425",
                 "shasum": ""
             },
             "require": {
@@ -336,9 +336,9 @@
             "description": "This PHP SMTP email library provides a simple and easy-to-use solution for sending emails using SMTP servers.",
             "support": {
                 "issues": "https://github.com/LouisOuellet/php-smtp/issues",
-                "source": "https://github.com/LouisOuellet/php-smtp/tree/v2.1.0"
+                "source": "https://github.com/LouisOuellet/php-smtp/tree/v2.1.1"
             },
-            "time": "2023-03-30T20:13:32+00:00"
+            "time": "2023-04-03T16:54:41+00:00"
         }
     ],
     "packages-dev": [],
