@@ -79,7 +79,7 @@ class Installer {
 					'type' => 'VARCHAR(60)',
 					'extra' => ['NOT NULL','UNIQUE']
 				],
-				'sbnr/irs' => [
+				'sbnr/ein' => [
 					'type' => 'VARCHAR(60)',
 					'extra' => ['NULL','UNIQUE']
 				],
@@ -173,6 +173,22 @@ class Installer {
 					'type' => 'VARCHAR(255)',
 					'extra' => ['NULL']
 				],
+				'2FASalt' => [
+					'type' => 'VARCHAR(255)',
+					'extra' => ['NULL']
+				],
+				'2FAHash' => [
+					'type' => 'VARCHAR(255)',
+					'extra' => ['NULL']
+				],
+				'last2FA' => [
+					'type' => 'TIMESTAMP',
+					'extra' => ['NULL']
+				],
+				'2FAMethod' => [
+					'type' => 'JSON',
+					'extra' => ['NULL']
+				],
 				'bearerToken' => [
 					'type' => 'VARCHAR(255)',
 					'extra' => ['NULL','UNIQUE']
@@ -202,6 +218,10 @@ class Installer {
 					'extra' => ['NULL']
 				],
 				'phone' => [
+					'type' => 'VARCHAR(255)',
+					'extra' => ['NULL']
+				],
+				'mobile' => [
 					'type' => 'VARCHAR(255)',
 					'extra' => ['NULL']
 				],

@@ -30,6 +30,9 @@ class Authorization {
 	// Relationships
   private $Relationships = [];
 
+	// Hostnames
+  private $Hostnames = [];
+
   /**
    * Create a new Authentication instance.
    *
@@ -45,6 +48,9 @@ class Authorization {
     // Retrieve Log Level
     $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
 
+    // Retrieve Hostnames
+    $this->Hostnames = $this->Configurator->get('auth', 'hostnames') ?: $this->Hostnames;
+
     // Initialize User
     $this->User = $User;
 
@@ -54,6 +60,45 @@ class Authorization {
       $this->Logger = new phpLogger('auth');
     }
   }
+
+  /**
+   * Verify if the user access through this hostname.
+   *
+   * @return boolean
+   */
+	public function isAuthorized(){
+
+		// Initiate Hostname
+		$Hostname = 'localhost';
+
+		// Retrieve Hostname
+		if(isset($_SERVER['SERVER_NAME'])){
+			$Hostname = $_SERVER['SERVER_NAME'];
+		}
+		if(isset($_SERVER['HTTP_HOST'])){
+			$Hostname = $_SERVER['HTTP_HOST'];
+		}
+
+		// Log request
+		$this->Logger->info("User [" . $this->User->get('username') . "] is requesting access through {$Hostname}");
+
+		// Validate Hostname
+		if(in_array($Hostname,$this->Hostnames)){
+
+			// Log request
+			$this->Logger->success("User [" . $this->User->get('username') . "] was granted access through {$Hostname}");
+
+			// Return
+			return true;
+		} else {
+
+			// Log request
+			$this->Logger->error("User [" . $this->User->get('username') . "] was denied access through {$Hostname}");
+
+			// Return
+			return false;
+		}
+	}
 
   /**
    * Verify if the user has a specific permission.

@@ -13,11 +13,14 @@ $Configurator = new phpConfigurator('auth');
 // Configure Auth to only use Basic and Bearer Authentication
 $Configurator->set('auth','basic',true)->set('auth','bearer',true)->set('auth','request',false)->set('auth','cookie',false)->set('auth','session',false);
 
+// Initiate phpConfigurator
+$AccountConfigurator = new phpConfigurator('account');
+
 // cURL Options
-$url = "https://phpauth.local/api.php";
-$username = "username@domain.com";
-$password = "f+&J3%^JLFc6Y9^T";
-$token = "api@domain.com:72c902533ffc40415e93d73d350e96978fb07d52cb06b5f5034577e0d34281c8";
+$url = $AccountConfigurator->get('account','url');
+$username = $AccountConfigurator->get('account','username');
+$password = $AccountConfigurator->get('account','password');
+$token = $AccountConfigurator->get('account','token');
 
 // Encode
 $username = base64_encode($username);

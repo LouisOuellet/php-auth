@@ -167,6 +167,17 @@ class Authentication {
 	}
 
   /**
+   * Check if 2FA is ready to be received.
+   *
+   * @return boolean
+   */
+	public function is2FAReady(){
+
+    // Return
+    return $this->Request->is2FAReady();
+  }
+
+  /**
    * Handling Authentication.
    *
    * @return void

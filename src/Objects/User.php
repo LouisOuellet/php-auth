@@ -13,10 +13,13 @@ use LaswitchTech\phpLogger\phpLogger;
 use LaswitchTech\phpDB\Database;
 
 // Import phpSMTP Class into the global namespace
-use LaswitchTech\phpSMTP\phpSMTP;
+use LaswitchTech\SMTP\phpSMTP;
 
 // Import phpIMAP Class into the global namespace
-use LaswitchTech\phpIMAP\phpIMAP;
+use LaswitchTech\IMAP\phpIMAP;
+
+// Import phpSMS Class into the global namespace
+use LaswitchTech\phpSMS\phpSMS;
 
 // Import Role Class into the global namespace
 use LaswitchTech\phpAUTH\Objects\Relationship;
@@ -65,6 +68,9 @@ class User {
   // phpIMAP
   private $IMAP = null;
 
+  // phpSMS
+  private $SMS = null;
+
   // Object
   private $Object = null;
   private $Classes = [
@@ -100,10 +106,12 @@ class User {
   // Security
   private $Token = null;
   private $Password = null;
+  private $Code = null;
   private $maxAttempts = 5;
   private $maxRequests = 1000;
   private $windowAttempts = 100;
   private $windowRequests = 60;
+  private $window2FA = 30;
   private $lockoutDuration = 1800;
 
   /**
@@ -130,6 +138,7 @@ class User {
     $this->lockoutDuration = $this->Configurator->get('auth', 'lockoutDuration') ?: $this->lockoutDuration;
     $this->windowAttempts = $this->Configurator->get('auth', 'windowAttempts') ?: $this->windowAttempts;
     $this->windowRequests = $this->Configurator->get('auth', 'windowRequests') ?: $this->windowRequests;
+    $this->window2FA = $this->Configurator->get('auth', 'window2FA') ?: $this->window2FA;
 
     // Initiate Id
     $this->Id = $Id;
@@ -221,6 +230,28 @@ class User {
   }
 
   /**
+   * Generate a Code.
+   *
+   * @param  int|null $length
+   * @return string
+   */
+	private function generateCode($length = 6) {
+    // Define possible characters
+    $chars = '0123456789';
+
+    // Get the length of the character list
+    $charLength = strlen($chars);
+
+    // Generate random password
+    $this->Code = '';
+    for ($i = 0; $i < $length; $i++) {
+      $this->Code .= $chars[rand(0, $charLength - 1)];
+    }
+
+    return $this->Code;
+  }
+
+  /**
    * Generate a strong password.
    *
    * @param  int|null $length
@@ -261,9 +292,19 @@ class User {
   }
 
   /**
+   * Get saved generated code.
+   *
+   * @return string
+   */
+	public function getCode() {
+
+    // Return the saved generated code
+    return $this->Code;
+  }
+
+  /**
    * Get saved generated password.
    *
-   * @param  int|null $length
    * @return string
    */
 	public function getPassword() {
@@ -275,13 +316,116 @@ class User {
   /**
    * Get saved generated token.
    *
-   * @param  int|null $length
    * @return string
    */
 	public function getToken() {
 
     // Return the saved generated token
     return $this->Token;
+  }
+
+  /**
+   * Send code.
+   *
+   * @return object|void
+   * @throws Exception
+   */
+	public function sendCode(){
+    try{
+
+      // Generate a Code
+      $Code = $this->generateCode();
+
+      // Create Salt
+      $Salt = bin2hex(random_bytes(16));
+
+      // Hash the Code
+      $Hash = password_hash($Code . $Salt, PASSWORD_DEFAULT);
+
+      // Get current timestamp
+      $Timestamp = time();
+
+      // Create User Array
+      $User = [
+        "2FASalt" => $Salt,
+        "2FAHash" => $Hash,
+        "last2FA" => $Timestamp,
+      ];
+
+      // Save Salt, Hash and Timestamp
+      $this->save($User);
+
+      // Send Code
+      foreach($this->get('2FAMethod') as $Method){
+        switch($Method){
+          case"smtp":
+
+            // Initiate phpSMTP
+            if(!$this->SMTP){
+              $this->SMTP = new phpSMTP();
+            }
+
+            // Check if phpSMTP is configured
+            if(!$this->SMTP || !$this->SMTP->isConnected()){
+              throw new Exception("Unable to initiate phpSMTP.");
+            }
+
+            // Send Code
+            $this->SMTP->send([
+              'to' => $this->get('username'),
+              'subject' => "Verification Code",
+              'body' => "Your verification code is: {$Code}",
+            ]);
+            break;
+          case"sms":
+
+            // Initiate phpSMS
+            if(!$this->SMS){
+              $this->SMS = new phpSMS();
+            }
+
+            // Check if phpSMS is configured
+            if(!$this->SMS || !$this->SMS->isReady()){
+              throw new Exception("Unable to initiate phpSMS.");
+            }
+
+            // Send Code
+            $this->SMS->send($this->get('mobile'),"Your verification code is: {$Code}");
+            break;
+        }
+      }
+
+      // Return
+      return $this;
+    } catch (Exception $e) {
+
+			// If an exception is caught, log an error message
+      $this->Logger->error('Error: '.$e->getMessage());
+    }
+  }
+
+  /**
+   * Validate code.
+   *
+   * @param string $Code
+   * @return boolean
+   */
+	public function validateCode($Code){
+
+    // Set Current Time and Calculate Time Difference
+    $currentTime = time();
+    $timeDifference = $currentTime - $this->get('last2FA');
+
+    // Debug Information
+    $this->Logger->debug("Time Difference is currently at : {$timeDifference}");
+
+    // Validate Code
+    if (password_verify($Code . $this->get('2FASalt'), $this->get('2FAHash')) && $timeDifference <= $this->window2FA) {
+      return true;
+    }
+
+    // Return False
+    return false;
   }
 
   /**
@@ -493,6 +637,9 @@ class User {
         // Hash the token data using a secure hashing algorithm
         $Data['bearerToken'] = $this->generateToken();
       } else {
+
+        // Set Default 2FA Method
+        $Data['2FAMethod'] = ["smtp"];
 
         // Generate a password if none were provided
         if(!isset($Data['password'])){
@@ -1180,6 +1327,9 @@ class User {
     $Array = [
       "requests" => 0,
       "lastRequest" => NULL,
+      "2FASalt" => NULL,
+      "2FAHash" => NULL,
+      "last2FA" => NULL,
     ];
 
     // Log Attempt

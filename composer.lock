@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "60e4109b14e2250f2e6b74d9feaccc7b",
+    "content-hash": "b7525c074f47ba3b8ad2ea85466d39bc",
     "packages": [
         {
             "name": "components/jquery",
@@ -297,6 +297,47 @@
                 "source": "https://github.com/LouisOuellet/php-net/tree/v1.1.5"
             },
             "time": "2023-04-03T16:52:44+00:00"
+        },
+        {
+            "name": "laswitchtech/php-sms",
+            "version": "v1.0.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/LouisOuellet/php-sms.git",
+                "reference": "ca2cf6ace547a78c36a899fc2ac19f317c1069cb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/LouisOuellet/php-sms/zipball/ca2cf6ace547a78c36a899fc2ac19f317c1069cb",
+                "reference": "ca2cf6ace547a78c36a899fc2ac19f317c1069cb",
+                "shasum": ""
+            },
+            "require": {
+                "laswitchtech/php-configurator": "^1.0",
+                "laswitchtech/php-logger": "^1.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "LaswitchTech\\phpSMS\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "Louis Ouellet",
+                    "email": "louis_ouellet@hotmail.com"
+                }
+            ],
+            "description": "SMS Library for PHP Applications",
+            "support": {
+                "issues": "https://github.com/LouisOuellet/php-sms/issues",
+                "source": "https://github.com/LouisOuellet/php-sms/tree/v1.0.8"
+            },
+            "time": "2023-04-04T18:03:06+00:00"
         },
         {
             "name": "laswitchtech/php-smtp",

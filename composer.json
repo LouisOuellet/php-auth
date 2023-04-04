@@ -17,7 +17,8 @@
         "laswitchtech/php-imap": "^2.0",
         "laswitchtech/php-smtp": "^2.0",
         "laswitchtech/php-logger": "^1.1",
-        "laswitchtech/php-configurator": "^1.0"
+        "laswitchtech/php-configurator": "^1.0",
+        "laswitchtech/php-sms": "^1.0"
     },
     "autoload": {
         "psr-4": {

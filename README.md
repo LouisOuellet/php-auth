@@ -11,6 +11,7 @@
   - 3rd-party Authentication Support through SMTP or IMAP
   - Authorization Support
   - Cross-site Request Forgery Protection ([phpCSRF](https://github.com/LouisOuellet/php-csrf))
+  - 2-Factor Authentication Support ([phpSMTP](https://github.com/LouisOuellet/php-smtp),[phpSMS](https://github.com/LouisOuellet/php-sms))
   <!-- - GDPR Cookie Compliance -->
   <!-- - CCPA Cookie Compliance -->
   <!-- - JavaScript class available for GDPR & CCPA Cookie Compliance -->
@@ -94,6 +95,12 @@ $phpAUTH = new phpAUTH();
 $phpAUTH->Authentication->isConnected()
 ```
 
+### Check if we can access through a specific hostname
+```php
+// Check if a User has a specific permission
+$phpAUTH->Authorization->hasPermission($Name, $Level)
+```
+
 ### Check if a User has a specific permission
 ```php
 // Check if a User has a specific permission
@@ -138,31 +145,80 @@ $Object->link($Table, $Id);
 $Object->unlink($Table, $Id);
 ```
 
-### Installer
+### Installer Example
 ```php
+// Initiate Session
+session_start();
+
 // These must be at the top of your script, not inside a function
 use LaswitchTech\phpAUTH\phpAUTH;
 use LaswitchTech\phpDB\Database;
-use LaswitchTech\phpLogger\phpLogger;
-use LaswitchTech\phpConfigurator\phpConfigurator;
+use LaswitchTech\SMTP\phpSMTP;
+use LaswitchTech\phpSMS\phpSMS;
 
 // Load Composer's autoloader
 require 'vendor/autoload.php';
 
-// Initialize Database
-$phpLogger = new phpLogger();
+// Initiate phpSMS
+$phpSMS = new phpSMS();
 
-// Configure phpLogger
-$phpLogger->config('level',5);
+// Configure phpSMS
+$phpSMS->config('provider','twilio')
+       ->config('sid', 'your_account_sid')
+       ->config('token', 'your_auth_token')
+       ->config('phone', 'your_twilio_phone_number');
 
-// Initialize Database
-$phpDB = new Database();
+// Initiate phpDB
+$phpDB = new phpDB();
 
-// Configure Database
-$phpDB->config("host","localhost")->config("username","demo")->config("password","demo")->config("database","demo2");
+// Configure phpDB
+$phpDB->config("host","localhost")
+      ->config("username","demo")
+      ->config("password","demo")
+      ->config("database","demo2");
+
+// Initiate phpSMTP
+$phpSMTP = new phpSMTP();
+
+// Configure phpDB
+$phpSMTP->config("username","username@domain.com")
+        ->config("password","*******************")
+        ->config("host","smtp.domain.com")
+        ->config("port",465)
+        ->config("encryption","ssl");
+
+// Construct Hostnames
+$Hostnames = ["localhost","::1","127.0.0.1"];
+if(isset($_SERVER['SERVER_NAME']) && !in_array($_SERVER['SERVER_NAME'],$Hostnames)){
+  $Hostnames[] = $_SERVER['SERVER_NAME'];
+}
+if(isset($_SERVER['HTTP_HOST']) && !in_array($_SERVER['HTTP_HOST'],$Hostnames)){
+  $Hostnames[] = $_SERVER['HTTP_HOST'];
+}
 
 // Initiate phpAUTH
 $phpAUTH = new phpAUTH();
+
+// Configure phpAUTH
+$phpAUTH->config("hostnames",$Hostnames)
+        ->config("basic",false)
+        ->config("bearer",false)
+        ->config("request",true)
+        ->config("cookie",true)
+        ->config("session",true)
+        ->config("2fa",true)
+        ->config("maxAttempts",5)
+        ->config("maxRequests",1000)
+        ->config("lockoutDuration",1800)
+        ->config("windowAttempts",100)
+        ->config("windowRequests",60)
+        ->config("window2FA",30)
+        ->config("host","localhost")
+        ->config("username","demo")
+        ->config("password","demo")
+        ->config("database","demo2")
+        ->config("level",5)
+        ->init();
 
 // Install phpAUTH
 $Installer = $phpAUTH->install();
@@ -172,11 +228,4 @@ $User = $Installer->create("user",["username" => "username@domain.com"]);
 
 // Create an API
 $API = $Installer->create("api",["username" => "api@domain.com"]);
-
-// Initiate phpConfigurator
-$Configurator = new phpConfigurator('auth');
-
-// Configure phpConfigurator
-$Configurator->set('auth','basic',false)->set('auth','bearer',false)->set('auth','request',true)->set('auth','cookie',true)->set('auth','session',true);
-$Configurator->set('auth','maxAttempts',5)->set('auth','maxRequests',1000)->set('auth','lockoutDuration',1800)->set('auth','windowAttempts',100)->set('auth','windowRequests',60);
 ```

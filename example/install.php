@@ -4,27 +4,43 @@ session_start();
 
 // These must be at the top of your script, not inside a function
 use LaswitchTech\phpAUTH\phpAUTH;
-use LaswitchTech\phpDB\Database;
-use LaswitchTech\phpLogger\phpLogger;
 use LaswitchTech\phpConfigurator\phpConfigurator;
 
 // Load Composer's autoloader
 require 'vendor/autoload.php';
 
-// Initialize Database
-$phpLogger = new phpLogger();
-
-// Configure phpLogger
-$phpLogger->config('level',5);
-
-// Initialize Database
-$phpDB = new Database();
-
-// Configure Database
-$phpDB->config("host","localhost")->config("username","demo")->config("password","demo")->config("database","demo2");
+// Construct Hostnames
+$Hostnames = ["localhost","::1","127.0.0.1"];
+if(isset($_SERVER['SERVER_NAME']) && !in_array($_SERVER['SERVER_NAME'],$Hostnames)){
+  $Hostnames[] = $_SERVER['SERVER_NAME'];
+}
+if(isset($_SERVER['HTTP_HOST']) && !in_array($_SERVER['HTTP_HOST'],$Hostnames)){
+  $Hostnames[] = $_SERVER['HTTP_HOST'];
+}
 
 // Initiate phpAUTH
 $phpAUTH = new phpAUTH();
+
+// Configure phpAUTH
+$phpAUTH->config("hostnames",$Hostnames)
+        ->config("basic",false)
+        ->config("bearer",false)
+        ->config("request",true)
+        ->config("cookie",true)
+        ->config("session",true)
+        ->config("2fa",true)
+        ->config("maxAttempts",5)
+        ->config("maxRequests",1000)
+        ->config("lockoutDuration",1800)
+        ->config("windowAttempts",100)
+        ->config("windowRequests",60)
+        ->config("window2FA",30)
+        ->config("host","localhost")
+        ->config("username","demo")
+        ->config("password","demo")
+        ->config("database","demo2")
+        ->config("level",5)
+        ->init();
 
 // Install phpAUTH
 $Installer = $phpAUTH->install();
@@ -36,11 +52,13 @@ $User = $Installer->create("user",["username" => "username@domain.com"]);
 $API = $Installer->create("api",["username" => "api@domain.com"]);
 
 // Initiate phpConfigurator
-$Configurator = new phpConfigurator('auth');
+$AccountConfigurator = new phpConfigurator('account');
 
-// Configure phpConfigurator
-$Configurator->set('auth','basic',false)->set('auth','bearer',false)->set('auth','request',true)->set('auth','cookie',true)->set('auth','session',true);
-$Configurator->set('auth','maxAttempts',5)->set('auth','maxRequests',1000)->set('auth','lockoutDuration',1800)->set('auth','windowAttempts',100)->set('auth','windowRequests',60);
+// Save Account for Testing
+$AccountConfigurator->set('account','url',"https://phpauth.local/api.php")
+                    ->set('account','username',$User->get('username'))
+                    ->set('account','password',$User->getPassword())
+                    ->set('account','token',$API->get('username').":".$API->getToken());
 
 //Render
 ?>

@@ -36,6 +36,9 @@ class Request {
 	// phpCSRF
   private $CSRF = null;
 
+	// Ready
+  private $Ready = false;
+
   /**
    * Create a new Request instance.
    *
@@ -107,7 +110,7 @@ class Request {
         // CSRF Protection Validation
         if($this->CSRF->validate()){
 
-          // Return the username and password as decoded strings
+          // Return the username and password
           return [ "username" => $_REQUEST['username'], "password" => $_REQUEST['password'] ];
         }
       }
@@ -120,6 +123,17 @@ class Request {
       $this->Logger->error('Error: '.$e->getMessage());
       return null;
     }
+  }
+
+  /**
+   * Check if 2FA is ready to be received.
+   *
+   * @return boolean
+   */
+	public function is2FAReady(){
+
+    // Return
+    return $this->Ready;
   }
 
   /**
@@ -170,6 +184,32 @@ class Request {
 
       // Record Authentication Attempt
       $User->recordAttempt();
+
+      // If 2FA is enable verify the code
+      if($this->Configurator->get('auth','2fa')){
+
+        // Check if the header contains the 2FA code
+        if(isset($_REQUEST['2fa']) && !empty($_REQUEST['2fa'])){
+
+          // Validate 2FA Code
+          if(!$User->validateCode($_REQUEST['2fa'])){
+
+            // Return
+            return false;
+          }
+        } else {
+
+          // Send 2FA Code
+          if($User->sendCode()){
+
+            // Set Ready
+            $this->Ready = true;
+          }
+
+          // Return
+          return false;
+        }
+      }
 
       // Validate Password
       if(!$User->validate($credentials['password'])){

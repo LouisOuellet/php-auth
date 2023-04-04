@@ -3,7 +3,7 @@
 // Declaring namespace
 namespace LaswitchTech\phpAUTH;
 
-//Import phpConfigurator class into the global namespace
+// Import phpConfigurator class into the global namespace
 use LaswitchTech\phpConfigurator\phpConfigurator;
 
 // Import phpLogger class into the global namespace
@@ -77,9 +77,6 @@ class phpAUTH {
     //Initiate phpCSRF
     $this->CSRF = new phpCSRF();
 
-    //Initiate phpDB
-    $this->Database = new Database();
-
 		// Initialize
 		$this->init();
   }
@@ -96,6 +93,52 @@ class phpAUTH {
 		try {
 			if(is_string($option)){
 	      switch($option){
+	        case"level":
+	          if(is_int($value)){
+
+							// Save to Configurator
+							$this->Configurator->set('logger',$option, $value);
+	          } else{
+	            throw new Exception("2nd argument must be an integer.");
+	          }
+	          break;
+	        case"maxAttempts":
+	        case"maxRequests":
+	        case"lockoutDuration":
+	        case"windowAttempts":
+	        case"windowRequests":
+	        case"window2FA":
+	          if(is_int($value)){
+
+							// Save to Configurator
+							$this->Configurator->set('auth',$option, $value);
+	          } else{
+	            throw new Exception("2nd argument must be an integer.");
+	          }
+	          break;
+	        case"basic":
+	        case"bearer":
+	        case"request":
+	        case"cookie":
+	        case"session":
+	        case"2fa":
+	          if(is_bool($value)){
+
+							// Save to Configurator
+							$this->Configurator->set('auth',$option, $value);
+	          } else{
+	            throw new Exception("2nd argument must be a boolean.");
+	          }
+	          break;
+	        case"hostnames":
+	          if(is_array($value)){
+
+							// Save to Configurator
+							$this->Configurator->set('auth',$option, $value);
+	          } else{
+	            throw new Exception("2nd argument must be an array.");
+	          }
+	          break;
 	        default:
 	          throw new Exception("unable to configure $option.");
 	          break;
@@ -123,6 +166,9 @@ class phpAUTH {
 
       // Debug Information
       $this->Logger->debug("Initializing");
+
+	    //Initiate phpDB
+	    $this->Database = new Database();
 
 			// Check if Database is Connected
 			if(!$this->Database->isConnected()){

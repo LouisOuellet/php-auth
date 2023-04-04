@@ -67,23 +67,39 @@ $phpCSRF = new phpCSRF();
               <?php } else { ?>
                 <h3 class="mb-4">Login to <strong>phpAUTH</strong></h3>
                 <form method="post">
-                  <div class="form-floating my-3">
-                    <input type="text" name="username" class="form-control form-control-lg" placeholder="username@domain.com" id="username">
-                    <label for="username">Username</label>
-                  </div>
-                  <div class="form-floating my-3">
-                    <input type="password" name="password" class="form-control form-control-lg" placeholder="*******************" id="password">
-                    <label for="password">Password</label>
-                  </div>
-                  <div class="form-check my-3 mb-5 form-switch">
-                    <input class="form-check-input" style="margin-left: -1.4em; margin-right: 1.4em;transform: scale(1.8);" type="checkbox" role="switch" name="remember" id="remember">
-                    <label class="form-check-label" for="remember">Remember me</label>
-                  </div>
-                  <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
-                  <div class="btn-group w-100 border shadow">
-                    <a href="install.php" class="btn btn-block btn-light">Install</a>
-                    <button type="submit" name="login" class="btn btn-block btn-primary">Log In</button>
-                  </div>
+                  <?php if($phpAUTH->Authentication->is2FAReady()){ ?>
+                    <div class="form-floating my-3">
+                      <input type="text" name="2fa" class="form-control form-control-lg" placeholder="Verification Code" id="2fa">
+                      <label for="2fa">Verification Code</label>
+                    </div>
+                    <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
+                    <input type="hidden" name="username" class="d-none" value="<?= $_POST['username'] ?>">
+                    <input type="hidden" name="password" class="d-none" value="<?= $_POST['password'] ?>">
+                    <?php if(isset($_POST['remember'])){ ?>
+                      <input type="hidden" name="remember" class="d-none" value="<?= $_POST['remember'] ?>">
+                    <?php } ?>
+                    <div class="btn-group w-100 border shadow">
+                      <button type="submit" name="login" class="btn btn-block btn-primary">Verify</button>
+                    </div>
+                  <?php } else { ?>
+                    <div class="form-floating my-3">
+                      <input type="text" name="username" class="form-control form-control-lg" placeholder="username@domain.com" id="username">
+                      <label for="username">Username</label>
+                    </div>
+                    <div class="form-floating my-3">
+                      <input type="password" name="password" class="form-control form-control-lg" placeholder="*******************" id="password">
+                      <label for="password">Password</label>
+                    </div>
+                    <div class="form-check my-3 mb-5 form-switch">
+                      <input class="form-check-input" style="margin-left: -1.4em; margin-right: 1.4em;transform: scale(1.8);" type="checkbox" role="switch" name="remember" id="remember">
+                      <label class="form-check-label" for="remember">Remember me</label>
+                    </div>
+                    <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
+                    <div class="btn-group w-100 border shadow">
+                      <a href="install.php" class="btn btn-block btn-light">Install</a>
+                      <button type="submit" name="login" class="btn btn-block btn-primary">Log In</button>
+                    </div>
+                  <?php } ?>
                 </form>
               <?php } ?>
             </div>
