@@ -27,6 +27,9 @@ use LaswitchTech\phpAUTH\Authorization;
 // Import Management class into the global namespace
 use LaswitchTech\phpAUTH\Management;
 
+// Import Compliance class into the global namespace
+use LaswitchTech\phpAUTH\Compliance;
+
 // Import Exception class into the global namespace
 use \Exception;
 
@@ -57,6 +60,9 @@ class phpAUTH {
 	// Management
   public $Management = null;
 
+	// Compliance
+  public $Compliance = null;
+
   /**
    * Create a new phpAUTH instance.
    *
@@ -67,6 +73,9 @@ class phpAUTH {
 
     // Initialize Configurator
     $this->Configurator = new phpConfigurator('auth');
+
+    // Initialize Compliance
+    $this->Compliance = new Compliance();
 
     // Retrieve Log Level
     $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;

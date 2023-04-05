@@ -12,10 +12,9 @@
   - Authorization Support
   - Cross-site Request Forgery Protection ([phpCSRF](https://github.com/LouisOuellet/php-csrf))
   - 2-Factor Authentication Support ([phpSMTP](https://github.com/LouisOuellet/php-smtp),[phpSMS](https://github.com/LouisOuellet/php-sms))
-  <!-- - GDPR Cookie Compliance -->
-  <!-- - CCPA Cookie Compliance -->
-  <!-- - JavaScript class available for GDPR & CCPA Cookie Compliance -->
-  <!-- - Host Validation -->
+  - Hostname Validation
+  - GDPR Cookie Compliance
+  - CCPA Cookie Compliance
 
 ## Why you might need it
 If you are looking for an easy way to setup authentication and authorization in your project. This PHP Class is for you.
@@ -105,6 +104,13 @@ $phpAUTH->Authorization->hasPermission($Name, $Level)
 ```php
 // Check if a User has a specific permission
 $phpAUTH->Authorization->hasPermission($Name, $Level)
+```
+
+### Check if 2FA Request is ready
+This method is useful to determine when to show the 2FA form.
+```php
+// Check if 2FA Request is ready
+$phpAUTH->Authentication->is2FAReady()
 ```
 
 ### Using Managers

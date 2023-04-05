@@ -948,7 +948,6 @@ class Organization {
     // Delete Relationships
     foreach($this->Relationships as $Table => $Records){
       foreach($Records as $Id => $Record){
-        $this->Relationship->delete($this->Table, $this->get('id'), $Table, $Record['id']);
         if($Table === 'users'){
           $Class = $this->Classes['users'];
           $Object = new $Class($Record[$this->Identifiers[$Table]], $this->Identifiers[$Table], $this->Logger, $this->Database);
@@ -957,8 +956,8 @@ class Organization {
       }
     }
 
-    // Delete this Object
-    $result = $this->Database->delete("DELETE FROM " . $this->Table . " WHERE `id` = ?", [$this->get('id')]);
+    // Set as Deleted
+    $this->save(['isDeleted' => 1]);
 
     // Nullify Object
     $this->Object = null;

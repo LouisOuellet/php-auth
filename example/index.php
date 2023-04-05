@@ -25,6 +25,8 @@ $phpCSRF = new phpCSRF();
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
     <title>Index</title>
+    <script src="/vendor/components/jquery/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   </head>
   <body class="h-100 w-100">
     <div class="row h-100 w-100 m-0 p-0">
@@ -66,6 +68,32 @@ $phpCSRF = new phpCSRF();
                 </div>
               <?php } else { ?>
                 <h3 class="mb-4">Login to <strong>phpAUTH</strong></h3>
+                <?php if($phpAUTH->Authentication->status() > 0 && $phpAUTH->Authentication->status() < 6){ ?>
+                  <div class="card text-bg-danger mb-4">
+                    <div class="card-body">
+                      <?php
+                        switch($phpAUTH->Authentication->status()){
+                  				case 1:
+                  					echo "<p class='m-0'>Your account has been deleted!</p>";
+                  					break;
+                  				case 2:
+                  					echo "<p class='m-0'>Your account has been banned!</p>";
+                  					break;
+                  				case 3:
+                  					echo "<p class='m-0'>Your account has been locked out!</p>";
+                            echo "<p class='m-0'>You may try again in 1800 seconds.</p>";
+                  					break;
+                  				case 4:
+                  					echo "<p class='m-0'>You attempted to login too many times.</p>";
+                  					break;
+                  				case 5:
+                  					echo "<p class='m-0'>Your account is not active!</p>";
+                  					break;
+                  			}
+                      ?>
+                    </div>
+                  </div>
+                <?php } ?>
                 <form method="post">
                   <?php if($phpAUTH->Authentication->is2FAReady()){ ?>
                     <div class="form-floating my-3">
@@ -107,8 +135,6 @@ $phpCSRF = new phpCSRF();
         </div>
       </div>
     </div>
-    <script src="/vendor/components/jquery/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/dist/js/cookie.js"></script>
+    <?= $phpAUTH->Compliance->form() ?>
   </body>
 </html>

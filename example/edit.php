@@ -94,6 +94,8 @@ $Header = ucfirst($Page);
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
     <title><?= $Header ?> Management</title>
+    <script src="/vendor/components/jquery/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   </head>
   <body class="h-100 w-100">
     <div class="row h-100 w-100 m-0 p-0">
@@ -174,8 +176,6 @@ $Header = ucfirst($Page);
         </div>
       </div>
     </div>
-    <script src="/vendor/components/jquery/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/dist/js/cookie.js"></script>
+    <?= $phpAUTH->Compliance->form() ?>
   </body>
 </html>

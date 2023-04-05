@@ -215,11 +215,46 @@ class User {
   }
 
   /**
+   * Get the User's Status.
+   *
+   * @return boolean
+   */
+	public function status(){
+
+    // If User is isDeleted
+    if($this->get('isDeleted')){
+      return 1;
+    }
+
+    // If User is Banned
+    if($this->get('isBanned')){
+      return 2;
+    }
+
+    // If User is Locked Out
+    if($this->isLockedOut()){
+      return 3;
+    }
+
+    // If User is Rate Limited
+    if($this->isRateLimited()){
+      return 4;
+    }
+
+    // If User is Inactive
+    if(!$this->get('isActive')){
+      return 5;
+    }
+
+    // User has no restrictions
+    return 6;
+  }
+
+  /**
    * Check if a variable contains JSON.
    *
    * @param  string  $String
    * @return boolean
-   * @throws Exception
    */
 	private function isJson($String){
     if($String !== null && is_string($String)){
@@ -1439,25 +1474,85 @@ class User {
   }
 
   /**
+   * Deactivate this user.
+   *
+   * @return object
+   */
+  public function deactivate(){
+
+    // Retrieve Record
+    $this->retrieve();
+
+    // Set as Deleted
+    $this->save(['isActive' => 0]);
+
+    // Return Result
+    return $this;
+  }
+
+  /**
+   * Activate this user.
+   *
+   * @return object
+   */
+  public function activate(){
+
+    // Retrieve Record
+    $this->retrieve();
+
+    // Set as Deleted
+    $this->save(['isActive' => 1]);
+
+    // Return Result
+    return $this;
+  }
+
+  /**
+   * Unban this user.
+   *
+   * @return object
+   */
+  public function unban(){
+
+    // Retrieve Record
+    $this->retrieve();
+
+    // Set as Deleted
+    $this->save(['isBanned' => 0]);
+
+    // Return Result
+    return $this;
+  }
+
+  /**
+   * Ban this user.
+   *
+   * @return object
+   */
+  public function ban(){
+
+    // Retrieve Record
+    $this->retrieve();
+
+    // Set as Deleted
+    $this->save(['isBanned' => 1]);
+
+    // Return Result
+    return $this;
+  }
+
+  /**
    * Delete this user.
    *
    * @return object|void
-   * @throws Exception
    */
   public function delete(){
 
     // Retrieve Record
     $this->retrieve();
 
-    // Delete Relationships
-    foreach($this->Relationships as $Table => $Records){
-      foreach($Records as $Id => $Record){
-        $this->Relationship->delete($this->Table, $this->get('id'), $Table, $Record['id']);
-      }
-    }
-
-    // Delete this Object
-    $result = $this->Database->delete("DELETE FROM " . $this->Table . " WHERE `id` = ?", [$this->get('id')]);
+    // Set as Deleted
+    $this->save(['isDeleted' => 1]);
 
     // Nullify Object
     $this->Object = null;

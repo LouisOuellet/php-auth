@@ -328,40 +328,4 @@ class Management {
       $this->Logger->error('Error: '.$e->getMessage());
     }
 	}
-
-  /**
-   * Link Method for Manager.
-   *
-   * @param  string|int  $Id
-   * @param  array  $Data
-   * @return void
-   * @throws Exception
-   */
-	public function link($Id, $Data){
-		try {
-
-			// // Retrieve Class name
-			// $Class = $this->Namespace . $this->Name;
-			//
-			// // Check if an Id was provided
-			// if($Id){
-			//
-			// 	// Create Object
-			// 	$Object = new $Class($Id, $this->Identifier, $this->Logger, $this->Database);
-			//
-			// 	// Retrieve Record
-			// 	$Object->retrieve();
-			//
-			// 	// Update Record
-			// 	$Object->save($Data);
-			//
-			// 	// Return Result
-			// 	return $Object;
-			// }
-		} catch (Exception $e) {
-
-			// If an exception is caught, log an error message
-      $this->Logger->error('Error: '.$e->getMessage());
-    }
-	}
 }

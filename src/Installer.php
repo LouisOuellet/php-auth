@@ -139,6 +139,10 @@ class Installer {
 					'type' => 'INT(1)',
 					'extra' => ['NOT NULL','DEFAULT "0"']
 				],
+				'isDeleted' => [
+					'type' => 'INT(1)',
+					'extra' => ['NOT NULL','DEFAULT "0"']
+				],
 				'isActive' => [
 					'type' => 'INT(1)',
 					'extra' => ['NOT NULL','DEFAULT "0"']
@@ -266,6 +270,14 @@ class Installer {
 					'extra' => ['NULL']
 				],
 				'isActive' => [
+					'type' => 'INT(1)',
+					'extra' => ['NOT NULL','DEFAULT "0"']
+				],
+				'isBanned' => [
+					'type' => 'INT(1)',
+					'extra' => ['NOT NULL','DEFAULT "0"']
+				],
+				'isDeleted' => [
 					'type' => 'INT(1)',
 					'extra' => ['NOT NULL','DEFAULT "0"']
 				],

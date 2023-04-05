@@ -32,6 +32,12 @@ class Cookie {
 
   // Class Specific
   private $Options;
+  private $Categories = [
+    "Essentials",
+    "Performance",
+    "Quality",
+    "Personalisations",
+  ];
 
   /**
    * Create a new Cookie instance.
@@ -69,6 +75,8 @@ class Cookie {
       'domain' => null,
       'samesite' => 'Strict',
       'expires' => time() + 60*60*24*30,
+      'category' => 'Essentials',
+      'force' => false,
     ];
 
     // Initialize Library
@@ -210,12 +218,32 @@ class Cookie {
       $defaults['domain'] = strval($defaults['domain']);
       $defaults['secure'] = boolval($defaults['secure']);
       $defaults['httponly'] = boolval($defaults['httponly']);
+      $defaults['category'] = strval($defaults['category']);
+      $defaults['force'] = boolval($defaults['force']);
 
       // If no value was passed in, set the data to an empty string.
       if($data == null){ $data = ''; }
 
+      // if category exist
+      if(!in_array($defaults['category'],$this->Categories)){
+        throw new Exception("This category of cookie is not supported");
+      }
+
+      // Debug Information
+      $this->Logger->debug(!$defaults['force']);
+      $this->Logger->debug(!isset($_COOKIE,$_COOKIE['cookiesAccept'.$defaults['category']]));
+
+      // if category exist
+      if(!$defaults['force'] && isset($_COOKIE,$_COOKIE['cookiesAccept'.$defaults['category']])){
+        return null;
+      }
+
       // If the value passed in is an array, convert it to a JSON string.
       if(is_array($data)){ $data = json_encode($data,JSON_UNESCAPED_SLASHES); }
+
+      // Unset unsupported options
+      unset($defaults['force']);
+      unset($defaults['category']);
 
       // Set the cookie using the setcookie function.
       setcookie($name, $data, $defaults);

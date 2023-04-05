@@ -178,6 +178,78 @@ class Session {
   }
 
   /**
+   * Get User Consent.
+   *
+   * @return string JSON
+   * @throws Exception
+   */
+  private function getUserConsent(){
+    try{
+
+      // Retrieve User Consent
+      $userConsent = [];
+      // Essentials
+      if(isset($_COOKIE,$_COOKIE['cookiesAcceptEssentials'])){
+
+        // Set Cookie `cookiesAcceptEssentials`
+        $userConsent[] = 'cookiesAcceptEssentials';
+      }
+      // Performance
+      if(isset($_COOKIE,$_COOKIE['cookiesAcceptPerformance'])){
+
+        // Set Cookie `cookiesAcceptPerformance`
+        $userConsent[] = 'cookiesAcceptPerformance';
+      }
+      // Quality
+      if(isset($_COOKIE,$_COOKIE['cookiesAcceptQuality'])){
+
+        // Set Cookie `cookiesAcceptQuality`
+        $userConsent[] = 'cookiesAcceptQuality';
+      }
+      // Personalisations
+      if(isset($_COOKIE,$_COOKIE['cookiesAcceptPersonalisations'])){
+
+        // Set Cookie `cookiesAcceptPersonalisations`
+        $userConsent[] = 'cookiesAcceptPersonalisations';
+      }
+
+      // Convert to JSON
+      $userConsent = json_encode($userConsent, JSON_UNESCAPED_SLASHES);
+
+      // Return
+      return $userConsent;
+    } catch (Exception $e) {
+
+			// If an exception is caught, log an error message
+      $this->Logger->error('Error: '.$e->getMessage());
+    }
+  }
+
+  /**
+   * Get User Agent.
+   *
+   * @return string JSON
+   * @throws Exception
+   */
+  private function getUserAgent(){
+    try{
+
+      // Retrieve User Agent
+      $userAgent = 'Unknown';
+      if(isset($_SERVER['HTTP_USER_AGENT'])){
+        $userAgent = json_encode($_SERVER['HTTP_USER_AGENT']);
+      }
+
+      // Return
+      return $userAgent;
+    } catch (Exception $e) {
+
+			// If an exception is caught, log an error message
+      $this->Logger->error('Error: '.$e->getMessage());
+    }
+  }
+
+  /**
    * Get Client Browser.
    *
    * This function attempts to determine the user's web browser based on the 'HTTP_USER_AGENT'
@@ -293,22 +365,16 @@ class Session {
       // Find an active session
       $Sessions = $this->Database->select("SELECT * FROM sessions WHERE username = ? AND sessionId = ?", [$User->get('username'),session_id()]);
 
-      // Retrieve User Agent
-      $userAgent = 'Unknown';
-      if(isset($_SERVER['HTTP_USER_AGENT'])){
-        $userAgent = $_SERVER['HTTP_USER_AGENT'];
-      }
-
       // Check if an active session was found
       if(count($Sessions) > 0){
         $Session = $Sessions[0];
 
         // Update the session
-        $this->Database->update("UPDATE sessions SET userAgent = ?, userBrowser = ?, userIP = ? WHERE sessionId = ?", [$userAgent,$this->getClientBrowser(),$this->getClientIp(),session_id()]);
+        $this->Database->update("UPDATE sessions SET userAgent = ?, userBrowser = ?, userIP = ?, userConsent = ? WHERE sessionId = ?", [$this->getUserAgent(),$this->getClientBrowser(),$this->getClientIp(),$this->getUserConsent(),session_id()]);
       } else {
 
         // Create the session
-        $this->Database->insert("INSERT INTO sessions (sessionId,username,userAgent,userBrowser,userIP) VALUES (?,?,?,?,?)", [session_id(),$User->get('username'),$userAgent,$this->getClientBrowser(),$this->getClientIp()]);
+        $this->Database->insert("INSERT INTO sessions (sessionId,username,userAgent,userBrowser,userIP,userConsent) VALUES (?,?,?,?,?,?)", [session_id(),$User->get('username'),$this->getUserAgent(),$this->getClientBrowser(),$this->getClientIp(),$this->getUserConsent()]);
       }
 
       // Update the session id

@@ -65,6 +65,7 @@ class Authentication {
 
 	// User
   public $User = null;
+  private $userStatus = 0;
 
 	// Method
   private $Method = null;
@@ -235,6 +236,28 @@ class Authentication {
 				throw new Exception("No user found");
 			}
 
+			// Save Status
+			$this->userStatus = $User->status();
+
+			// Check User Status
+			switch($this->userStatus){
+				case 1:
+					throw new Exception("User is deleted");
+					break;
+				case 2:
+					throw new Exception("User is banned");
+					break;
+				case 3:
+					throw new Exception("User is locked out");
+					break;
+				case 4:
+					throw new Exception("User has reached his limit");
+					break;
+				case 5:
+					throw new Exception("User is inactive");
+					break;
+			}
+
 			// Reset Attempts
 			$User->resetAttempts();
 
@@ -285,6 +308,15 @@ class Authentication {
       $this->Logger->warning('Failed: '.$e->getMessage());
 			return false;
     }
+	}
+
+  /**
+   * Retrieve Authentication Status.
+   *
+   * @return int
+   */
+	public function status(){
+		return $this->userStatus;
 	}
 
   /**
