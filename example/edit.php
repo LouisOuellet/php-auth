@@ -214,7 +214,6 @@ $Header = ucfirst($Page);
                                   <option value="ssl" <?php if(array_key_exists('encryption',$Server) && $Server['encryption'] === "ssl"){ echo "selected"; } ?>>SSL</option>
                                   <option value="tls" <?php if(array_key_exists('encryption',$Server) && $Server['encryption'] === "tls"){ echo "selected"; } ?>>TLS</option>
                                 </select>
-                                <input type="text" name="serverEncryption" value="<?php if(array_key_exists('host',$Server)){ echo "selected"; } ?>" class="form-control" placeholder="Encryption" aria-label="Encryption" aria-describedby="labelEncryption">
                               </div>
                             </div>
                           </div>
