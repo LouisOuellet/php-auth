@@ -96,8 +96,8 @@ $phpAUTH->Authentication->isConnected()
 
 ### Check if we can access through a specific hostname
 ```php
-// Check if a User has a specific permission
-$phpAUTH->Authorization->hasPermission($Name, $Level)
+// Check if we can access through a specific hostname
+$phpAUTH->Authorization->isAuthorized()
 ```
 
 ### Check if a User has a specific permission
