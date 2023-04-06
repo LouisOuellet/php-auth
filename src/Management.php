@@ -228,11 +228,29 @@ class Management {
 				// Return Result
 				return $Object;
 			} else {
-				// Build SQL Statement
-				$Statement = "SELECT {$this->Identifier} FROM {$this->Table} {$Limit}";
 
-				// Execute Statement
-				$Results = $this->Database->select($Statement);
+				// Retrieve table columns
+				$Columns = $this->Database->getColumns($this->Table);
+
+				// Build SQL Statement
+				if(isset($Columns['isDeleted'])){
+
+					// Build SQL Statement
+					$Statement = "SELECT {$this->Identifier} FROM {$this->Table} WHERE `isDeleted` = ? {$Limit}";
+
+					// Build Values Array
+					$Values = [0];
+
+					// Execute Statement
+					$Results = $this->Database->select($Statement,$Values);
+				} else {
+
+					// Build SQL Statement
+					$Statement = "SELECT {$this->Identifier} FROM {$this->Table} {$Limit}";
+
+					// Execute Statement
+					$Results = $this->Database->select($Statement);
+				}
 
 				// Create Objects
 				foreach($Results as $Result){

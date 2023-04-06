@@ -522,7 +522,7 @@ class Organization {
       // Link Users
       if(count($Users) > 0){
         foreach($Users as $User){
-          $this->add('users',$User['id']);
+          $this->link('users',$User['id']);
         }
       }
 

@@ -132,7 +132,7 @@ class Installer {
 					'extra' => ['NOT NULL','DEFAULT "SQL"']
 				],
 				'server' => [
-					'type' => 'VARCHAR(255)',
+					'type' => 'JSON',
 					'extra' => ['NULL']
 				],
 				'isSubsidiary' => [
@@ -238,7 +238,7 @@ class Installer {
 					'extra' => ['NOT NULL','DEFAULT "SQL"']
 				],
 				'server' => [
-					'type' => 'VARCHAR(255)',
+					'type' => 'JSON',
 					'extra' => ['NULL']
 				],
 				'domain' => [

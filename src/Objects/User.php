@@ -836,7 +836,7 @@ class User {
       $this->Logger->debug([$User['domain'],1]);
 
       // Look for Organizations
-      $Organizations = $this->Database->select("SELECT * FROM organizations WHERE `domain` = ? AND `isDefault` = ?", [$User['domain'],1]);
+      $Organizations = $this->Database->select("SELECT * FROM organizations WHERE `domain` = ?", [$User['domain']]);
 
       // Debug Information
       $this->Logger->debug($Organizations);

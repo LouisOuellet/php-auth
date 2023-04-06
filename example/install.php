@@ -42,14 +42,23 @@ $phpAUTH->config("hostnames",$Hostnames)
         ->config("level",5)
         ->init();
 
+// Initiate phpConfigurator
+$AccountsConfigurator = new phpConfigurator('accounts');
+
 // Install phpAUTH
 $Installer = $phpAUTH->install();
 
 // Create a User
-$User = $Installer->create("user",["username" => "username@domain.com"]);
+$User = $Installer->create("user",["username" => $AccountsConfigurator->get('accounts','username')]);
+
+// Activate User
+$User->activate();
 
 // Create an API
-$API = $Installer->create("api",["username" => "api@domain.com"]);
+$API = $Installer->create("api",["username" => $AccountsConfigurator->get('accounts','api')]);
+
+// Activate API
+$API->activate();
 
 // Initiate phpConfigurator
 $AccountConfigurator = new phpConfigurator('account');
