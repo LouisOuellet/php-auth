@@ -80,20 +80,26 @@ class Authorization {
 		}
 
 		// Log request
-		$this->Logger->info("User [" . $this->User->get('username') . "] is requesting access through {$Hostname}");
+		if($this->User){
+			$this->Logger->info("User [" . $this->User->get('username') . "] is requesting access through {$Hostname}");
+		}
 
 		// Validate Hostname
 		if(in_array($Hostname,$this->Hostnames)){
 
 			// Log request
-			$this->Logger->success("User [" . $this->User->get('username') . "] was granted access through {$Hostname}");
+			if($this->User){
+				$this->Logger->success("User [" . $this->User->get('username') . "] was granted access through {$Hostname}");
+			}
 
 			// Return
 			return true;
 		} else {
 
 			// Log request
-			$this->Logger->error("User [" . $this->User->get('username') . "] was denied access through {$Hostname}");
+			if($this->User){
+				$this->Logger->error("User [" . $this->User->get('username') . "] was denied access through {$Hostname}");
+			}
 
 			// Return
 			return false;

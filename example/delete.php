@@ -99,48 +99,60 @@ $Header = ucfirst($Page);
   </head>
   <body class="h-100 w-100">
     <div class="row h-100 w-100 m-0 p-0">
-      <div class="col h-100 m-0 p-0">
-        <div class="container h-100">
-          <div class="d-flex h-100 row align-items-center justify-content-center">
-            <div class="col">
-              <h3 class="mt-5 mb-3">Delete this <strong><?= $Header ?></strong> <small>(<?= $Object->get($Identifiers[$Page]); ?>)</small></h3>
-              <?php if($phpAUTH->Authentication->isConnected()){ ?>
-                <div class="btn-group w-100 border shadow mb-4">
-                  <a href="manage.php?type=<?= $Page ?>" class="btn btn-block btn-light">Return</a>
-                  <a href="create.php?type=<?= $Page ?>" class="btn btn-block btn-success">Create</a>
-                  <a href="detail.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-primary">Details</a>
-                  <a href="relationship.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-light">Relationships</a>
-                  <?php if($Page === "role"){ ?>
-                    <a href="permission.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-info">Permissions</a>
-                  <?php } ?>
-                  <a href="edit.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-warning">Edit</a>
-                  <a href="delete.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-danger">Delete</a>
-                </div>
-                <p class="mb-5">
-                  <div class="overflow-auto">
-                    <form method="post">
-                      <div class="row mb-2 mx-0">
-                        <div class="col-12 text-center mb-4">
-                          Are you sure you want to delete this <?= $Header ?> (<strong><?= $Id ?></strong>)?
-                        </div>
-                      </div>
-                      <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
-                      <div class="btn-group w-100 border shadow mb-4">
-                        <button type="submit" class="btn btn-block btn-danger">Yes</button>
-                      </div>
-                    </form>
+      <?php if($phpAUTH->Authorization->isAuthorized()){ ?>
+        <div class="col h-100 m-0 p-0">
+          <div class="container h-100">
+            <div class="d-flex h-100 row align-items-center justify-content-center">
+              <div class="col">
+                <h3 class="mt-5 mb-3">Delete this <strong><?= $Header ?></strong> <small>(<?= $Object->get($Identifiers[$Page]); ?>)</small></h3>
+                <?php if($phpAUTH->Authentication->isConnected()){ ?>
+                  <div class="btn-group w-100 border shadow mb-4">
+                    <a href="manage.php?type=<?= $Page ?>" class="btn btn-block btn-light">Return</a>
+                    <a href="create.php?type=<?= $Page ?>" class="btn btn-block btn-success">Create</a>
+                    <a href="detail.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-primary">Details</a>
+                    <a href="relationship.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-light">Relationships</a>
+                    <?php if($Page === "role"){ ?>
+                      <a href="permission.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-info">Permissions</a>
+                    <?php } ?>
+                    <a href="edit.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-warning">Edit</a>
+                    <a href="delete.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-danger">Delete</a>
                   </div>
-                </p>
-              <?php } else { ?>
-                <div class="btn-group w-100 border shadow">
-                  <a href="install.php" class="btn btn-block btn-light">Install</a>
-                  <a href="/" class="btn btn-block btn-primary">Log In</a>
-                </div>
-              <?php } ?>
+                  <p class="mb-5">
+                    <div class="overflow-auto">
+                      <form method="post">
+                        <div class="row mb-2 mx-0">
+                          <div class="col-12 text-center mb-4">
+                            Are you sure you want to delete this <?= $Header ?> (<strong><?= $Id ?></strong>)?
+                          </div>
+                        </div>
+                        <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
+                        <div class="btn-group w-100 border shadow mb-4">
+                          <button type="submit" class="btn btn-block btn-danger">Yes</button>
+                        </div>
+                      </form>
+                    </div>
+                  </p>
+                <?php } else { ?>
+                  <div class="btn-group w-100 border shadow">
+                    <a href="install.php" class="btn btn-block btn-light">Install</a>
+                    <a href="/" class="btn btn-block btn-primary">Log In</a>
+                  </div>
+                <?php } ?>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      <?php } else { ?>
+        <div class="col h-100 m-0 p-0">
+          <div class="container h-100">
+            <div class="d-flex h-100 row align-items-center justify-content-center">
+              <div class="col">
+                <h3 class="mt-5 mb-3">Unauthorized Host: <strong><?= $_SERVER['SERVER_NAME'] ?></strong></h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      <?php } ?>
     </div>
     <?= $phpAUTH->Compliance->form() ?>
   </body>

@@ -385,10 +385,10 @@ class Organization {
       foreach($Data as $Key => $Value){
 
         // Debut Information
-        $this->Logger->debug("Does {$Key} exist? " . !isset($this->Columns[$Key]));
+        $this->Logger->debug("Does {$Key} exist? " . !array_key_exists($Key,$this->Columns));
 
         // Unset Value if it does not exist
-        if(!isset($this->Columns[$Key])){
+        if(!array_key_exists($Key,$this->Columns)){
 
           // Debut Information
           $this->Logger->debug("Unset: {$Key}");
@@ -439,10 +439,10 @@ class Organization {
         }
 
         // Debut Information
-        $this->Logger->debug("Is {$Key} empty? " . (empty($Value) || $Value === '' || $Value === null));
+        $this->Logger->debug("Is {$Key} empty? " . ((empty($Value) || $Value === '' || $Value === null) && !is_int($Value)));
 
         // Unset Value if it's empty
-        if(empty($Value) || $Value === '' || $Value === null){
+        if((empty($Value) || $Value === '' || $Value === null) && !is_int($Value)){
 
           // Debut Information
           $this->Logger->debug("Unset: {$Key}");
@@ -594,10 +594,10 @@ class Organization {
       foreach($Array as $Key => $Value){
 
         // Debut Information
-        $this->Logger->debug("Does {$Key} exist? " . !isset($this->Columns[$Key]));
+        $this->Logger->debug("Does {$Key} exist? " . !array_key_exists($Key,$this->Columns));
 
         // Unset Value if it does not exist
-        if(!isset($this->Columns[$Key])){
+        if(!array_key_exists($Key,$this->Columns)){
 
           // Debut Information
           $this->Logger->debug("Unset: {$Key}");
@@ -654,10 +654,10 @@ class Organization {
         }
 
         // Debut Information
-        $this->Logger->debug("Is {$Key} empty? " . (empty($Value) || $Value === '' || $Value === null));
+        $this->Logger->debug("Is {$Key} empty? " . ((empty($Value) || $Value === '' || $Value === null) && !is_int($Value)));
 
         // Unset Value if it's empty
-        if(empty($Value) || $Value == '' || $Value == null){
+        if((empty($Value) || $Value === '' || $Value === null) && !is_int($Value)){
 
           $Value = NULL;
 
@@ -931,6 +931,40 @@ class Organization {
     }
 
     // Return
+    return $this;
+  }
+
+  /**
+   * Deactivate this user.
+   *
+   * @return object
+   */
+  public function deactivate(){
+
+    // Retrieve Record
+    $this->retrieve();
+
+    // Set as Deleted
+    $this->save(['isActive' => 0]);
+
+    // Return Result
+    return $this;
+  }
+
+  /**
+   * Activate this user.
+   *
+   * @return object
+   */
+  public function activate(){
+
+    // Retrieve Record
+    $this->retrieve();
+
+    // Set as Deleted
+    $this->save(['isActive' => 1]);
+
+    // Return Result
     return $this;
   }
 

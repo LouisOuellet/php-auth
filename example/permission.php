@@ -152,101 +152,113 @@ if(isset($_POST) && !empty($_POST)){
   </head>
   <body class="h-100 w-100">
     <div class="row h-100 w-100 m-0 p-0">
-      <div class="col h-100 m-0 p-0">
-        <div class="container h-100">
-          <div class="d-flex h-100 row align-items-center justify-content-center">
-            <div class="col">
-              <h3 class="mt-5 mb-3">Permissions of <strong><?= $Header ?></strong> <small>(<?= $Object->get($Identifiers[$Page]); ?>)</small></h3>
-              <?php if($phpAUTH->Authentication->isConnected()){ ?>
-                <div class="btn-group w-100 border shadow mb-4">
-                  <a href="manage.php?type=<?= $Page ?>" class="btn btn-block btn-light">Return</a>
-                  <a href="create.php?type=<?= $Page ?>" class="btn btn-block btn-success">Create</a>
-                  <a href="detail.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-primary">Details</a>
-                  <a href="relationship.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-light">Relationships</a>
-                  <?php if($Page === "role"){ ?>
-                    <a href="permission.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-info">Permissions</a>
-                  <?php } ?>
-                  <a href="edit.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-warning">Edit</a>
-                  <a href="delete.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-danger">Delete</a>
-                </div>
-                <p class="mb-3">
-                  <div class="overflow-auto">
-                    <form method="post">
-                      <div class="row mb-2 mx-0">
-                        <div class="col-12">
-                          <div class="input-group">
-                            <span class="input-group-text text-bg-primary" id="labelPermission">Permission</span>
-                            <select class="form-select" id="selectType" name="name" aria-label="Permission" aria-describedby="labelPermission" required>
-                              <option selected>Select a permission</option>
-                              <?php foreach($Permissions as $Permission){ ?>
-                                <option value="<?= $Permission->get('name') ?>"><?= $Permission->get('name') ?></option>
-                              <?php } ?>
-                            </select>
+      <?php if($phpAUTH->Authorization->isAuthorized()){ ?>
+        <div class="col h-100 m-0 p-0">
+          <div class="container h-100">
+            <div class="d-flex h-100 row align-items-center justify-content-center">
+              <div class="col">
+                <h3 class="mt-5 mb-3">Permissions of <strong><?= $Header ?></strong> <small>(<?= $Object->get($Identifiers[$Page]); ?>)</small></h3>
+                <?php if($phpAUTH->Authentication->isConnected()){ ?>
+                  <div class="btn-group w-100 border shadow mb-4">
+                    <a href="manage.php?type=<?= $Page ?>" class="btn btn-block btn-light">Return</a>
+                    <a href="create.php?type=<?= $Page ?>" class="btn btn-block btn-success">Create</a>
+                    <a href="detail.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-primary">Details</a>
+                    <a href="relationship.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-light">Relationships</a>
+                    <?php if($Page === "role"){ ?>
+                      <a href="permission.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-info">Permissions</a>
+                    <?php } ?>
+                    <a href="edit.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-warning">Edit</a>
+                    <a href="delete.php?type=<?= $Page ?>&id=<?= $Id ?>" class="btn btn-block btn-danger">Delete</a>
+                  </div>
+                  <p class="mb-3">
+                    <div class="overflow-auto">
+                      <form method="post">
+                        <div class="row mb-2 mx-0">
+                          <div class="col-12">
+                            <div class="input-group">
+                              <span class="input-group-text text-bg-primary" id="labelPermission">Permission</span>
+                              <select class="form-select" id="selectType" name="name" aria-label="Permission" aria-describedby="labelPermission" required>
+                                <option selected>Select a permission</option>
+                                <?php foreach($Permissions as $Permission){ ?>
+                                  <option value="<?= $Permission->get('name') ?>"><?= $Permission->get('name') ?></option>
+                                <?php } ?>
+                              </select>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
-                      <div class="btn-group w-100 border shadow mt-4 mb-4">
-                        <button type="submit" name="set" class="btn btn-block btn-success">Set</button>
-                      </div>
-                    </form>
-                  </div>
-                </p>
-                <p class="mb-3">
-                  <div class="overflow-auto my-2">
-                    <table class="table border table-striped table-hover">
-                      <thead>
-                        <tr class="text-bg-light">
-                          <th class="border">Name</th>
-                          <th class="border">Level</th>
-                          <th class="border">Effective</th>
-                          <th class="border position-sticky end-0 text-bg-light">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php foreach($Object->get('permissions') as $Name => $Level){ ?>
-                          <tr>
-                            <td class="border"><?= $Name ?></td>
-                            <td class="border"><?= $Level ?></td>
-                            <td class="border">
-                              <?php foreach($Levels as $LevelValue => $LevelName){ ?>
-                                <?php if($LevelValue > 0 && $LevelValue <= $Level){ ?>
-                                  <span class="badge rounded-pill mx-1 text-bg-<?= $Colors[$LevelName] ?>"><?= $LevelName ?></span>
-                                <?php } else { ?>
-                                  <?php if($LevelValue <= 0){ ?>
+                        <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
+                        <div class="btn-group w-100 border shadow mt-4 mb-4">
+                          <button type="submit" name="set" class="btn btn-block btn-success">Set</button>
+                        </div>
+                      </form>
+                    </div>
+                  </p>
+                  <p class="mb-3">
+                    <div class="overflow-auto my-2">
+                      <table class="table border table-striped table-hover">
+                        <thead>
+                          <tr class="text-bg-light">
+                            <th class="border">Name</th>
+                            <th class="border">Level</th>
+                            <th class="border">Effective</th>
+                            <th class="border position-sticky end-0 text-bg-light">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php foreach($Object->get('permissions') as $Name => $Level){ ?>
+                            <tr>
+                              <td class="border"><?= $Name ?></td>
+                              <td class="border"><?= $Level ?></td>
+                              <td class="border">
+                                <?php foreach($Levels as $LevelValue => $LevelName){ ?>
+                                  <?php if($LevelValue > 0 && $LevelValue <= $Level){ ?>
                                     <span class="badge rounded-pill mx-1 text-bg-<?= $Colors[$LevelName] ?>"><?= $LevelName ?></span>
+                                  <?php } else { ?>
+                                    <?php if($LevelValue <= 0){ ?>
+                                      <span class="badge rounded-pill mx-1 text-bg-<?= $Colors[$LevelName] ?>"><?= $LevelName ?></span>
+                                    <?php } ?>
                                   <?php } ?>
                                 <?php } ?>
-                              <?php } ?>
-                            </td>
-                            <td class="border position-sticky end-0 text-bg-light">
-                              <form method="post">
-                                <input type="hidden" class="d-none" name="name" value="<?= $Name ?>">
-                                <input type="hidden" class="d-none" name="level" value="<?= $Level ?>">
-                                <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
-                                <div class="btn-group border shadow">
-                                  <button type="submit" name="increase" value="increase" class="btn btn-sm btn-success">Increase</button>
-                                  <button type="submit" name="decrease" value="decrease" class="btn btn-sm btn-danger">Decrease</button>
-                                  <button type="submit" name="unset" value="unset" class="btn btn-sm btn-light">Unset</button>
-                                </div>
-                              </form>
-                            </td>
-                          </tr>
-                        <?php } ?>
-                      </tbody>
-                    </table>
+                              </td>
+                              <td class="border position-sticky end-0 text-bg-light">
+                                <form method="post">
+                                  <input type="hidden" class="d-none" name="name" value="<?= $Name ?>">
+                                  <input type="hidden" class="d-none" name="level" value="<?= $Level ?>">
+                                  <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
+                                  <div class="btn-group border shadow">
+                                    <button type="submit" name="increase" value="increase" class="btn btn-sm btn-success">Increase</button>
+                                    <button type="submit" name="decrease" value="decrease" class="btn btn-sm btn-danger">Decrease</button>
+                                    <button type="submit" name="unset" value="unset" class="btn btn-sm btn-light">Unset</button>
+                                  </div>
+                                </form>
+                              </td>
+                            </tr>
+                          <?php } ?>
+                        </tbody>
+                      </table>
+                    </div>
+                  </p>
+                <?php } else { ?>
+                  <div class="btn-group w-100 border shadow">
+                    <a href="install.php" class="btn btn-block btn-light">Install</a>
+                    <a href="/" class="btn btn-block btn-primary">Log In</a>
                   </div>
-                </p>
-              <?php } else { ?>
-                <div class="btn-group w-100 border shadow">
-                  <a href="install.php" class="btn btn-block btn-light">Install</a>
-                  <a href="/" class="btn btn-block btn-primary">Log In</a>
-                </div>
-              <?php } ?>
+                <?php } ?>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      <?php } else { ?>
+        <div class="col h-100 m-0 p-0">
+          <div class="container h-100">
+            <div class="d-flex h-100 row align-items-center justify-content-center">
+              <div class="col">
+                <h3 class="mt-5 mb-3">Unauthorized Host: <strong><?= $_SERVER['SERVER_NAME'] ?></strong></h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      <?php } ?>
     </div>
     <?= $phpAUTH->Compliance->form() ?>
   </body>

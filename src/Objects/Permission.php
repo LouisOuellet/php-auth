@@ -375,10 +375,10 @@ class Permission {
       foreach($Data as $Key => $Value){
 
         // Debut Information
-        $this->Logger->debug("Does {$Key} exist? " . !isset($this->Columns[$Key]));
+        $this->Logger->debug("Does {$Key} exist? " . !array_key_exists($Key,$this->Columns));
 
         // Unset Value if it does not exist
-        if(!isset($this->Columns[$Key])){
+        if(!array_key_exists($Key,$this->Columns)){
 
           // Debut Information
           $this->Logger->debug("Unset: {$Key}");
@@ -429,10 +429,10 @@ class Permission {
         }
 
         // Debut Information
-        $this->Logger->debug("Is {$Key} empty? " . (empty($Value) || $Value === '' || $Value === null));
+        $this->Logger->debug("Is {$Key} empty? " . ((empty($Value) || $Value === '' || $Value === null) && !is_int($Value)));
 
         // Unset Value if it's empty
-        if(empty($Value) || $Value === '' || $Value === null){
+        if((empty($Value) || $Value === '' || $Value === null) && !is_int($Value)){
 
           // Debut Information
           $this->Logger->debug("Unset: {$Key}");
@@ -537,10 +537,10 @@ class Permission {
       foreach($Array as $Key => $Value){
 
         // Debut Information
-        $this->Logger->debug("Does {$Key} exist? " . !isset($this->Columns[$Key]));
+        $this->Logger->debug("Does {$Key} exist? " . !array_key_exists($Key,$this->Columns));
 
         // Unset Value if it does not exist
-        if(!isset($this->Columns[$Key])){
+        if(!array_key_exists($Key,$this->Columns)){
 
           // Debut Information
           $this->Logger->debug("Unset: {$Key}");
@@ -597,10 +597,10 @@ class Permission {
         }
 
         // Debut Information
-        $this->Logger->debug("Is {$Key} empty? " . (empty($Value) || $Value === '' || $Value === null));
+        $this->Logger->debug("Is {$Key} empty? " . ((empty($Value) || $Value === '' || $Value === null) && !is_int($Value)));
 
         // Unset Value if it's empty
-        if(empty($Value) || $Value == '' || $Value == null){
+        if((empty($Value) || $Value === '' || $Value === null) && !is_int($Value)){
 
           $Value = NULL;
 

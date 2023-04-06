@@ -86,82 +86,94 @@ $Header = ucfirst($Page);
   </head>
   <body class="h-100 w-100">
     <div class="row h-100 w-100 m-0 p-0">
-      <div class="col h-100 m-0 p-0">
-        <div class="container h-100">
-          <div class="d-flex h-100 row align-items-center justify-content-center">
-            <div class="col">
-              <h3 class="mt-5 mb-3">Create a <strong><?= $Header ?></strong></h3>
-              <?php if($phpAUTH->Authentication->isConnected()){ ?>
-                <div class="btn-group w-100 border shadow mb-4">
-                  <a href="manage.php?type=<?= $Page ?>" class="btn btn-block btn-light">Return</a>
-                  <a href="create.php?type=<?= $Page ?>" class="btn btn-block btn-success">Create</a>
-                </div>
-                <p class="mb-5">
-                  <div class="overflow-auto">
-                    <form method="post">
-                      <?php foreach($Columns as $Column => $DataType){ ?>
-                        <?php if(in_array($Column,['passwordSalt','passwordHash','bearerToken','permissions'])){ continue; } ?>
-                        <?php if(isset($Defaults[$Column]) || isset($OnUpdate[$Column]) || $Column == $Primary){ continue; } ?>
-                        <div class="row mb-2 mx-0">
-                          <div class="col-12">
-                            <div class="input-group">
-                              <span class="input-group-text <?php if(in_array($Column,$Required)){ echo "text-bg-primary"; } ?>" id="label<?= $Column ?>"><?= ucfirst($Column) ?></span>
-                              <?php
-                                switch($DataType){
-                                  case"longtext":
-                                  case"text":
-                                  case"json":
-                                    ?><textarea class="form-control" name="<?= $Column ?>" placeholder="<?= ucfirst($Column) ?>" aria-label="<?= ucfirst($Column) ?>" aria-describedby="label<?= $Column ?>" <?php if(in_array($Column,$Required)){ echo "required"; } ?>></textarea><?php
-                                    break;
-                                  case"date":
-                                    ?><input type="date" name="<?= $Column ?>" class="form-control" placeholder="<?= ucfirst($Column) ?>" aria-label="<?= ucfirst($Column) ?>" aria-describedby="label<?= $Column ?>" <?php if(in_array($Column,$Required)){ echo "required"; } ?>><?php
-                                    break;
-                                  case"time":
-                                    ?><input type="time" name="<?= $Column ?>" class="form-control" placeholder="<?= ucfirst($Column) ?>" aria-label="<?= ucfirst($Column) ?>" aria-describedby="label<?= $Column ?>" <?php if(in_array($Column,$Required)){ echo "required"; } ?>><?php
-                                    break;
-                                  case"datetime":
-                                    ?><input type="datetime-local" name="<?= $Column ?>" class="form-control" placeholder="<?= ucfirst($Column) ?>" aria-label="<?= ucfirst($Column) ?>" aria-describedby="label<?= $Column ?>" <?php if(in_array($Column,$Required)){ echo "required"; } ?>><?php
-                                    break;
-                                  case"int":
-                                  case"bigint":
-                                    ?><input type="number" name="<?= $Column ?>" class="form-control" placeholder="<?= ucfirst($Column) ?>" aria-label="<?= ucfirst($Column) ?>" aria-describedby="label<?= $Column ?>" <?php if(in_array($Column,$Required)){ echo "required"; } ?>><?php
-                                    break;
-                                  default:
-                                    ?><input type="text" name="<?= $Column ?>" class="form-control" placeholder="<?= ucfirst($Column) ?>" aria-label="<?= ucfirst($Column) ?>" aria-describedby="label<?= $Column ?>" <?php if(in_array($Column,$Required)){ echo "required"; } ?>><?php
-                                    break;
-                                }
-                              ?>
-                            </div>
-                          </div>
-                        </div>
-                      <?php } ?>
-                      <?php if($Page === 'user'){ ?>
-                        <div class="row mb-2 mx-0">
-                          <div class="col-12">
-                            <div class="input-group">
-                              <span class="input-group-text text-bg-primary" id="labelPassword">Password</span>
-                              <input type="text" name="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="labelPassword" required>
-                            </div>
-                          </div>
-                        </div>
-                      <?php } ?>
-                      <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
-                      <div class="btn-group w-100 border shadow mb-4">
-                        <button type="submit" class="btn btn-block btn-success">Save</button>
-                      </div>
-                    </form>
+      <?php if($phpAUTH->Authorization->isAuthorized()){ ?>
+        <div class="col h-100 m-0 p-0">
+          <div class="container h-100">
+            <div class="d-flex h-100 row align-items-center justify-content-center">
+              <div class="col">
+                <h3 class="mt-5 mb-3">Create a <strong><?= $Header ?></strong></h3>
+                <?php if($phpAUTH->Authentication->isConnected()){ ?>
+                  <div class="btn-group w-100 border shadow mb-4">
+                    <a href="manage.php?type=<?= $Page ?>" class="btn btn-block btn-light">Return</a>
+                    <a href="create.php?type=<?= $Page ?>" class="btn btn-block btn-success">Create</a>
                   </div>
-                </p>
-              <?php } else { ?>
-                <div class="btn-group w-100 border shadow">
-                  <a href="install.php" class="btn btn-block btn-light">Install</a>
-                  <a href="/" class="btn btn-block btn-primary">Log In</a>
-                </div>
-              <?php } ?>
+                  <p class="mb-5">
+                    <div class="overflow-auto">
+                      <form method="post">
+                        <?php foreach($Columns as $Column => $DataType){ ?>
+                          <?php if(in_array($Column,['passwordSalt','passwordHash','2FASalt','2FAHash','bearerToken','permissions','attempts','requests','lastAttempt','lastRequest','last2FA','sessionId','2FAMethod','server'])){ continue; } ?>
+                          <?php if(isset($Defaults[$Column]) || isset($OnUpdate[$Column]) || $Column == $Primary){ continue; } ?>
+                          <div class="row mb-2 mx-0">
+                            <div class="col-12">
+                              <div class="input-group">
+                                <span class="input-group-text <?php if(in_array($Column,$Required)){ echo "text-bg-primary"; } ?>" id="label<?= $Column ?>"><?= ucfirst($Column) ?></span>
+                                <?php
+                                  switch($DataType){
+                                    case"longtext":
+                                    case"text":
+                                    case"json":
+                                      ?><textarea class="form-control" name="<?= $Column ?>" placeholder="<?= ucfirst($Column) ?>" aria-label="<?= ucfirst($Column) ?>" aria-describedby="label<?= $Column ?>" <?php if(in_array($Column,$Required)){ echo "required"; } ?>></textarea><?php
+                                      break;
+                                    case"date":
+                                      ?><input type="date" name="<?= $Column ?>" class="form-control" placeholder="<?= ucfirst($Column) ?>" aria-label="<?= ucfirst($Column) ?>" aria-describedby="label<?= $Column ?>" <?php if(in_array($Column,$Required)){ echo "required"; } ?>><?php
+                                      break;
+                                    case"time":
+                                      ?><input type="time" name="<?= $Column ?>" class="form-control" placeholder="<?= ucfirst($Column) ?>" aria-label="<?= ucfirst($Column) ?>" aria-describedby="label<?= $Column ?>" <?php if(in_array($Column,$Required)){ echo "required"; } ?>><?php
+                                      break;
+                                    case"datetime":
+                                      ?><input type="datetime-local" name="<?= $Column ?>" class="form-control" placeholder="<?= ucfirst($Column) ?>" aria-label="<?= ucfirst($Column) ?>" aria-describedby="label<?= $Column ?>" <?php if(in_array($Column,$Required)){ echo "required"; } ?>><?php
+                                      break;
+                                    case"int":
+                                    case"bigint":
+                                      ?><input type="number" name="<?= $Column ?>" class="form-control" placeholder="<?= ucfirst($Column) ?>" aria-label="<?= ucfirst($Column) ?>" aria-describedby="label<?= $Column ?>" <?php if(in_array($Column,$Required)){ echo "required"; } ?>><?php
+                                      break;
+                                    default:
+                                      ?><input type="text" name="<?= $Column ?>" class="form-control" placeholder="<?= ucfirst($Column) ?>" aria-label="<?= ucfirst($Column) ?>" aria-describedby="label<?= $Column ?>" <?php if(in_array($Column,$Required)){ echo "required"; } ?>><?php
+                                      break;
+                                  }
+                                ?>
+                              </div>
+                            </div>
+                          </div>
+                        <?php } ?>
+                        <?php if($Page === 'user'){ ?>
+                          <div class="row mb-2 mx-0">
+                            <div class="col-12">
+                              <div class="input-group">
+                                <span class="input-group-text text-bg-primary" id="labelPassword">Password</span>
+                                <input type="text" name="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="labelPassword" required>
+                              </div>
+                            </div>
+                          </div>
+                        <?php } ?>
+                        <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
+                        <div class="btn-group w-100 border shadow mb-4">
+                          <button type="submit" class="btn btn-block btn-success">Save</button>
+                        </div>
+                      </form>
+                    </div>
+                  </p>
+                <?php } else { ?>
+                  <div class="btn-group w-100 border shadow">
+                    <a href="install.php" class="btn btn-block btn-light">Install</a>
+                    <a href="/" class="btn btn-block btn-primary">Log In</a>
+                  </div>
+                <?php } ?>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      <?php } else { ?>
+        <div class="col h-100 m-0 p-0">
+          <div class="container h-100">
+            <div class="d-flex h-100 row align-items-center justify-content-center">
+              <div class="col">
+                <h3 class="mt-5 mb-3">Unauthorized Host: <strong><?= $_SERVER['SERVER_NAME'] ?></strong></h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      <?php } ?>
     </div>
     <?= $phpAUTH->Compliance->form() ?>
   </body>

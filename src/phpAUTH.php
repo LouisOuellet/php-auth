@@ -187,10 +187,8 @@ class phpAUTH {
       // Initialize Authentication
       $this->Authentication = new Authentication($this->Logger, $this->Database, $this->CSRF);
 
-			// If a User is authenticated, Initialize Authorization
-			if($this->Authentication && $this->Authentication->isConnected()){
-				$this->Authorization = new Authorization($this->Authentication->User, $this->Logger);
-			}
+			// Initialize Authorization
+			$this->Authorization = new Authorization($this->Authentication->User, $this->Logger);
     } catch (Exception $e) {
 
 			// If an exception is caught, log an error message

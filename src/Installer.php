@@ -147,10 +147,6 @@ class Installer {
 					'type' => 'INT(1)',
 					'extra' => ['NOT NULL','DEFAULT "0"']
 				],
-				'isDefault' => [
-					'type' => 'INT(1)',
-					'extra' => ['NOT NULL','DEFAULT "0"']
-				],
 			]);
 			$this->Database->create('users',[
 				'id' => [

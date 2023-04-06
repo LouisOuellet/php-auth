@@ -76,88 +76,100 @@ $Header = ucfirst($Page);
   </head>
   <body class="h-100 w-100">
     <div class="row h-100 w-100 m-0 p-0">
-      <div class="col h-100 m-0 p-0">
-        <div class="container h-100">
-          <div class="d-flex h-100 row align-items-center justify-content-center">
-            <div class="col">
-              <h3 class="mt-5 mb-3"><?= $Header ?> <strong>Management</strong> <small>(<?= count($Objects); ?>)</small></h3>
-              <?php if($phpAUTH->Authentication->isConnected()){ ?>
-                <div class="btn-group w-100 border shadow mb-4">
-                  <a href="/" class="btn btn-block btn-light">Index</a>
-                  <?php foreach($Types as $Type){ ?>
-                    <?php if($Type === $Page){ ?>
-                      <a href="manage.php?type=<?= $Type ?>" class="btn btn-block btn-primary"><?= ucfirst($Type) ?></a>
-                    <?php } else { ?>
-                      <a href="manage.php?type=<?= $Type ?>" class="btn btn-block btn-light"><?= ucfirst($Type) ?></a>
+      <?php if($phpAUTH->Authorization->isAuthorized()){ ?>
+        <div class="col h-100 m-0 p-0">
+          <div class="container h-100">
+            <div class="d-flex h-100 row align-items-center justify-content-center">
+              <div class="col">
+                <h3 class="mt-5 mb-3"><?= $Header ?> <strong>Management</strong> <small>(<?= count($Objects); ?>)</small></h3>
+                <?php if($phpAUTH->Authentication->isConnected()){ ?>
+                  <div class="btn-group w-100 border shadow mb-4">
+                    <a href="/" class="btn btn-block btn-light">Index</a>
+                    <?php foreach($Types as $Type){ ?>
+                      <?php if($Type === $Page){ ?>
+                        <a href="manage.php?type=<?= $Type ?>" class="btn btn-block btn-primary"><?= ucfirst($Type) ?></a>
+                      <?php } else { ?>
+                        <a href="manage.php?type=<?= $Type ?>" class="btn btn-block btn-light"><?= ucfirst($Type) ?></a>
+                      <?php } ?>
                     <?php } ?>
-                  <?php } ?>
-                </div>
-                <p class="mb-5">
-                  <div class="btn-group w-100 border shadow mb-3">
-                    <a href="create.php?type=<?= $Page ?>" class="btn btn-block btn-success">Create</a>
                   </div>
-                  <div class="overflow-auto">
-                    <table class="table border table-striped table-hover">
-                      <thead>
-                        <tr class="text-bg-light">
-                          <?php foreach($Columns as $Column => $DataType){ ?>
-                            <th class="border"><?= ucfirst($Column) ?></th>
-                          <?php } ?>
-                          <?php if($Page === "permission"){ ?>
-                            <th class="border">Effective</th>
-                          <?php } ?>
-                          <th class="border position-sticky end-0 text-bg-light">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php foreach($Objects as $Object){ ?>
-                          <tr>
+                  <p class="mb-5">
+                    <div class="btn-group w-100 border shadow mb-3">
+                      <a href="create.php?type=<?= $Page ?>" class="btn btn-block btn-success">Create</a>
+                    </div>
+                    <div class="overflow-auto">
+                      <table class="table border table-striped table-hover">
+                        <thead>
+                          <tr class="text-bg-light">
                             <?php foreach($Columns as $Column => $DataType){ ?>
-                              <?php $Value = $Object->get($Column); ?>
-                              <?php if(is_array($Value)){ $Value = json_encode($Value, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT); } ?>
-                              <td class="border"><?= $Value ?></td>
+                              <th class="border"><?= ucfirst($Column) ?></th>
                             <?php } ?>
                             <?php if($Page === "permission"){ ?>
-                              <td class="border">
-                                <?php foreach($Levels as $Level => $Name){ ?>
-                                  <?php if($Level > 0 && $phpAUTH->Authorization->hasPermission($Object->get('name'), $Level)){ ?>
-                                    <span class="badge rounded-pill mx-1 text-bg-<?= $Colors[$Name] ?>"><?= $Name ?></span>
-                                  <?php } else { ?>
-                                    <?php if($Level <= 0){ ?>
+                              <th class="border">Effective</th>
+                            <?php } ?>
+                            <th class="border position-sticky end-0 text-bg-light">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php foreach($Objects as $Object){ ?>
+                            <tr>
+                              <?php foreach($Columns as $Column => $DataType){ ?>
+                                <?php $Value = $Object->get($Column); ?>
+                                <?php if(is_array($Value)){ $Value = json_encode($Value, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT); } ?>
+                                <td class="border"><?= $Value ?></td>
+                              <?php } ?>
+                              <?php if($Page === "permission"){ ?>
+                                <td class="border">
+                                  <?php foreach($Levels as $Level => $Name){ ?>
+                                    <?php if($Level > 0 && $phpAUTH->Authorization->hasPermission($Object->get('name'), $Level)){ ?>
                                       <span class="badge rounded-pill mx-1 text-bg-<?= $Colors[$Name] ?>"><?= $Name ?></span>
+                                    <?php } else { ?>
+                                      <?php if($Level <= 0){ ?>
+                                        <span class="badge rounded-pill mx-1 text-bg-<?= $Colors[$Name] ?>"><?= $Name ?></span>
+                                      <?php } ?>
                                     <?php } ?>
                                   <?php } ?>
-                                <?php } ?>
+                                </td>
+                              <?php } ?>
+                              <td class="border position-sticky end-0 text-bg-light">
+                                <div class="btn-group border shadow">
+                                  <a href="detail.php?type=<?= $Page ?>&id=<?= $Object->get($Identifiers[$Page]); ?>" class="btn btn-sm btn-primary">Details</a>
+                                  <?php if($Page !== "permission"){ ?>
+                                    <a href="relationship.php?type=<?= $Page ?>&id=<?= $Object->get($Identifiers[$Page]); ?>" class="btn btn-sm btn-light">Relationships</a>
+                                  <?php } ?>
+                                  <?php if($Page === "role"){ ?>
+                                    <a href="permission.php?type=<?= $Page ?>&id=<?= $Object->get($Identifiers[$Page]); ?>" class="btn btn-sm btn-info">Permissions</a>
+                                  <?php } ?>
+                                  <a href="edit.php?type=<?= $Page ?>&id=<?= $Object->get($Identifiers[$Page]); ?>" class="btn btn-sm btn-warning">Edit</a>
+                                  <a href="delete.php?type=<?= $Page ?>&id=<?= $Object->get($Identifiers[$Page]); ?>" class="btn btn-sm btn-danger">Delete</a>
+                                </div>
                               </td>
-                            <?php } ?>
-                            <td class="border position-sticky end-0 text-bg-light">
-                              <div class="btn-group border shadow">
-                                <a href="detail.php?type=<?= $Page ?>&id=<?= $Object->get($Identifiers[$Page]); ?>" class="btn btn-sm btn-primary">Details</a>
-                                <?php if($Page !== "permission"){ ?>
-                                  <a href="relationship.php?type=<?= $Page ?>&id=<?= $Object->get($Identifiers[$Page]); ?>" class="btn btn-sm btn-light">Relationships</a>
-                                <?php } ?>
-                                <?php if($Page === "role"){ ?>
-                                  <a href="permission.php?type=<?= $Page ?>&id=<?= $Object->get($Identifiers[$Page]); ?>" class="btn btn-sm btn-info">Permissions</a>
-                                <?php } ?>
-                                <a href="edit.php?type=<?= $Page ?>&id=<?= $Object->get($Identifiers[$Page]); ?>" class="btn btn-sm btn-warning">Edit</a>
-                                <a href="delete.php?type=<?= $Page ?>&id=<?= $Object->get($Identifiers[$Page]); ?>" class="btn btn-sm btn-danger">Delete</a>
-                              </div>
-                            </td>
-                          </tr>
-                        <?php } ?>
-                      </tbody>
-                    </table>
+                            </tr>
+                          <?php } ?>
+                        </tbody>
+                      </table>
+                    </div>
+                  </p>
+                <?php } else { ?>
+                  <div class="btn-group w-100 border shadow">
+                    <a href="/" class="btn btn-block btn-primary">Log In</a>
                   </div>
-                </p>
-              <?php } else { ?>
-                <div class="btn-group w-100 border shadow">
-                  <a href="/" class="btn btn-block btn-primary">Log In</a>
-                </div>
-              <?php } ?>
+                <?php } ?>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      <?php } else { ?>
+        <div class="col h-100 m-0 p-0">
+          <div class="container h-100">
+            <div class="d-flex h-100 row align-items-center justify-content-center">
+              <div class="col">
+                <h3 class="mt-5 mb-3">Unauthorized Host: <strong><?= $_SERVER['SERVER_NAME'] ?></strong></h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      <?php } ?>
     </div>
     <?= $phpAUTH->Compliance->form() ?>
   </body>
