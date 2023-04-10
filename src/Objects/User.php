@@ -112,7 +112,9 @@ class User {
   private $windowAttempts = 100;
   private $windowRequests = 60;
   private $window2FA = 60;
+  private $windowVerification = 60 * 60 * 24 * 30;
   private $lockoutDuration = 1800;
+  private $ErrorReport = null;
 
   /**
    * Create a new Session instance.
@@ -139,6 +141,7 @@ class User {
     $this->windowAttempts = $this->Configurator->get('auth', 'windowAttempts') ?: $this->windowAttempts;
     $this->windowRequests = $this->Configurator->get('auth', 'windowRequests') ?: $this->windowRequests;
     $this->window2FA = $this->Configurator->get('auth', 'window2FA') ?: $this->window2FA;
+    $this->windowVerification = $this->Configurator->get('auth', 'windowVerification') ?: $this->windowVerification;
 
     // Initiate Id
     $this->Id = $Id;
@@ -217,7 +220,7 @@ class User {
   /**
    * Get the User's Status.
    *
-   * @return boolean
+   * @return int
    */
 	public function status(){
 
@@ -246,8 +249,24 @@ class User {
       return 5;
     }
 
+    // If User is is Verified
+    if(!$this->get('isVerified')){
+      return 6;
+    }
+
     // User has no restrictions
-    return 6;
+    return 7;
+  }
+
+  /**
+   * Return error report.
+   *
+   * @return string|null
+   */
+	public function error(){
+
+    // Return
+    return $this->ErrorReport;
   }
 
   /**
@@ -360,12 +379,12 @@ class User {
   }
 
   /**
-   * Send code.
+   * Send 2FA code.
    *
    * @return object|void
    * @throws Exception
    */
-	public function sendCode(){
+	public function send2FACode(){
     try{
 
       // Generate a Code
@@ -392,47 +411,15 @@ class User {
 
       // Send Code
       foreach($this->get('2FAMethod') as $Method){
-        switch($Method){
-          case"smtp":
-
-            // Initiate phpSMTP
-            if(!$this->SMTP){
-              $this->SMTP = new phpSMTP();
-            }
-
-            // Check if phpSMTP is configured
-            if(!$this->SMTP || !$this->SMTP->isConnected()){
-              throw new Exception("Unable to initiate phpSMTP.");
-            }
-
-            // Send Code
-            $this->SMTP->send([
-              'to' => $this->get('username'),
-              'subject' => "Verification Code",
-              'body' => "Your verification code is: {$Code}",
-            ]);
-            break;
-          case"sms":
-
-            // Initiate phpSMS
-            if(!$this->SMS){
-              $this->SMS = new phpSMS();
-            }
-
-            // Check if phpSMS is configured
-            if(!$this->SMS || !$this->SMS->isReady()){
-              throw new Exception("Unable to initiate phpSMS.");
-            }
-
-            // Send Code
-            $this->SMS->send($this->get('mobile'),"Your verification code is: {$Code}");
-            break;
-        }
+        $this->sendCode($Code, $Method);
       }
 
       // Return
       return $this;
     } catch (Exception $e) {
+
+      // Save Error
+      $this->ErrorReport = $e->getMessage();
 
 			// If an exception is caught, log an error message
       $this->Logger->error('Error: '.$e->getMessage());
@@ -440,12 +427,119 @@ class User {
   }
 
   /**
-   * Validate code.
+   * Send Verification code.
+   *
+   * @return object|void
+   * @throws Exception
+   */
+	public function sendVerificationCode(){
+    try{
+
+      // Generate a Code
+      $Code = $this->generateCode();
+
+      // Create Salt
+      $Salt = bin2hex(random_bytes(16));
+
+      // Hash the Code
+      $Hash = password_hash($Code . $Salt, PASSWORD_DEFAULT);
+
+      // Get current timestamp
+      $Timestamp = time();
+
+      // Create User Array
+      $User = [
+        "verifiedSalt" => $Salt,
+        "verifiedHash" => $Hash,
+        "verifiedUntil" => $Timestamp + $this->windowVerification,
+      ];
+
+      // Save Salt, Hash and Timestamp
+      $this->save($User);
+
+      // Send code
+      $this->sendCode($Code, "smtp");
+
+      // Return
+      return $this;
+    } catch (Exception $e) {
+
+      // Save Error
+      $this->ErrorReport = $e->getMessage();
+
+			// If an exception is caught, log an error message
+      $this->Logger->error('Error: '.$e->getMessage());
+    }
+  }
+
+  /**
+   * Send code.
+   *
+   * @param string $Code
+   * @param string $Method
+   * @return object|void
+   * @throws Exception
+   */
+	private function sendCode($Code, $Method){
+    try{
+
+      // Send Code
+      switch($Method){
+        case"smtp":
+
+          // Initiate phpSMTP
+          if(!$this->SMTP){
+            $this->SMTP = new phpSMTP();
+          }
+
+          // Check if phpSMTP is configured
+          if(!$this->SMTP || !$this->SMTP->isConnected()){
+            throw new Exception("Unable to initiate phpSMTP.");
+          }
+
+          // Send Code
+          $this->SMTP->send([
+            'to' => $this->get('username'),
+            'subject' => "Verification Code",
+            'body' => "Your verification code is: {$Code}",
+          ]);
+          break;
+        case"sms":
+
+          // Initiate phpSMS
+          if(!$this->SMS){
+            $this->SMS = new phpSMS();
+          }
+
+          // Check if phpSMS is configured
+          if(!$this->SMS || !$this->SMS->isReady()){
+            throw new Exception("Unable to initiate phpSMS.");
+          }
+
+          // Send Code
+          $this->SMS->send($this->get('mobile'),"Your verification code is: {$Code}");
+          break;
+      }
+
+      // Return
+      return $this;
+    } catch (Exception $e) {
+
+      // Save Error
+      $this->ErrorReport = $e->getMessage();
+
+			// If an exception is caught, log an error message
+      $this->Logger->error('Error: '.$e->getMessage());
+    }
+  }
+
+  /**
+   * Validate 2FA code.
    *
    * @param string $Code
    * @return boolean
    */
-	public function validateCode($Code){
+	public function validate2FACode($Code){
 
     // Set Current Time and Calculate Time Difference
     $currentTime = time();
@@ -457,6 +551,57 @@ class User {
     // Validate Code
     if (password_verify($Code . $this->get('2FASalt'), $this->get('2FAHash')) && $timeDifference <= $this->window2FA) {
       return true;
+    }
+
+    // Return False
+    return false;
+  }
+
+  /**
+   * Validate Verification code.
+   *
+   * @param string $Code
+   * @return boolean
+   */
+	public function validateVerificationCode($Code){
+
+    // Set Current Time and Calculate Time Difference
+    $currentTime = time();
+    $timeDifference = $this->get('verifiedUntil') - $currentTime;
+
+    // Set DateTime
+    $DateTime = new DateTime();
+    $DateTime->setTimestamp($currentTime);
+
+    // Debug Information
+    $this->Logger->debug("Time Difference is currently at : {$timeDifference}");
+
+    // Check if User is already Verified
+    if(!$this->isVerified()){
+
+      // Validate Code
+      if (password_verify($Code . $this->get('verifiedSalt'), $this->get('verifiedHash'))) {
+
+        // Validate Verification Window
+        if($timeDifference > 0){
+
+          // Save User's Verification
+          $this->save([
+            "isVerified" => 1,
+            "verifiedOn" => $DateTime->format('Y-m-d H:i:s'),
+            "verifiedUntil" => $currentTime,
+            "verifiedSalt" => null,
+            "verifiedHash" => null,
+          ]);
+
+          // Return True
+          return true;
+        } else {
+
+          // Soft Delete User
+          $this->delete();
+        }
+      }
     }
 
     // Return False
@@ -519,6 +664,9 @@ class User {
 
       return $this;
     } catch (Exception $e) {
+
+      // Save Error
+      $this->ErrorReport = $e->getMessage();
 
 			// If an exception is caught, log an error message
       $this->Logger->error('Error: '.$e->getMessage());
@@ -604,6 +752,9 @@ class User {
         return $this->Object[$Key];
       }
     } catch (Exception $e) {
+
+      // Save Error
+      $this->ErrorReport = $e->getMessage();
 
 			// If an exception is caught, log an error message
       $this->Logger->error('Error: '.$e->getMessage());
@@ -832,6 +983,9 @@ class User {
       // Retrieve new Object
       $this->retrieve();
 
+      // Send Verification Code
+      $this->sendVerificationCode();
+
       // Debug Information
       $this->Logger->debug([$User['domain'],1]);
 
@@ -851,6 +1005,9 @@ class User {
       // Return
       return $this;
     } catch (Exception $e) {
+
+      // Save Error
+      $this->ErrorReport = $e->getMessage();
 
 			// If an exception is caught, log an error message
       $this->Logger->error('Error: '.$e->getMessage());
@@ -1084,6 +1241,9 @@ class User {
       return $this;
     } catch (Exception $e) {
 
+      // Save Error
+      $this->ErrorReport = $e->getMessage();
+
 			// If an exception is caught, log an error message
       $this->Logger->error('Error: '.$e->getMessage());
       return null;
@@ -1219,6 +1379,26 @@ class User {
 
     // Return
     return $this;
+  }
+
+  /**
+   * Verify if user is verified.
+   *
+   * @return boolean
+   */
+  public function isVerified() {
+
+    return $this->get('isVerified');
+  }
+
+  /**
+   * Verify if user is deleted.
+   *
+   * @return boolean
+   */
+  public function isDeleted() {
+
+    return $this->get('isDeleted');
   }
 
   /**
@@ -1462,10 +1642,10 @@ class User {
           throw new Exception("Unknown database.");
           break;
       }
-
-      // Return null
-      return null;
     } catch (Exception $e) {
+
+      // Save Error
+      $this->ErrorReport = $e->getMessage();
 
       // If an exception is caught, log an error message
       $this->Logger->error('Error: '.$e->getMessage());

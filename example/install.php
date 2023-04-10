@@ -31,10 +31,11 @@ $phpAUTH->config("hostnames",$Hostnames)
         ->config("2fa",true)
         ->config("maxAttempts",5)
         ->config("maxRequests",1000)
-        ->config("lockoutDuration",1800)
-        ->config("windowAttempts",100)
-        ->config("windowRequests",60)
-        ->config("window2FA",60)
+        ->config("lockoutDuration",1800) // 30 mins
+        ->config("windowAttempts",100) // 100 seconds
+        ->config("windowRequests",60) // 60 seconds
+        ->config("window2FA",60) // 60 seconds
+        ->config("windowVerification",2592000) // 30 Days
         ->config("host","localhost")
         ->config("username","demo")
         ->config("password","demo")

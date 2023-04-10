@@ -269,6 +269,26 @@ class Installer {
 					'type' => 'INT(1)',
 					'extra' => ['NOT NULL','DEFAULT "0"']
 				],
+				'isVerified' => [
+					'type' => 'INT(1)',
+					'extra' => ['NOT NULL','DEFAULT "0"']
+				],
+				'verifiedSalt' => [
+					'type' => 'VARCHAR(255)',
+					'extra' => ['NULL']
+				],
+				'verifiedHash' => [
+					'type' => 'VARCHAR(255)',
+					'extra' => ['NULL']
+				],
+				'verifiedOn' => [
+					'type' => 'DATETIME',
+					'extra' => ['NULL']
+				],
+				'verifiedUntil' => [
+					'type' => 'TIMESTAMP',
+					'extra' => ['NULL']
+				],
 				'isBanned' => [
 					'type' => 'INT(1)',
 					'extra' => ['NOT NULL','DEFAULT "0"']

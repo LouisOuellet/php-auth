@@ -12,6 +12,9 @@ use LaswitchTech\phpLogger\phpLogger;
 // Import Database Class into the global namespace
 use LaswitchTech\phpDB\Database;
 
+// Import phpCSRF Class into the global namespace
+use LaswitchTech\phpCSRF\phpCSRF;
+
 // Import User class into the global namespace
 use LaswitchTech\phpAUTH\Objects\User;
 
@@ -30,6 +33,9 @@ class Session {
   // phpDB
   private $Database = null;
 
+	// phpCSRF
+  private $CSRF = null;
+
   /**
    * Create a new Session instance.
    *
@@ -38,7 +44,7 @@ class Session {
    * @return void
    * @throws Exception
    */
-  public function __construct($Logger = null, $Database = null) {
+  public function __construct($Logger = null, $Database = null, $CSRF = null) {
 
     // Initialize Configurator
     $this->Configurator = new phpConfigurator('auth');
@@ -56,6 +62,12 @@ class Session {
     $this->Database = $Database;
     if(!$this->Database){
       $this->Database = new Database();
+    }
+
+    // Initiate phpCSRF
+    $this->CSRF = $CSRF;
+    if(!$this->CSRF){
+      $this->CSRF = new phpCSRF();
     }
 
     // Initialize Library
@@ -162,6 +174,24 @@ class Session {
 			// Check if user is isLockedOut
 			if($User->isRateLimited()){
 				throw new Exception("User has reached the limit of attempts");
+			}
+
+			// Check if user is verified
+			if(!$User->isVerified()){
+
+        // Check if Code was submitted
+        if(isset($_REQUEST['verifiedCode'])){
+
+          $verifiedCode = $_REQUEST['verifiedCode'];
+
+          // Check CSRF
+          if($this->CSRF->validate()){
+
+            if(!$User->validateVerificationCode($verifiedCode)){
+              throw new Exception("Invalid Verification Code");
+            }
+          }
+        }
 			}
 
       // Record Authentication Attempt

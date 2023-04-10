@@ -274,6 +274,20 @@ $Header = ucfirst($Page);
                             </div>
                           </div>
                         <?php } ?>
+                        <?php if(isset($Columns['isVerified'])){ ?>
+                          <div class="row mb-2 mx-0">
+                            <div class="col-12">
+                              <div class="input-group d-flex">
+                                <span class="input-group-text">Verified</span>
+                                <input type="radio" class="btn-check" value="1" name="isVerified" id="isVerifiedYes" autocomplete="off" <?php if($Object->get('isVerified')){ echo "checked"; } ?>>
+                                <label class="btn btn-block btn-outline-primary flex-grow-1" for="isVerifiedYes">Yes</label>
+
+                                <input type="radio" class="btn-check" value="0" name="isVerified" id="isVerifiedNo" autocomplete="off" <?php if(!$Object->get('isVerified')){ echo "checked"; } ?>>
+                                <label class="btn btn-block btn-outline-primary flex-grow-1" for="isVerifiedNo">No</label>
+                              </div>
+                            </div>
+                          </div>
+                        <?php } ?>
                         <?php if(isset($Columns['database'])){ ?>
                           <div class="row mb-2 mx-0">
                             <div class="col-12">

@@ -113,6 +113,12 @@ class Authorization {
    */
 	public function hasPermission($permissionName, $requiredLevel = 1){
 
+		if(!$this->User->isVerified() || $this->User->isDeleted()){
+
+			// User should not have access
+			return false;
+		}
+
 		// Retrieve the Relationships if not already done
 		if(!$this->Relationships){
 			$this->Relationships = $this->User->get('relationships', true);

@@ -192,7 +192,7 @@ class Request {
         if(isset($_REQUEST['2fa']) && !empty($_REQUEST['2fa'])){
 
           // Validate 2FA Code
-          if(!$User->validateCode($_REQUEST['2fa'])){
+          if(!$User->validate2FACode($_REQUEST['2fa'])){
 
             // Return
             return false;
@@ -200,7 +200,7 @@ class Request {
         } else {
 
           // Send 2FA Code
-          if($User->sendCode()){
+          if($User->send2FACode()){
 
             // Set Ready
             $this->Ready = true;

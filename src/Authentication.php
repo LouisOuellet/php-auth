@@ -124,7 +124,7 @@ class Authentication {
 			}
 
 			// Initialize Session
-			$this->Session = new Session($this->Logger, $this->Database);
+			$this->Session = new Session($this->Logger, $this->Database, $this->CSRF);
 
 			// Initialize Cookie
 			$this->Cookie = new Cookie($this->Logger, $this->Database);
@@ -176,6 +176,17 @@ class Authentication {
 
     // Return
     return $this->Request->is2FAReady();
+  }
+
+  /**
+   * Check if email is verified.
+   *
+   * @return boolean
+   */
+	public function isVerified(){
+
+    // Return
+    return ($this->User && $this->User->isVerified());
   }
 
   /**
@@ -311,12 +322,29 @@ class Authentication {
 	}
 
   /**
+   * Retrieve Authentication Error.
+   *
+   * @return string
+   */
+	public function error(){
+
+		// Check if User is logged in
+		if($this->isConnected()){
+			return $this->User->error();
+		}
+	}
+
+  /**
    * Retrieve Authentication Status.
    *
    * @return int
    */
 	public function status(){
-		return $this->userStatus;
+
+		// Check if User is logged in
+		if($this->isConnected()){
+			return $this->User->status();
+		}
 	}
 
   /**

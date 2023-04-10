@@ -55,18 +55,39 @@ $phpCSRF = new phpCSRF();
             <div class="d-flex h-100 row align-items-center justify-content-center">
               <div class="col-7">
                 <?php if($phpAUTH->Authentication->isConnected()){ ?>
-                  <h3>Logged in to <strong>phpAUTH</strong></h3>
-                  <p class="mb-4">
-                    <p>User: <?= $phpAUTH->Authentication->User->get('username') ?></p>
-                    <p>BASE64 [pass1]: <?= base64_encode("pass1") ?></p>
-                    <p>Session ID: <?= session_id() ?></p>
-                  </p>
-                  <div class="btn-group w-100 border shadow">
-                    <a href="/" class="btn btn-block btn-light">Refresh</a>
-                    <a href="manage.php?type=user" class="btn btn-block btn-primary">Management</a>
-                    <a href="install.php" class="btn btn-block btn-warning">Re-Install</a>
-                    <a href="?logout&csrf=<?= $phpCSRF->token() ?>" class="btn btn-block btn-primary">Log Out</a>
-                  </div>
+                  <?php if(!$phpAUTH->Authentication->isVerified()){ ?>
+                    <h3 class="mb-4">Account <strong>Verification</strong></h3>
+                    <?php if($phpAUTH->Authentication->error()){ ?>
+                      <div class="card text-bg-info mb-4">
+                        <div class="card-body">
+                          <p class="m-0"><?= $phpAUTH->Authentication->error() ?></p>
+                        </div>
+                      </div>
+                    <?php } ?>
+                    <form method="post">
+                      <div class="form-floating my-3">
+                        <input type="text" name="verifiedCode" class="form-control form-control-lg" placeholder="Verification Code" id="2fa">
+                        <label for="verifiedCode">Verification Code</label>
+                      </div>
+                      <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
+                      <div class="btn-group w-100 border shadow">
+                        <button type="submit" name="login" class="btn btn-block btn-primary">Verify</button>
+                      </div>
+                    </form>
+                  <?php } else { ?>
+                    <h3>Logged in to <strong>phpAUTH</strong></h3>
+                    <p class="mb-4">
+                      <p>User: <?= $phpAUTH->Authentication->User->get('username') ?></p>
+                      <p>BASE64 [pass1]: <?= base64_encode("pass1") ?></p>
+                      <p>Session ID: <?= session_id() ?></p>
+                    </p>
+                    <div class="btn-group w-100 border shadow">
+                      <a href="/" class="btn btn-block btn-light">Refresh</a>
+                      <a href="manage.php?type=user" class="btn btn-block btn-primary">Management</a>
+                      <a href="install.php" class="btn btn-block btn-warning">Re-Install</a>
+                      <a href="?logout&csrf=<?= $phpCSRF->token() ?>" class="btn btn-block btn-primary">Log Out</a>
+                    </div>
+                  <?php } ?>
                 <?php } else { ?>
                   <h3 class="mb-4">Login to <strong>phpAUTH</strong></h3>
                   <?php if($phpAUTH->Authentication->status() > 0 && $phpAUTH->Authentication->status() < 6){ ?>
@@ -95,11 +116,18 @@ $phpCSRF = new phpCSRF();
                       </div>
                     </div>
                   <?php } ?>
+                  <?php if($phpAUTH->Authentication->error()){ ?>
+                    <div class="card text-bg-info mb-4">
+                      <div class="card-body">
+                        <p class="m-0"><?= $phpAUTH->Authentication->error() ?></p>
+                      </div>
+                    </div>
+                  <?php } ?>
                   <form method="post">
                     <?php if($phpAUTH->Authentication->is2FAReady()){ ?>
                       <div class="form-floating my-3">
-                        <input type="text" name="2fa" class="form-control form-control-lg" placeholder="Verification Code" id="2fa">
-                        <label for="2fa">Verification Code</label>
+                        <input type="text" name="2fa" class="form-control form-control-lg" placeholder="2-Factor Authentication Code" id="2fa">
+                        <label for="2fa">2-Factor Authentication Code</label>
                       </div>
                       <input type="hidden" class="d-none" name="csrf" value="<?= $phpCSRF->token() ?>">
                       <input type="hidden" name="username" class="d-none" value="<?= $_POST['username'] ?>">
@@ -108,7 +136,7 @@ $phpCSRF = new phpCSRF();
                         <input type="hidden" name="remember" class="d-none" value="<?= $_POST['remember'] ?>">
                       <?php } ?>
                       <div class="btn-group w-100 border shadow">
-                        <button type="submit" name="login" class="btn btn-block btn-primary">Verify</button>
+                        <button type="submit" name="login" class="btn btn-block btn-primary">Validate</button>
                       </div>
                     <?php } else { ?>
                       <div class="form-floating my-3">
