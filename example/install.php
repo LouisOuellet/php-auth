@@ -79,6 +79,8 @@ $AccountConfigurator->set('account','url',"https://phpauth.local/api.php")
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
     <title>Install</title>
+    <script src="/vendor/components/jquery/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   </head>
   <body class="h-100 w-100">
     <div class="row h-100 w-100 m-0 p-0">
@@ -88,11 +90,8 @@ $AccountConfigurator->set('account','url',"https://phpauth.local/api.php")
             <div class="col">
               <h3>Installation <strong>Completed</strong></h3>
               <p class="mb-4">
-                <span class="me-4">
-                  <strong>Username:</strong> <?= $API->get('username'); ?>
-                </span>
                 <span>
-                  <strong>Token:</strong> <?= $API->getToken(); ?>
+                  <strong>Token:</strong> <?= $API->get('username'); ?>:<?= $API->getToken(); ?>
                 </span>
               </p>
               <p class="mb-4">
@@ -112,7 +111,5 @@ $AccountConfigurator->set('account','url',"https://phpauth.local/api.php")
         </div>
       </div>
     </div>
-    <script src="/vendor/components/jquery/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
