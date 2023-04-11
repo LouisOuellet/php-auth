@@ -226,7 +226,7 @@ $phpSMS->config('provider','twilio')
        ->config('phone', 'your_twilio_phone_number');
 
 // Initiate phpDB
-$phpDB = new phpDB();
+$phpDB = new Database();
 
 // Configure phpDB
 $phpDB->config("host","localhost")

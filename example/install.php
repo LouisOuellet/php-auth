@@ -114,6 +114,5 @@ $AccountConfigurator->set('account','url',"https://phpauth.local/api.php")
     </div>
     <script src="/vendor/components/jquery/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/dist/js/cookie.js"></script>
   </body>
 </html>

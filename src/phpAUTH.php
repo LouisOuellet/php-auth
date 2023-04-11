@@ -116,7 +116,8 @@ class phpAUTH {
 	        case"lockoutDuration":
 	        case"windowAttempts":
 	        case"windowRequests":
-	        case"window2FA":
+			case"window2FA":
+			case"windowVerification":
 	          if(is_int($value)){
 
 							// Save to Configurator
