@@ -585,14 +585,8 @@ class User {
         // Validate Verification Window
         if($timeDifference > 0){
 
-          // Save User's Verification
-          $this->save([
-            "isVerified" => 1,
-            "verifiedOn" => $DateTime->format('Y-m-d H:i:s'),
-            "verifiedUntil" => $currentTime,
-            "verifiedSalt" => null,
-            "verifiedHash" => null,
-          ]);
+          // Verify User
+          $this->verify();
 
           // Return True
           return true;
@@ -1700,6 +1694,9 @@ class User {
     // Set as Deleted
     $this->save(['isVerified' => 0]);
 
+    // Send Verification Email
+    $this->sendVerificationCode();
+
     // Return Result
     return $this;
   }
@@ -1714,8 +1711,28 @@ class User {
     // Retrieve Record
     $this->retrieve();
 
-    // Set as Deleted
-    $this->save(['isVerified' => 1]);
+    // Set Current Time and Calculate Time Difference
+    $currentTime = time();
+
+    // Set DateTime
+    $DateTime = new DateTime();
+    $DateTime->setTimestamp($currentTime);
+
+    // Set as Verified
+    $this->save([
+      "isVerified" => 1,
+      "verifiedOn" => $DateTime->format('Y-m-d H:i:s'),
+      "verifiedUntil" => $currentTime,
+      "verifiedSalt" => null,
+      "verifiedHash" => null,
+    ]);
+
+    // Send Verification Notice
+    $this->SMTP->send([
+      'to' => $this->get('username'),
+      'subject' => "Email Verified",
+      'body' => "Your email has been verified.",
+    ]);
 
     // Return Result
     return $this;
