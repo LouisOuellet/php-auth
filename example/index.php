@@ -54,7 +54,7 @@ $phpCSRF = new phpCSRF();
           <div class="container h-100">
             <div class="d-flex h-100 row align-items-center justify-content-center">
               <div class="col-7">
-                <?php if($phpAUTH->Authentication->isConnected()){ ?>
+                <?php if($phpAUTH->Authentication->isAuthenticated()){ ?>
                   <?php if(!$phpAUTH->Authentication->isVerified()){ ?>
                     <h3 class="mb-4">Account <strong>Verification</strong></h3>
                     <?php if($phpAUTH->Authentication->error()){ ?>

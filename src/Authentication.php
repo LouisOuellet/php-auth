@@ -347,12 +347,21 @@ class Authentication {
 		}
 	}
 
-  /**
-   * Check if User is connected.
-   *
-   * @return boolean
-   */
+	/**
+	 * Check if User is connected.
+	 *
+	 * @return boolean
+	 */
 	public function isConnected(){
+		return ($this->User !== null);
+	}
+
+	/**
+	 * Check if User is authenticated.
+	 *
+	 * @return boolean
+	 */
+	public function isAuthenticated(){
 		return ($this->User !== null);
 	}
 }

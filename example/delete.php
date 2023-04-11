@@ -105,7 +105,7 @@ $Header = ucfirst($Page);
             <div class="d-flex h-100 row align-items-center justify-content-center">
               <div class="col">
                 <h3 class="mt-5 mb-3">Delete this <strong><?= $Header ?></strong> <small>(<?= $Object->get($Identifiers[$Page]); ?>)</small></h3>
-                <?php if($phpAUTH->Authentication->isConnected()){ ?>
+                <?php if($phpAUTH->Authentication->isAuthenticated()){ ?>
                   <div class="btn-group w-100 border shadow mb-4">
                     <a href="manage.php?type=<?= $Page ?>" class="btn btn-block btn-light">Return</a>
                     <a href="create.php?type=<?= $Page ?>" class="btn btn-block btn-success">Create</a>

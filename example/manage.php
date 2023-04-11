@@ -82,7 +82,7 @@ $Header = ucfirst($Page);
             <div class="d-flex h-100 row align-items-center justify-content-center">
               <div class="col">
                 <h3 class="mt-5 mb-3"><?= $Header ?> <strong>Management</strong> <small>(<?= count($Objects); ?>)</small></h3>
-                <?php if($phpAUTH->Authentication->isConnected()){ ?>
+                <?php if($phpAUTH->Authentication->isAuthenticated()){ ?>
                   <div class="btn-group w-100 border shadow mb-4">
                     <a href="/" class="btn btn-block btn-light">Index</a>
                     <?php foreach($Types as $Type){ ?>

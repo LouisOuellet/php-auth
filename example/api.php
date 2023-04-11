@@ -12,4 +12,4 @@ require 'vendor/autoload.php';
 $phpAUTH = new phpAUTH();
 
 // Dump Connection Status
-echo json_encode($phpAUTH->Authentication->isConnected());
+echo json_encode($phpAUTH->Authentication->isAuthenticated());

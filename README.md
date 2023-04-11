@@ -119,7 +119,7 @@ $phpAUTH->Authorization->hasPermission($Name, $Level)
 ### Check if a User was authenticated
 ```php
 // Check if a User was authenticated
-$phpAUTH->Authentication->isConnected()
+$phpAUTH->Authentication->isAuthenticated()
 ```
 
 ### Check if 2FA Request is ready
