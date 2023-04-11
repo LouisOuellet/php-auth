@@ -78,8 +78,6 @@ $phpCSRF = new phpCSRF();
                     <h3>Logged in to <strong>phpAUTH</strong></h3>
                     <p class="mb-4">
                       <p>User: <?= $phpAUTH->Authentication->User->get('username') ?></p>
-                      <p>BASE64 [pass1]: <?= base64_encode("pass1") ?></p>
-                      <p>Session ID: <?= session_id() ?></p>
                     </p>
                     <div class="btn-group w-100 border shadow">
                       <a href="/" class="btn btn-block btn-light">Refresh</a>
