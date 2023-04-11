@@ -319,35 +319,4 @@ class Cookie {
       return false;
     }
   }
-
-  // /**
-  //  * Certify user consent.
-  //  *
-  //  * @return boolean
-  //  * @throws Exception
-  //  */
-  // private function certification(){
-  //   if(isset($_SESSION,$_SESSION['sessionID']) || isset($_COOKIE,$_COOKIE['sessionID'])){
-  //     if(isset($_REQUEST,$_REQUEST['cookiesAccept']) && !isset($_COOKIE['cookiesAccept'])){
-  //       if(isset($_REQUEST['cookiesAccept'])){
-  //         $this->setCookie( "cookiesAccept", true, ['httponly' => false] );
-  //         $this->setCookie( "cookiesAcceptEssentials", true, ['httponly' => false] );
-  //         $_SESSION['cookiesAccept'] = true;
-  //         $_SESSION['cookiesAcceptEssentials'] = true;
-  //       }
-  //       if(isset($_REQUEST['cookiesAcceptPerformance'])){
-  //         $this->setCookie( "cookiesAcceptPerformance", true, ['httponly' => false] );
-  //         $_SESSION['cookiesAcceptPerformance'] = true;
-  //       }
-  //       if(isset($_REQUEST['cookiesAcceptQuality'])){
-  //         $this->setCookie( "cookiesAcceptQuality", true, ['httponly' => false] );
-  //         $_SESSION['cookiesAcceptQuality'] = true;
-  //       }
-  //       if(isset($_REQUEST['cookiesAcceptPersonalisations'])){
-  //         $this->setCookie( "cookiesAcceptPersonalisations", true, ['httponly' => false] );
-  //         $_SESSION['cookiesAcceptPersonalisations'] = true;
-  //       }
-  //     }
-  //   }
-  // }
 }

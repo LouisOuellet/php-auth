@@ -15,6 +15,7 @@
   - Hostname Validation
   - GDPR Cookie Compliance
   - CCPA Cookie Compliance
+  - Email Verification
 
 ## Why you might need it
 If you are looking for an easy way to setup authentication and authorization in your project. This PHP Class is for you.
@@ -49,6 +50,15 @@ This library also includes support for relationships. Here are the ones already 
 * Organization - Group : Organization can use the Group to manager it's members.
 * Organization - Role : Organization can use the Role to manager it's members.
 * Group - Role : Group is a member of the Role.
+
+## User Statuses
+* __1__: User is deleted (soft)
+* __2__: User is banned
+* __3__: User is locked out
+* __4__: User has reach a rate limit (request or attempts)
+* __5__: User is inactive
+* __6__: User's e-mail is not verified
+* __7__: User does not have any restrictions. OK.
 
 ## Understanding Roles and Groups
 When using this library, permissions are assigned on roles. Roles can be assigned directly to a user or through a group of users. The highest permission level provided is used for validation. For example, if a user is member of role `Administrator` and `User`, both possess the permission `Dashboard`, `Administrator`'s level is set to `4` and `User`'s level is set to `1`, then the effective permission level is `4`.
@@ -88,10 +98,10 @@ require 'vendor/autoload.php';
 $phpAUTH = new phpAUTH();
 ```
 
-### Check if a User was authenticated
+### Generate a GDPR/CCPA Compliance HTML Form
 ```php
-// Check if a User was authenticated
-$phpAUTH->Authentication->isConnected()
+// Generate a GDPR/CCPA Compliance HTML Form with Bootstrap 5
+$phpAUTH->Compliance->form()
 ```
 
 ### Check if we can access through a specific hostname
@@ -106,11 +116,45 @@ $phpAUTH->Authorization->isAuthorized()
 $phpAUTH->Authorization->hasPermission($Name, $Level)
 ```
 
+### Check if a User was authenticated
+```php
+// Check if a User was authenticated
+$phpAUTH->Authentication->isConnected()
+```
+
 ### Check if 2FA Request is ready
 This method is useful to determine when to show the 2FA form.
 ```php
 // Check if 2FA Request is ready
 $phpAUTH->Authentication->is2FAReady()
+```
+
+### Check if email is verified
+This method is useful to determine if the user's email address has been verified.
+```php
+// Check if email is verified
+$phpAUTH->Authentication->isVerified()
+```
+
+### Logout user
+This method logs out the user.
+```php
+// Logout user
+$phpAUTH->Authentication->logout()
+```
+
+### Retrieve Authentication Error
+This method retrieves authentication errors.
+```php
+// Retrieve Authentication Error
+$phpAUTH->Authentication->error()
+```
+
+### Retrieve Authentication Status
+This method retrieves the user's status.
+```php
+// Retrieve Authentication Status
+$phpAUTH->Authentication->status()
 ```
 
 ### Using Managers
@@ -157,13 +201,20 @@ $Object->unlink($Table, $Id);
 session_start();
 
 // These must be at the top of your script, not inside a function
-use LaswitchTech\phpAUTH\phpAUTH;
-use LaswitchTech\phpDB\Database;
-use LaswitchTech\SMTP\phpSMTP;
+use LaswitchTech\phpLogger\phpLogger;
 use LaswitchTech\phpSMS\phpSMS;
+use LaswitchTech\SMTP\phpSMTP;
+use LaswitchTech\phpDB\Database;
+use LaswitchTech\phpAUTH\phpAUTH;
 
 // Load Composer's autoloader
 require 'vendor/autoload.php';
+
+// Initiate phpLogger
+$phpLogger = new phpLogger();
+
+// Configure phpLogger
+$phpLogger->config("level",0); // Set Logging Level
 
 // Initiate phpSMS
 $phpSMS = new phpSMS();
@@ -186,7 +237,7 @@ $phpDB->config("host","localhost")
 // Initiate phpSMTP
 $phpSMTP = new phpSMTP();
 
-// Configure phpDB
+// Configure phpSMTP
 $phpSMTP->config("username","username@domain.com")
         ->config("password","*******************")
         ->config("host","smtp.domain.com")
@@ -207,23 +258,19 @@ $phpAUTH = new phpAUTH();
 
 // Configure phpAUTH
 $phpAUTH->config("hostnames",$Hostnames)
-        ->config("basic",false)
-        ->config("bearer",false)
-        ->config("request",true)
-        ->config("cookie",true)
-        ->config("session",true)
-        ->config("2fa",true)
-        ->config("maxAttempts",5)
-        ->config("maxRequests",1000)
-        ->config("lockoutDuration",1800)
-        ->config("windowAttempts",100)
-        ->config("windowRequests",60)
-        ->config("window2FA",30)
-        ->config("host","localhost")
-        ->config("username","demo")
-        ->config("password","demo")
-        ->config("database","demo2")
-        ->config("level",5)
+        ->config("basic",false) // Enable/Disable Basic Authentication
+        ->config("bearer",false) // Enable/Disable Bearer Token Authentication
+        ->config("request",true) // Enable/Disable Request Authentication
+        ->config("cookie",true) // Enable/Disable Cookie Authentication
+        ->config("session",true) // Enable/Disable Session Authentication
+        ->config("2fa",true) // Enable/Disable 2-Factor Authentication
+        ->config("maxAttempts",5) // Max amount of authentication attempts per windowAttempts
+        ->config("maxRequests",1000) // Max amount of API request per windowRequests
+        ->config("lockoutDuration",1800) // 30 mins
+        ->config("windowAttempts",100) // 100 seconds
+        ->config("windowRequests",60) // 60 seconds
+        ->config("window2FA",60) // 60 seconds
+        ->config("windowVerification",2592000) // 30 Days
         ->init();
 
 // Install phpAUTH
