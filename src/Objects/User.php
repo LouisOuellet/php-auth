@@ -1688,6 +1688,40 @@ class User {
   }
 
   /**
+   * Un-Verify this user's email.
+   *
+   * @return object
+   */
+  public function unverify(){
+
+    // Retrieve Record
+    $this->retrieve();
+
+    // Set as Deleted
+    $this->save(['isVerified' => 0]);
+
+    // Return Result
+    return $this;
+  }
+
+  /**
+   * Verify this user's email.
+   *
+   * @return object
+   */
+  public function verify(){
+
+    // Retrieve Record
+    $this->retrieve();
+
+    // Set as Deleted
+    $this->save(['isVerified' => 1]);
+
+    // Return Result
+    return $this;
+  }
+
+  /**
    * Unban this user.
    *
    * @return object
