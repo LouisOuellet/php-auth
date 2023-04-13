@@ -161,7 +161,7 @@ class Authorization {
     foreach ($this->Roles as $RoleId => $Role) {
 
 			// Select Object
-			$Object = current($Role);
+			$Object = $Role;
 
 			// Retrieve Roles's Permissions
       $permissions = $Object->get('permissions');
