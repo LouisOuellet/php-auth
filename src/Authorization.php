@@ -113,6 +113,12 @@ class Authorization {
    */
 	public function hasPermission($permissionName, $requiredLevel = 1){
 
+		if($this->User === null){
+
+			// User should not have access
+			return false;
+		}
+
 		if(!$this->User->isVerified() || $this->User->isDeleted()){
 
 			// User should not have access
