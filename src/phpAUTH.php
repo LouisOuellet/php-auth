@@ -60,8 +60,11 @@ class phpAUTH {
 	// Management
   public $Management = null;
 
-	// Compliance
-  public $Compliance = null;
+  	// Compliance
+	public $Compliance = null;
+
+	// User
+	public $User = null;
 
   /**
    * Create a new phpAUTH instance.
@@ -86,8 +89,8 @@ class phpAUTH {
     //Initiate phpCSRF
     $this->CSRF = new phpCSRF();
 
-		// Initialize
-		$this->init();
+	// Initialize
+	$this->init();
   }
 
   /**
@@ -102,15 +105,6 @@ class phpAUTH {
 		try {
 			if(is_string($option)){
 	      switch($option){
-	        case"level":
-	          if(is_int($value)){
-
-							// Save to Configurator
-							$this->Configurator->set('logger',$option, $value);
-	          } else{
-	            throw new Exception("2nd argument must be an integer.");
-	          }
-	          break;
 	        case"maxAttempts":
 	        case"maxRequests":
 	        case"lockoutDuration":
@@ -171,33 +165,36 @@ class phpAUTH {
    * @return void
    * @throws Exception
    */
-  public function init(){
-    try {
+	public function init(){
+	try {
 
-      // Debug Information
-      $this->Logger->debug("Initializing");
+		// Debug Information
+		$this->Logger->debug("Initializing");
 
-	    //Initiate phpDB
-	    $this->Database = new Database();
+		//Initiate phpDB
+		$this->Database = new Database();
 
-			// Check if Database is Connected
-			if(!$this->Database->isConnected()){
-				throw new Exception("Database is not connected.");
-			}
+		// Check if Database is Connected
+		if(!$this->Database->isConnected()){
+			throw new Exception("Database is not connected.");
+		}
 
-      // Initialize Authentication
-      $this->Authentication = new Authentication($this->Logger, $this->Database, $this->CSRF);
+		// Initialize Authentication
+		$this->Authentication = new Authentication($this->Logger, $this->Database, $this->CSRF);
+		if($this->Authentication){
+			$this->User = $this->Authentication->User;
+		}
 
-			// Initialize Authorization
-			$this->Authorization = new Authorization($this->Authentication->User, $this->Logger);
-    } catch (Exception $e) {
+		// Initialize Authorization
+		$this->Authorization = new Authorization($this->User, $this->Logger);
+	} catch (Exception $e) {
 
-			// If an exception is caught, log an error message
-      $this->Logger->error('Error: '.$e->getMessage());
-    }
+		// If an exception is caught, log an error message
+		$this->Logger->error('Error: '.$e->getMessage());
+	}
 
-    return $this;
-  }
+	return $this;
+	}
 
   /**
    * Install phpAuth and create the database tables required.

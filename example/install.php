@@ -36,11 +36,6 @@ $phpAUTH->config("hostnames",$Hostnames)
         ->config("windowRequests",60) // 60 seconds
         ->config("window2FA",60) // 60 seconds
         ->config("windowVerification",2592000) // 30 Days
-        ->config("host","localhost")
-        ->config("username","demo")
-        ->config("password","demo")
-        ->config("database","demo2")
-        ->config("level",5)
         ->init();
 
 // Initiate phpConfigurator

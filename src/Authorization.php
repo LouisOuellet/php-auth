@@ -13,7 +13,6 @@ class Authorization {
 
 	// Logger
 	private $Logger;
-	private $Level = 1;
 
   // Configurator
   private $Configurator = null;
@@ -44,9 +43,6 @@ class Authorization {
 
     // Initialize Configurator
     $this->Configurator = new phpConfigurator('auth');
-
-    // Retrieve Log Level
-    $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
 
     // Retrieve Hostnames
     $this->Hostnames = $this->Configurator->get('auth', 'hostnames') ?: $this->Hostnames;
