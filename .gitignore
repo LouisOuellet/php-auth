@@ -2,12 +2,12 @@ composer.phar
 *composer.phar
 .DS_Store
 *.DS_Store
+.git
 /vendor/
 /tmp/
 /data/
 /config/
 /log/
-/example/log/
 *.log
 *.cfg
 
