@@ -14,55 +14,76 @@ class Authorization {
 	// Logger
 	private $Logger;
 
-  // Configurator
-  private $Configurator = null;
+	// Configurator
+	private $Configurator = null;
 
 	// User
-  private $User = null;
+	private $User = null;
 
 	// Groups
-  private $Groups = [];
+	private $Groups = [];
 
 	// Roles
-  private $Roles = [];
+	private $Roles = [];
 
 	// Relationships
-  private $Relationships = [];
+	private $Relationships = [];
 
 	// Hostnames
-  private $Hostnames = [];
+	private $Hostnames = [];
 
-  /**
-   * Create a new Authentication instance.
-   *
-   * @param  Object  $User
-   * @param  Object  $Logger
-   * @return void
-   */
-  public function __construct($User, $Logger = null){
+	// Override
+	private $Override = false;
 
-    // Initialize Configurator
-    $this->Configurator = new phpConfigurator('auth');
+	/**
+	 * Create a new Authentication instance.
+	 *
+	 * @param  Object  $User
+	 * @param  Object  $Logger
+	 * @return void
+	 */
+	public function __construct($User, $Logger = null, $Override = false){
 
-    // Retrieve Hostnames
-    $this->Hostnames = $this->Configurator->get('auth', 'hostnames') ?: $this->Hostnames;
+		// Initialize Configurator
+		$this->Configurator = new phpConfigurator('auth');
 
-    // Initialize User
-    $this->User = $User;
+		// Retrieve Hostnames
+		$this->Hostnames = $this->Configurator->get('auth', 'hostnames') ?: $this->Hostnames;
 
-    // Initialize phpLogger
-    $this->Logger = $Logger;
-    if(!$this->Logger){
-      $this->Logger = new phpLogger('auth');
-    }
-  }
+		// Initialize User
+		$this->User = $User;
 
-  /**
-   * Verify if the user access through this hostname.
-   *
-   * @return boolean
-   */
+		// Initialize Override
+		$this->Override = $Override;
+
+		// Initialize phpLogger
+		$this->Logger = $Logger;
+		if(!$this->Logger){
+			$this->Logger = new phpLogger('auth');
+		}
+	}
+
+	/**
+	 * Verify if the user access through this hostname.
+	 *
+	 * @return boolean
+	 */
 	public function isAuthorized(){
+
+		// Check if Override is enabled
+		if($this->Override){
+
+			// Debug Information
+			$this->Logger->debug("Override enabled");
+
+			// Log request
+			if($this->User){
+				$this->Logger->warning("User [" . $this->User->get('username') . "] is requesting access through {$Hostname} with Override enabled");
+			}
+
+			// Return
+			return true;
+		}
 
 		// Initiate Hostname
 		$Hostname = 'localhost';
@@ -102,12 +123,27 @@ class Authorization {
 		}
 	}
 
-  /**
-   * Verify if the user has a specific permission.
-   *
-   * @return boolean
-   */
+	/**
+	 * Verify if the user has a specific permission.
+	 *
+	 * @return boolean
+	 */
 	public function hasPermission($permissionName, $requiredLevel = 1){
+
+		// Check if Override is enabled
+		if($this->Override){
+
+			// Debug Information
+			$this->Logger->debug("Override enabled");
+
+			// Log request
+			if($this->User){
+				$this->Logger->warning("User [" . $this->User->get('username') . "] is requesting access through {$Hostname} with Override enabled");
+			}
+
+			// Return
+			return true;
+		}
 
 		if($this->User === null){
 
@@ -153,28 +189,28 @@ class Authorization {
 		// Log request
 		$this->Logger->info("User [" . $this->User->get('username') . "] is requesting ({$permissionName})");
 
-    // Check permissions in user roles
-    foreach ($this->Roles as $RoleId => $Role) {
+		// Check permissions in user roles
+		foreach ($this->Roles as $RoleId => $Role) {
 
 			// Select Object
 			$Object = $Role;
 
 			// Retrieve Roles's Permissions
-      $permissions = $Object->get('permissions');
+			$permissions = $Object->get('permissions');
 
 			// Debug Information
 			$this->Logger->debug($permissions);
 
 			// Validate Permission Level
-      if (isset($permissions[$permissionName]) && $permissions[$permissionName] >= $requiredLevel) {
+			if (isset($permissions[$permissionName]) && $permissions[$permissionName] >= $requiredLevel) {
 
 				// Log request
 				$this->Logger->success("User [" . $this->User->get('username') . "] is requesting ({$permissionName}) and was granted access");
 
 				// Return
-        return true;
-      }
-    }
+				return true;
+			}
+		}
 
 		// Log request
 		$this->Logger->error("User [" . $this->User->get('username') . "] is requesting ({$permissionName}) and was denied access");

@@ -39,26 +39,26 @@ class phpAUTH {
 	private $Logger;
 	private $Level = 1;
 
-  // Configurator
-  private $Configurator = null;
+	// Configurator
+	private $Configurator = null;
 
 	// phpDB
-  private $Database = null;
+  	private $Database = null;
 
 	// phpCSRF
-  private $CSRF = null;
+  	private $CSRF = null;
 
 	// Installer
-  public $Installer = null;
+  	public $Installer = null;
 
 	// Authentication
-  public $Authentication = null;
+  	public $Authentication = null;
 
 	// Authorization
-  public $Authorization = null;
+  	public $Authorization = null;
 
 	// Management
-  public $Management = null;
+  	public $Management = null;
 
   	// Compliance
 	public $Compliance = null;
@@ -66,142 +66,148 @@ class phpAUTH {
 	// User
 	public $User = null;
 
-  /**
-   * Create a new phpAUTH instance.
-   *
-   * @return void
-   * @throws Exception
-   */
-  public function __construct(){
+	// Override
+	private $Override = false;
 
-    // Initialize Configurator
-    $this->Configurator = new phpConfigurator('auth');
+	/**
+	 * Create a new phpAUTH instance.
+	 *
+	 * @return void
+	 * @throws Exception
+	 */
+	public function __construct($Override = false){
 
-    // Initialize Compliance
-    $this->Compliance = new Compliance();
+		// Initialize Configurator
+		$this->Configurator = new phpConfigurator('auth');
 
-    // Retrieve Log Level
-    $this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
+		// Initialize Compliance
+		$this->Compliance = new Compliance();
 
-    // Initiate phpLogger
-    $this->Logger = new phpLogger('auth');
+		// Retrieve Log Level
+		$this->Level = $this->Configurator->get('logger', 'level') ?: $this->Level;
 
-    //Initiate phpCSRF
-    $this->CSRF = new phpCSRF();
+		// Initiate phpLogger
+		$this->Logger = new phpLogger('auth');
 
-	// Initialize
-	$this->init();
-  }
+		// Initiate phpCSRF
+		$this->CSRF = new phpCSRF();
 
-  /**
-   * Configure Library.
-   *
-   * @param  string  $option
-   * @param  bool|int  $value
-   * @return void
-   * @throws Exception
-   */
-  public function config($option, $value){
+		// Override
+		$this->Override = $Override;
+
+		// Initialize
+		$this->init();
+	}
+
+	/**
+	 * Configure Library.
+	 *
+	 * @param  string  $option
+	 * @param  bool|int  $value
+	 * @return void
+	 * @throws Exception
+	 */
+	public function config($option, $value){
 		try {
 			if(is_string($option)){
-	      switch($option){
-	        case"maxAttempts":
-	        case"maxRequests":
-	        case"lockoutDuration":
-	        case"windowAttempts":
-	        case"windowRequests":
-			case"window2FA":
-			case"windowVerification":
-	          if(is_int($value)){
+				switch($option){
+					case"maxAttempts":
+					case"maxRequests":
+					case"lockoutDuration":
+					case"windowAttempts":
+					case"windowRequests":
+					case"window2FA":
+					case"windowVerification":
+						if(is_int($value)){
 
 							// Save to Configurator
 							$this->Configurator->set('auth',$option, $value);
-	          } else{
-	            throw new Exception("2nd argument must be an integer.");
-	          }
-	          break;
-	        case"basic":
-	        case"bearer":
-	        case"request":
-	        case"cookie":
-	        case"session":
-	        case"2fa":
-	          if(is_bool($value)){
+						} else{
+							throw new Exception("2nd argument must be an integer.");
+						}
+						break;
+					case"basic":
+					case"bearer":
+					case"request":
+					case"cookie":
+					case"session":
+					case"2fa":
+						if(is_bool($value)){
 
 							// Save to Configurator
 							$this->Configurator->set('auth',$option, $value);
-	          } else{
-	            throw new Exception("2nd argument must be a boolean.");
-	          }
-	          break;
-	        case"hostnames":
-	          if(is_array($value)){
+						} else{
+							throw new Exception("2nd argument must be a boolean.");
+						}
+						break;
+					case"hostnames":
+						if(is_array($value)){
 
 							// Save to Configurator
 							$this->Configurator->set('auth',$option, $value);
-	          } else{
-	            throw new Exception("2nd argument must be an array.");
-	          }
-	          break;
-	        default:
-	          throw new Exception("unable to configure $option.");
-	          break;
-	      }
-	    } else{
-	      throw new Exception("1st argument must be as string.");
-	    }
+						} else{
+							throw new Exception("2nd argument must be an array.");
+						}
+						break;
+					default:
+						throw new Exception("unable to configure $option.");
+						break;
+				}
+			} else{
+				throw new Exception("1st argument must be as string.");
+			}
 		} catch (Exception $e) {
 
 			// If an exception is caught, log an error message
 			$this->Logger->error('Error: '.$e->getMessage());
 		}
 
-    return $this;
-  }
+		return $this;
+  	}
 
-  /**
-   * Init Library.
-   *
-   * @return void
-   * @throws Exception
-   */
-	public function init(){
-	try {
+	/**
+	 * Init Library.
+	 *
+	 * @return void
+	 * @throws Exception
+	 */
+		public function init(){
+		try {
 
-		// Debug Information
-		$this->Logger->debug("Initializing");
+			// Debug Information
+			$this->Logger->debug("Initializing");
 
-		//Initiate phpDB
-		$this->Database = new Database();
+			//Initiate phpDB
+			$this->Database = new Database();
 
-		// Check if Database is Connected
-		if(!$this->Database->isConnected()){
-			throw new Exception("Database is not connected.");
+			// Check if Database is Connected
+			if(!$this->Database->isConnected()){
+				throw new Exception("Database is not connected.");
+			}
+
+			// Initialize Authentication
+			$this->Authentication = new Authentication($this->Logger, $this->Database, $this->CSRF);
+			if($this->Authentication){
+				$this->User = $this->Authentication->User;
+			}
+
+			// Initialize Authorization
+			$this->Authorization = new Authorization($this->User, $this->Logger, $this->Override);
+		} catch (Exception $e) {
+
+			// If an exception is caught, log an error message
+			$this->Logger->error('Error: '.$e->getMessage());
 		}
 
-		// Initialize Authentication
-		$this->Authentication = new Authentication($this->Logger, $this->Database, $this->CSRF);
-		if($this->Authentication){
-			$this->User = $this->Authentication->User;
-		}
-
-		// Initialize Authorization
-		$this->Authorization = new Authorization($this->User, $this->Logger);
-	} catch (Exception $e) {
-
-		// If an exception is caught, log an error message
-		$this->Logger->error('Error: '.$e->getMessage());
+		return $this;
 	}
 
-	return $this;
-	}
-
-  /**
-   * Install phpAuth and create the database tables required.
-   *
-   * @return void
-   * @throws Exception
-   */
+	/**
+	 * Install phpAuth and create the database tables required.
+	 *
+	 * @return void
+	 * @throws Exception
+	 */
 	public function install(){
 
 		// Initialize Installer
@@ -211,12 +217,12 @@ class phpAUTH {
 		return $this->Installer;
 	}
 
-  /**
-   * Manage phpAuth components.
-   *
-   * @return void
-   * @throws Exception
-   */
+	/**
+	 * Manage phpAuth components.
+	 *
+	 * @return void
+	 * @throws Exception
+	 */
 	public function manage($Type){
 
 		// Check available types
