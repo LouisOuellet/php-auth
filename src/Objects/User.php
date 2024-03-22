@@ -653,6 +653,11 @@ class User {
         }
       }
 
+      // Update Status
+      if($this->Object['status'] !== $this->status()){
+        $this->save(['status' => $this->status()]);
+      }
+
       // Retrieve Relationships
       $this->Relationships = $this->Relationship->getRelated($this->Table, $this->get('id'));
 
