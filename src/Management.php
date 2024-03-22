@@ -248,11 +248,17 @@ class Management {
 				// Retrieve table columns
 				$Columns = $this->Database->getColumns($this->Table);
 
+				// Set Columns Selection
+				$Columns = $this->Identifier;
+				if(!$Convert){
+					$Columns = "*";
+				}
+
 				// Build SQL Statement
 				if(isset($Columns['isDeleted'])){
 
 					// Build SQL Statement
-					$Statement = "SELECT {$this->Identifier} FROM {$this->Table} WHERE `isDeleted` = ? {$Limit}";
+					$Statement = "SELECT {$Columns} FROM {$this->Table} WHERE `isDeleted` = ? {$Limit}";
 
 					// Build Values Array
 					$Values = [0];
@@ -262,7 +268,7 @@ class Management {
 				} else {
 
 					// Build SQL Statement
-					$Statement = "SELECT {$this->Identifier} FROM {$this->Table} {$Limit}";
+					$Statement = "SELECT {$Columns} FROM {$this->Table} {$Limit}";
 
 					// Execute Statement
 					$Results = $this->Database->select($Statement);
