@@ -190,16 +190,17 @@ class Management {
    * @return void
    * @throws Exception
    */
-	public function read($Arg1 = null, $Arg2 = null){
+	public function read($Arg1 = null, $Arg2 = null, $Arg3 = null){
 		try {
 
 			// Initialize Variables
 			$Limit = '';
 			$Id = null;
 			$Array = [];
+			$Convert = true;
 
 			// Parse Arguments
-			foreach([$Arg1,$Arg2] as $Arg){
+			foreach([$Arg1,$Arg2,$Arg3] as $Arg){
 				if($Arg !== null){
 					if(is_int($Arg)){
 						$Limit = 'LIMIT ' . $Arg;
@@ -207,7 +208,10 @@ class Management {
 					if(is_string($Arg)){
 						$Id = $Arg;
 					}
-					if(!is_string($Arg) && !is_int($Arg)){
+					if(is_bool($Arg)){
+						$Convert = $Arg;
+					}
+					if(!is_string($Arg) && !is_int($Arg) && !is_bool($Arg)){
 						throw new Exception("Invalid Argument.");
 					}
 				}
@@ -219,14 +223,26 @@ class Management {
 			// Check if an Id was provided
 			if($Id){
 
-				// Create Object
-				$Object = new $Class($Id, $this->Identifier, $this->Logger, $this->Database);
+				// Check if we should convert the results
+				if($Convert){
+					// Create Object
+					$Object = new $Class($Id, $this->Identifier, $this->Logger, $this->Database);
 
-				// Retrieve Record
-				$Object->retrieve();
+					// Retrieve Record
+					$Object->retrieve();
 
-				// Return Result
-				return $Object;
+					// Return Result
+					return $Object;
+				} else {
+					// Build SQL Statement
+					$Statement = "SELECT * FROM {$this->Table} WHERE `{$this->Identifier}` = ?";
+
+					// Execute Statement
+					$Results = $this->Database->select($Statement,[$Id]);
+
+					// Return Result
+					return $Results;
+				}
 			} else {
 
 				// Retrieve table columns
@@ -250,6 +266,11 @@ class Management {
 
 					// Execute Statement
 					$Results = $this->Database->select($Statement);
+				}
+
+				// Check if we should convert the results
+				if(!$Convert){
+					return $Results;
 				}
 
 				// Create Objects
