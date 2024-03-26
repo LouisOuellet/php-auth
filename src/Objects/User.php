@@ -214,6 +214,11 @@ class User {
       if($Save){
         $this->Object = $Object;
       }
+
+      // Update Status
+      if($this->Object['status'] !== $this->status()){
+        $this->save(['status' => $this->status()]);
+      }
     }
   }
 
