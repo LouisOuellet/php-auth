@@ -254,7 +254,7 @@ class User {
       return 5;
     }
 
-    // If User is is Verified
+    // If User is not Verified
     if(!$this->get('isVerified')){
       return 6;
     }
