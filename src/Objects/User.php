@@ -1795,8 +1795,22 @@ class User {
     // Set as Deleted
     $this->save(['isDeleted' => 1]);
 
-    // Nullify Object
-    $this->Object = null;
+    // Return Result
+    return $this;
+  }
+
+  /**
+   * Retore this user.
+   *
+   * @return object|void
+   */
+  public function restore(){
+
+    // Retrieve Record
+    $this->retrieve();
+
+    // Set as Restored
+    $this->save(['isDeleted' => 0]);
 
     // Return Result
     return $this;
