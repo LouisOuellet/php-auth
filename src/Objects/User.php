@@ -1667,7 +1667,7 @@ class User {
     // Retrieve Record
     $this->retrieve();
 
-    // Set as Deleted
+    // Set as Deactivated
     $this->save(['isActive' => 0]);
 
     // Return Result
@@ -1684,7 +1684,7 @@ class User {
     // Retrieve Record
     $this->retrieve();
 
-    // Set as Deleted
+    // Set as Activated
     $this->save(['isActive' => 1]);
 
     // Return Result
@@ -1758,7 +1758,7 @@ class User {
     // Retrieve Record
     $this->retrieve();
 
-    // Set as Deleted
+    // Set as Unbanned
     $this->save(['isBanned' => 0]);
 
     // Return Result
@@ -1775,7 +1775,7 @@ class User {
     // Retrieve Record
     $this->retrieve();
 
-    // Set as Deleted
+    // Set as Banned
     $this->save(['isBanned' => 1]);
 
     // Return Result
